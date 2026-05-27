@@ -5,6 +5,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.MDC;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -37,8 +38,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected boolean shouldNotFilter(HttpServletRequest request) {
         final String path = request.getRequestURI();
         if (path == null || path.isBlank()) return false;
-        return path.startsWith("/api/auth/login")
-                || path.startsWith("/api/auth/logout")
+        return path.startsWith("/api/system/auth/")
                 || path.startsWith("/error/")
                 || path.equals("/favicon.ico");
     }
@@ -61,22 +61,28 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         final Long accountId = jwtTokenProvider.getAccountId(token);
         if (employeeId == null || accountId == null) { filterChain.doFilter(request, response); return; }
 
-        // 権限コードをロード
-        final List<String> permissionCodes = employeeAuthorityProvider.loadPermissionCodes(employeeId);
-        final List<SimpleGrantedAuthority> authorities = permissionCodes.stream()
-                .filter(Objects::nonNull)
-                .map(String::trim)
-                .filter(s -> !s.isBlank())
-                .distinct()
-                .map(SimpleGrantedAuthority::new)
-                .toList();
+        try {
+            MDC.put("userId", String.valueOf(employeeId));
 
-        final var principal = new LoginPrincipal(employeeId, accountId);
-        final var authentication = new UsernamePasswordAuthenticationToken(principal, null, authorities);
-        authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+            // 権限コードをロード
+            final List<String> permissionCodes = employeeAuthorityProvider.loadPermissionCodes(employeeId);
+            final List<SimpleGrantedAuthority> authorities = permissionCodes.stream()
+                    .filter(Objects::nonNull)
+                    .map(String::trim)
+                    .filter(s -> !s.isBlank())
+                    .distinct()
+                    .map(SimpleGrantedAuthority::new)
+                    .toList();
 
-        filterChain.doFilter(request, response);
+            final var principal = new LoginPrincipal(employeeId, accountId);
+            final var authentication = new UsernamePasswordAuthenticationToken(principal, null, authorities);
+            authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+
+            filterChain.doFilter(request, response);
+        } finally {
+            MDC.remove("userId");
+        }
     }
 
     // AuthorizationヘッダーからBearerトークンを取得

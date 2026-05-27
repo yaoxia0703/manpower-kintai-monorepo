@@ -1,0 +1,80 @@
+spring:
+  application:
+    name: manpower-kintai-backend
+
+  profiles:
+    active: dev
+
+  mvc:
+    format:
+      date: yyyy-MM-dd
+      time: HH:mm:ss
+      date-time: yyyy-MM-dd HH:mm:ss
+
+  jackson:
+    time-zone: Asia/Tokyo
+
+  servlet:
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 20MB
+
+server:
+  port: 8080
+
+  tomcat:
+    threads:
+      max: 200
+      min-spare: 20
+
+  compression:
+    enabled: true
+    mime-types: application/json,application/xml,text/html,text/xml,text/plain
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+  endpoint:
+    health:
+      show-details: "never"
+
+logging:
+  file:
+    path: logs   # プロジェクトルート配下のログ出力先
+
+  level:
+    root: INFO
+    org.springframework.web: INFO
+
+mybatis-plus:
+  mapper-locations: classpath*:mapper/**/*.xml
+
+  global-config:
+    db-config:
+      logic-delete-field: is_deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+
+  configuration:
+    map-underscore-to-camel-case: true
+
+# =========================================
+# アプリケーション共通設定
+# =========================================
+app:
+  trace-id:
+    enabled: true   # true=有効 / false=無効
+  page:
+    default-page-num: 1
+    default-page-size: 10
+    max-page-size: 100
+
+
+security:
+  jwt:
+    secret: "bXktZGV2LWp3dC1zZWNyZXQta2V5LWxlbmd0aC1tdXN0LWJlLTMyLWJ5dGVzIQ=="
+    issuer: "manpower-kintai"
+    expire-seconds: 7200

@@ -16,20 +16,24 @@ import java.util.Map;
 public class JwtTokenProvider {
 
     private final SecretKey secretKey;
+    private final String issuer;
     private final long expirationMs;
 
     public JwtTokenProvider(
-            @Value("${jwt.secret}") String secret,
-            @Value("${jwt.expiration-ms}") long expirationMs
+            @Value("${security.jwt.secret}") String secret,
+            @Value("${security.jwt.issuer}") String issuer,
+            @Value("${security.jwt.expire-seconds}") long expireSeconds
     ) {
         this.secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
-        this.expirationMs = expirationMs;
+        this.issuer = issuer;
+        this.expirationMs = expireSeconds * 1000L;
     }
 
     // トークン生成
     public String generateToken(Long employeeId, Long accountId, List<String> roles) {
         return Jwts.builder()
                 .setSubject(String.valueOf(employeeId))
+                .setIssuer(issuer)
                 .addClaims(Map.of(
                         "accountId", accountId,
                         "roles", roles
@@ -66,6 +70,7 @@ public class JwtTokenProvider {
     private Claims parseClaims(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(secretKey)
+                .requireIssuer(issuer)
                 .build()
                 .parseClaimsJws(token)
                 .getBody();

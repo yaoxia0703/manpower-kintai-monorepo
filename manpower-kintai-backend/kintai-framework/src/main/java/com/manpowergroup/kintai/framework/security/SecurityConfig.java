@@ -44,6 +44,10 @@ public class SecurityConfig {
                 // CORS設定適用
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
+                // Spring Security標準ログイン画面を無効化（SPA + JWT）
+                .formLogin(AbstractHttpConfigurer::disable)
+                .httpBasic(AbstractHttpConfigurer::disable)
+
                 // セッションを使用しない（JWT前提）
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
@@ -71,6 +75,7 @@ public class SecurityConfig {
 
                         // 認証必須API
                         .requestMatchers("/api/system/**").authenticated()
+                        .requestMatchers("/admin/**", "/employee/**").authenticated()
 
                         // その他は許可
                         .anyRequest().permitAll()
