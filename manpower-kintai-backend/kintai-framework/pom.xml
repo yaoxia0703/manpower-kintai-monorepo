@@ -13,7 +13,7 @@
     <artifactId>kintai-framework</artifactId>
     <packaging>jar</packaging>
     <name>kintai-framework</name>
-    <description>Security・JWT・MyBatis・Redis・Swagger 横断基盤</description>
+    <description>Security・JWT・MyBatis・Swagger 横断基盤</description>
 
     <dependencies>
         <!-- Spring Web -->
@@ -25,11 +25,6 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
-        </dependency>
-        <!-- Redis -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-redis</artifactId>
         </dependency>
         <!-- MyBatis-Plus -->
         <dependency>
