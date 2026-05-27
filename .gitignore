@@ -69,4 +69,5 @@ desktop.ini
 **/.nb-gradle/
 
 # Local assistant notes
+**/.claude/
 **/CLAUDE.md

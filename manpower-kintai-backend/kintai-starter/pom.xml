@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.manpowergroup.kintai</groupId>
+        <artifactId>manpower-kintai-backend-parent</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>kintai-starter</artifactId>
+    <packaging>jar</packaging>
+    <name>kintai-starter</name>
+    <description>起動モジュール・エントリーポイント</description>
+
+    <dependencies>
+        <!-- フレームワーク -->
+        <dependency>
+            <groupId>com.manpowergroup.kintai</groupId>
+            <artifactId>kintai-framework</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <!-- 共通 -->
+        <dependency>
+            <groupId>com.manpowergroup.kintai</groupId>
+            <artifactId>kintai-common</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <!-- システムモジュール -->
+        <dependency>
+            <groupId>com.manpowergroup.kintai</groupId>
+            <artifactId>kintai-module-system</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <!-- 勤怠モジュール -->
+        <dependency>
+            <groupId>com.manpowergroup.kintai</groupId>
+            <artifactId>kintai-module-attendance</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <!-- 管理者API -->
+        <dependency>
+            <groupId>com.manpowergroup.kintai</groupId>
+            <artifactId>kintai-admin-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <!-- 社員API -->
+        <dependency>
+            <groupId>com.manpowergroup.kintai</groupId>
+            <artifactId>kintai-employee-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <!-- MySQL -->
+        <dependency>
+            <groupId>com.mysql</groupId>
+            <artifactId>mysql-connector-j</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <!-- Redis -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                        </exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
