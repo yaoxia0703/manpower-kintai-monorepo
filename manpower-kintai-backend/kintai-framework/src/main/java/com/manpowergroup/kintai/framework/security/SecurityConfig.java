@@ -68,7 +68,7 @@ public class SecurityConfig {
                 // アクセス制御
                 .authorizeHttpRequests(auth -> auth
                         // 認証不要（ログイン系）
-                        .requestMatchers("/api/system/auth/**").permitAll()
+                        .requestMatchers("/api/system/auth/login").permitAll()
 
                         // 基本リソース
                         .requestMatchers("/error/**", "/favicon.ico").permitAll()

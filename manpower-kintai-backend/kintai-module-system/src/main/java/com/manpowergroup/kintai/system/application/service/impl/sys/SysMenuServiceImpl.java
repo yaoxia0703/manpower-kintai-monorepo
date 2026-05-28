@@ -47,7 +47,8 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu>
         // 有効期間内のロールIDを取得
         List<Long> roleIds = employeeRoleMapper.selectList(Wrappers.<SysEmployeeRole>lambdaQuery()
                         .eq(SysEmployeeRole::getEmployeeId, employeeId)
-                        .le(SysEmployeeRole::getStartDate, LocalDate.now())
+                        .and(w -> w.isNull(SysEmployeeRole::getStartDate)
+                                .or().le(SysEmployeeRole::getStartDate, LocalDate.now()))
                         .and(w -> w.isNull(SysEmployeeRole::getEndDate)
                                 .or().ge(SysEmployeeRole::getEndDate, LocalDate.now())))
                 .stream().map(SysEmployeeRole::getRoleId).collect(Collectors.toList());

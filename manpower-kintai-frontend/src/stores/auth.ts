@@ -1,46 +1,58 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import { useRouter } from 'vue-router'
-import { login as loginApi } from '@/api/auth'
+import { fetchCurrentUser, login as loginApi, logout as logoutApi } from '@/api/auth'
+import { usePermissionStore } from '@/stores/permissionStore'
+import { useUserStore } from '@/stores/userStore'
 
 export const useAuthStore = defineStore('auth', () => {
   const router = useRouter()
+  const userStore = useUserStore()
+  const permissionStore = usePermissionStore()
 
   const token = ref<string | null>(localStorage.getItem('token'))
-  const employeeId = ref<number | null>(
-    localStorage.getItem('employeeId') ? Number(localStorage.getItem('employeeId')) : null,
-  )
-  const displayName = ref<string | null>(localStorage.getItem('displayName'))
-  const email = ref<string | null>(localStorage.getItem('email'))
 
   async function login(emailInput: string, password: string) {
     const res = await loginApi(emailInput, password)
     const data = res.data.data
 
     token.value = data.token
-    employeeId.value = data.employeeId
-    displayName.value = data.displayName
-    email.value = data.email
-
     localStorage.setItem('token', data.token)
-    localStorage.setItem('employeeId', String(data.employeeId))
-    localStorage.setItem('displayName', data.displayName)
-    localStorage.setItem('email', data.email)
+
+    await loadCurrentUser()
   }
 
-  function logout() {
+  async function loadCurrentUser() {
+    const res = await fetchCurrentUser()
+    const data = res.data.data
+
+    userStore.setProfile(data.user)
+    permissionStore.setAccess({
+      roles: data.roles ?? [],
+      permissions: data.permissions ?? [],
+      menus: data.menus ?? [],
+    })
+  }
+
+  function clearSession() {
     token.value = null
-    employeeId.value = null
-    displayName.value = null
-    email.value = null
 
     localStorage.removeItem('token')
-    localStorage.removeItem('employeeId')
-    localStorage.removeItem('displayName')
-    localStorage.removeItem('email')
-
-    router.push('/login')
+    userStore.clearProfile()
+    permissionStore.clearAccess()
   }
 
-  return { token, employeeId, displayName, email, login, logout }
+  async function logout() {
+    try {
+      if (token.value) {
+        await logoutApi()
+      }
+    } finally {
+      clearSession()
+
+      router.push('/login')
+    }
+  }
+
+  return { token, login, loadCurrentUser, clearSession, logout }
 })

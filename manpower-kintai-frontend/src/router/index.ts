@@ -1,5 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import LoginView from '@/views/LoginView.vue'
+import SystemLayout from '@/components/layouts/SystemLayout.vue'
+import { useAuthStore } from '@/stores/auth'
+import { useUserStore } from '@/stores/userStore'
+import LoginView from '@/views/login/LoginView.vue'
 import DashboardView from '@/views/DashboardView.vue'
 
 const router = createRouter({
@@ -19,8 +22,15 @@ const router = createRouter({
     {
       path: '/admin',
       name: 'admin',
-      component: DashboardView,
+      component: SystemLayout,
       meta: { requiresAuth: true },
+      children: [
+        {
+          path: '',
+          name: 'admin-home',
+          component: DashboardView,
+        },
+      ],
     },
     {
       path: '/dashboard',
@@ -33,13 +43,27 @@ const router = createRouter({
   ],
 })
 
-router.beforeEach((to) => {
-  const token = localStorage.getItem('token')
+router.beforeEach(async (to) => {
+  const authStore = useAuthStore()
+  const userStore = useUserStore()
+  const token = authStore.token
 
   if (to.meta.requiresAuth && !token) {
     return {
       path: '/login',
       query: { redirect: to.fullPath },
+    }
+  }
+
+  if (to.meta.requiresAuth && token && !userStore.isLoaded) {
+    try {
+      await authStore.loadCurrentUser()
+    } catch {
+      authStore.clearSession()
+      return {
+        path: '/login',
+        query: { redirect: to.fullPath },
+      }
     }
   }
 
