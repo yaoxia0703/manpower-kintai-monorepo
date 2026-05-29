@@ -60,7 +60,7 @@ interface HeaderMenu {
 
 const fallbackMenus: HeaderMenu[] = [
   { name: 'ホーム', code: 'home', path: '/admin' },
-  { name: '勤務表', code: 'timesheet' },
+  { name: '勤務表', code: 'timesheet', path: '/admin/timesheet' },
   { name: '事前申請', code: 'request' },
   { name: '経費精算', code: 'expense' },
   { name: '工数実績', code: 'worklog' },

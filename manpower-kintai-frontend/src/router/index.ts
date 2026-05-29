@@ -4,6 +4,7 @@ import { useAuthStore } from '@/stores/auth'
 import { useUserStore } from '@/stores/userStore'
 import LoginView from '@/views/login/LoginView.vue'
 import DashboardView from '@/views/DashboardView.vue'
+import TimesheetView from '@/views/timesheet/TimesheetView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -29,6 +30,11 @@ const router = createRouter({
           path: '',
           name: 'admin-home',
           component: DashboardView,
+        },
+        {
+          path: 'timesheet',
+          name: 'timesheet',
+          component: TimesheetView,
         },
       ],
     },
