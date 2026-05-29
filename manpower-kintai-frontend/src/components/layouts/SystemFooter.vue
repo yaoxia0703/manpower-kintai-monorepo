@@ -1,8 +1,8 @@
 <template>
   <div class="system-footer">
     <div class="footer-brand">
-      <span class="footer-mark" aria-hidden="true">M</span>
-      <span>Manpower</span>
+      <el-avatar :size="24" class="footer-mark">M</el-avatar>
+      <el-text type="primary" tag="span">Manpower</el-text>
     </div>
   </div>
 </template>
@@ -13,7 +13,7 @@
   height: 100%;
   align-items: center;
   justify-content: flex-end;
-  background: rgba(255, 255, 255, 0.72);
+  background: var(--el-bg-color-overlay);
   padding: 0 24px;
 }
 
@@ -21,19 +21,12 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  color: #355270;
   font-weight: 700;
 }
 
 .footer-mark {
-  display: grid;
-  width: 24px;
-  height: 24px;
-  place-items: center;
-  border-radius: 6px;
-  background: #0f5f9e;
-  color: #ffffff;
-  font-size: 0.8rem;
+  background: var(--el-color-primary);
+  color: var(--el-color-white);
   font-weight: 700;
 }
 </style>

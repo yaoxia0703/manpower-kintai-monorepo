@@ -22,29 +22,32 @@ import SystemMain from '@/components/layouts/SystemMain.vue'
 
 <style scoped>
 .layout {
-  min-height: 100vh;
-  background:
-    linear-gradient(rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.18)),
-    #b8cde5;
-  color: #172033;
+  width: 100%;
+  height: 100dvh;
+  overflow: hidden;
+  background: var(--el-bg-color-page);
+  color: var(--el-text-color-primary);
 }
 
 .layout-header {
   height: auto;
-  border-bottom: 1px solid #c7d2e0;
-  background: #ffffff;
-  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.08);
+  border-bottom: 1px solid var(--el-border-color-light);
+  background: var(--el-bg-color);
+  box-shadow: var(--el-box-shadow-light);
   padding: 0;
 }
 
 .layout-body {
+  flex: 1 1 auto;
   min-height: 0;
+  overflow: auto;
   padding: 0;
 }
 
 .layout-footer {
+  flex-shrink: 0;
   height: 48px;
-  border-top: 1px solid #c7d2e0;
+  border-top: 1px solid var(--el-border-color-light);
   padding: 0;
 }
 </style>

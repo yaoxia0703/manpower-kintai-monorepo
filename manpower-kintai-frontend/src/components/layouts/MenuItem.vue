@@ -30,7 +30,7 @@ defineProps<{
   border: 0;
   border-bottom: 3px solid transparent;
   background: transparent;
-  color: #344054;
+  color: var(--el-text-color-regular);
   cursor: pointer;
   font-size: 0.92rem;
   line-height: 1;
@@ -40,14 +40,14 @@ defineProps<{
 }
 
 .menu-item:hover {
-  background: #f6f8fb;
-  color: #0f5f9e;
+  background: var(--el-fill-color-light);
+  color: var(--el-color-primary);
 }
 
 .menu-item.active {
-  border-bottom-color: #0f8fcf;
-  background: #eaf6fd;
-  color: #0b5f8f;
+  border-bottom-color: var(--el-color-primary);
+  background: var(--app-brand-color-light);
+  color: var(--el-color-primary);
 }
 
 .chevron {

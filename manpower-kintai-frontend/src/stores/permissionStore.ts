@@ -23,6 +23,22 @@ export const usePermissionStore = defineStore('permission', () => {
     return permissions.value.includes(permission)
   }
 
+  function findMenuPath(path: string) {
+    const byId = new Map(menus.value.map((menu) => [menu.id, menu]))
+    const current = menus.value.find((menu) => menu.path === path)
+    if (!current) return []
+
+    const pathMenus = []
+    let cursor: CurrentMenu | undefined = current
+
+    while (cursor) {
+      pathMenus.unshift(cursor)
+      cursor = cursor.parentId == null ? undefined : byId.get(cursor.parentId)
+    }
+
+    return pathMenus
+  }
+
   function clearAccess() {
     roles.value = []
     permissions.value = []
@@ -37,6 +53,7 @@ export const usePermissionStore = defineStore('permission', () => {
     setAccess,
     hasRole,
     hasPermission,
+    findMenuPath,
     clearAccess,
   }
 })

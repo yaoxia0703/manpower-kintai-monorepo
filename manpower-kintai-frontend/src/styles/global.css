@@ -1,0 +1,24 @@
+:root {
+  --app-bg-color: #f5f7fa;
+  --app-brand-color: #123c69;
+  --app-brand-color-light: #f0f6fc;
+}
+
+html,
+body,
+#app {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+}
+
+body {
+  color: var(--el-text-color-primary);
+  background: var(--app-bg-color);
+  font-family: var(--el-font-family);
+}
+
+* {
+  box-sizing: border-box;
+}

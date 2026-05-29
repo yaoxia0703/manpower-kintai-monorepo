@@ -1,8 +1,9 @@
 import axios from 'axios'
 import router from '@/router'
+import { API_BASE_URL } from '@/config/env'
 
 const request = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || '',
+  baseURL: API_BASE_URL,
   timeout: 10000,
 })
 

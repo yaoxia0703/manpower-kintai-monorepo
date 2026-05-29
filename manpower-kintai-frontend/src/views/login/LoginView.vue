@@ -1,21 +1,24 @@
 <template>
-  <main class="login-page">
-    <section class="brand-panel" aria-label="ManpowerGroup Kintai">
-      <div class="brand-mark" aria-hidden="true">M</div>
-      <h1>勤怠管理システム</h1>
-      <p>ManpowerGroup</p>
-    </section>
+  <el-row class="login-page">
+    <el-col :xs="24" :md="12" class="login-side login-brand">
+      <el-space direction="vertical" alignment="flex-start" :size="20" class="login-content">
+        <el-avatar :size="72" class="brand-avatar">M</el-avatar>
+        <div>
+          <h1 class="brand-title">勤怠管理システム</h1>
+          <el-text class="brand-subtitle">ManpowerGroup</el-text>
+        </div>
+      </el-space>
+    </el-col>
 
-    <section class="form-panel">
-      <div class="form-wrapper">
-        <h2>ログイン</h2>
+    <el-col :xs="24" :md="12" class="login-side login-form-side">
+      <div class="login-content form-content">
+        <h2 class="form-title">ログイン</h2>
 
         <el-form
           ref="formRef"
           :model="form"
           :rules="rules"
           label-position="top"
-          class="login-form"
           @keyup.enter="handleLogin"
         >
           <el-form-item label="メールアドレス" prop="email">
@@ -39,19 +42,13 @@
             />
           </el-form-item>
 
-          <el-button
-            type="primary"
-            size="large"
-            :loading="loading"
-            class="login-button"
-            @click="handleLogin"
-          >
+          <el-button type="primary" size="large" :loading="loading" class="login-button" @click="handleLogin">
             ログイン
           </el-button>
         </el-form>
       </div>
-    </section>
-  </main>
+    </el-col>
+  </el-row>
 </template>
 
 <script setup lang="ts">
@@ -102,94 +99,82 @@ async function handleLogin() {
 
 <style scoped>
 .login-page {
-  display: grid;
-  min-height: 100vh;
-  grid-template-columns: minmax(320px, 0.9fr) minmax(360px, 1.1fr);
-  background: #f6f8fb;
+  width: 100%;
+  height: 100dvh;
+  overflow: hidden;
+  background: var(--el-bg-color-page);
 }
 
-.brand-panel {
+.login-side {
   display: flex;
   min-height: 100%;
-  flex-direction: column;
+  align-items: center;
   justify-content: center;
-  padding: 64px;
-  background: #123c69;
-  color: #ffffff;
+  padding: 48px;
 }
 
-.brand-mark {
-  display: grid;
-  width: 72px;
-  height: 72px;
-  margin-bottom: 32px;
-  place-items: center;
+.login-brand {
+  background: var(--app-brand-color);
+  color: var(--el-color-white);
+}
+
+.login-content {
+  width: min(100%, 420px);
+}
+
+.brand-avatar {
   border: 2px solid rgba(255, 255, 255, 0.72);
-  border-radius: 8px;
-  font-size: 2rem;
+  background: transparent;
+  color: var(--el-color-white);
+  font-size: 32px;
   font-weight: 700;
 }
 
-.brand-panel h1 {
-  margin: 0 0 12px;
-  font-size: 2rem;
+.brand-title,
+.form-title {
+  margin: 0;
   font-weight: 700;
   line-height: 1.25;
 }
 
-.brand-panel p {
-  margin: 0;
+.brand-title {
+  color: var(--el-color-white);
+  font-size: 32px;
+}
+
+.brand-subtitle {
   color: rgba(255, 255, 255, 0.78);
-  font-size: 1rem;
 }
 
-.form-panel {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 40px 24px;
+.login-form-side {
+  background: var(--el-bg-color-page);
 }
 
-.form-wrapper {
-  width: min(100%, 400px);
-}
-
-.form-wrapper h2 {
-  margin: 0 0 28px;
-  color: #172033;
-  font-size: 1.7rem;
-  font-weight: 700;
-}
-
-.login-form :deep(.el-form-item) {
-  margin-bottom: 22px;
-}
-
-.login-form :deep(.el-form-item__label) {
-  color: #344054;
-  font-weight: 600;
+.form-title {
+  margin-bottom: 32px;
+  color: var(--el-text-color-primary);
+  font-size: 28px;
 }
 
 .login-button {
   width: 100%;
-  margin-top: 4px;
+  margin-top: 8px;
 }
 
-@media (max-width: 760px) {
+@media (max-width: 767px) {
   .login-page {
-    grid-template-columns: 1fr;
+    height: auto;
+    min-height: 100dvh;
+    overflow: auto;
   }
 
-  .brand-panel {
-    min-height: 220px;
+  .login-side {
+    min-height: 50dvh;
     padding: 32px 24px;
   }
 
-  .brand-mark {
-    width: 56px;
-    height: 56px;
-    margin-bottom: 20px;
-    font-size: 1.5rem;
+  .brand-title {
+    font-size: 26px;
   }
 }
 </style>

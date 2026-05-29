@@ -1,29 +1,27 @@
 <template>
   <div class="system-header">
     <div class="header-main">
-      <button class="icon-button app-switcher" type="button" aria-label="メニュー">
+      <el-button circle aria-label="メニュー" class="app-switcher">
         <span v-for="index in 9" :key="index"></span>
-      </button>
+      </el-button>
 
       <div class="brand">
-        <div class="brand-mark" aria-hidden="true">M</div>
+        <el-avatar :size="34" class="brand-mark">M</el-avatar>
         <span class="brand-name">Manpower</span>
       </div>
 
-      <label class="global-search" aria-label="グローバル検索">
-        <span class="search-icon" aria-hidden="true"></span>
-        <input type="search" placeholder="検索..." disabled />
-      </label>
+      <el-input class="global-search" placeholder="検索..." size="default" disabled />
 
       <div class="header-actions">
-        <button class="icon-button" type="button" aria-label="通知">
-          <span class="bell-icon" aria-hidden="true"></span>
-        </button>
+        <el-button circle aria-label="通知">!</el-button>
 
-        <el-dropdown trigger="click" @command="handleUserCommand">
-          <button class="user-button" type="button" aria-label="ユーザー">
-            {{ userInitial }}
-          </button>
+        <el-dropdown
+          trigger="click"
+          placement="bottom-end"
+          :teleported="false"
+          @command="handleUserCommand"
+        >
+          <el-avatar :size="38" class="user-avatar">{{ userInitial }}</el-avatar>
           <template #dropdown>
             <el-dropdown-menu>
               <el-dropdown-item command="logout">ログアウト</el-dropdown-item>
@@ -106,36 +104,20 @@ async function handleUserCommand(command: string) {
 <style scoped>
 .system-header {
   height: 100%;
-  background: #ffffff;
+  background: var(--el-bg-color);
 }
 
 .header-main {
   display: grid;
   min-height: 56px;
-  grid-template-columns: auto auto minmax(220px, 440px) 1fr;
+  grid-template-columns: auto auto minmax(180px, 440px) minmax(0, 1fr);
   align-items: center;
   gap: 16px;
   padding: 8px 18px;
 }
 
-.icon-button {
-  display: grid;
-  width: 34px;
-  height: 34px;
-  place-items: center;
-  border: 1px solid transparent;
-  border-radius: 6px;
-  background: transparent;
-  color: #475467;
-  cursor: pointer;
-}
-
-.icon-button:hover {
-  border-color: #d0d5dd;
-  background: #f6f8fb;
-}
-
 .app-switcher {
+  display: grid;
   grid-template-columns: repeat(3, 4px);
   grid-template-rows: repeat(3, 4px);
   gap: 4px;
@@ -145,7 +127,7 @@ async function handleUserCommand(command: string) {
   width: 4px;
   height: 4px;
   border-radius: 50%;
-  background: #667085;
+  background: var(--el-text-color-secondary);
 }
 
 .brand {
@@ -156,113 +138,33 @@ async function handleUserCommand(command: string) {
 }
 
 .brand-mark {
-  display: grid;
-  width: 34px;
-  height: 34px;
-  place-items: center;
-  border-radius: 6px;
-  background: #0f5f9e;
-  color: #ffffff;
-  font-size: 1.05rem;
+  background: var(--el-color-primary);
+  color: var(--el-color-white);
   font-weight: 700;
 }
 
 .brand-name {
-  color: #172033;
-  font-size: 1rem;
+  color: var(--el-text-color-primary);
   font-weight: 700;
 }
 
 .global-search {
-  position: relative;
-  display: block;
   width: 100%;
-}
-
-.global-search input {
-  width: 100%;
-  height: 34px;
-  border: 1px solid #aeb7c3;
-  border-radius: 5px;
-  background: #ffffff;
-  color: #475467;
-  cursor: not-allowed;
-  font-size: 0.92rem;
-  opacity: 1;
-  padding: 0 12px 0 36px;
-}
-
-.search-icon {
-  position: absolute;
-  top: 50%;
-  left: 13px;
-  width: 12px;
-  height: 12px;
-  border: 2px solid #667085;
-  border-radius: 50%;
-  transform: translateY(-50%);
-}
-
-.search-icon::after {
-  position: absolute;
-  right: -6px;
-  bottom: -5px;
-  width: 7px;
-  height: 2px;
-  border-radius: 2px;
-  background: #667085;
-  content: '';
-  transform: rotate(45deg);
+  min-width: 0;
 }
 
 .header-actions {
   display: inline-flex;
+  min-width: 0;
   justify-self: end;
   align-items: center;
   gap: 8px;
 }
 
-.bell-icon {
-  position: relative;
-  width: 15px;
-  height: 16px;
-  border: 2px solid #667085;
-  border-bottom: 0;
-  border-radius: 9px 9px 4px 4px;
-}
-
-.bell-icon::before {
-  position: absolute;
-  right: -4px;
-  bottom: -3px;
-  left: -4px;
-  height: 2px;
-  border-radius: 2px;
-  background: #667085;
-  content: '';
-}
-
-.bell-icon::after {
-  position: absolute;
-  bottom: -7px;
-  left: 50%;
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: #667085;
-  content: '';
-  transform: translateX(-50%);
-}
-
-.user-button {
-  display: grid;
-  width: 38px;
-  height: 38px;
-  place-items: center;
-  border: 2px solid #d9e4ef;
-  border-radius: 50%;
-  background: #355270;
-  color: #ffffff;
+.user-avatar {
+  border: 2px solid var(--el-border-color-lighter);
+  background: var(--el-color-primary);
+  color: var(--el-color-white);
   cursor: pointer;
   font-weight: 700;
 }
@@ -272,13 +174,14 @@ async function handleUserCommand(command: string) {
   min-height: 42px;
   align-items: stretch;
   overflow-x: auto;
-  border-top: 1px solid #eef2f6;
+  overflow-y: hidden;
+  border-top: 1px solid var(--el-border-color-lighter);
   padding: 0 18px 0 68px;
 }
 
 @media (max-width: 860px) {
   .header-main {
-    grid-template-columns: auto auto 1fr auto;
+    grid-template-columns: auto auto minmax(0, 1fr) auto;
   }
 
   .brand-name {
@@ -296,7 +199,7 @@ async function handleUserCommand(command: string) {
 
 @media (max-width: 640px) {
   .header-main {
-    grid-template-columns: auto 1fr auto;
+    grid-template-columns: auto minmax(0, 1fr) auto;
     gap: 10px;
   }
 
