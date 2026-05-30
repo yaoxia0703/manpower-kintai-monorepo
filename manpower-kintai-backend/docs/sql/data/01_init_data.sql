@@ -22,15 +22,29 @@ USE `manpower_kintai`;
 
 /*Data for the table `att_record` */
 
+insert  into `att_record`(`id`,`employee_id`,`company_id`,`work_date`,`clock_in`,`clock_out`,`attendance_type`,`work_minutes`,`overtime_minutes`,`remark`,`status`,`created_by`,`created_at`,`updated_by`,`updated_at`,`is_deleted`) values 
+(1,1,1,'2026-05-01','09:00:00','23:40:00','OFFICE',850,370,NULL,0,1,'2026-05-30 00:32:39',1,'2026-05-30 00:32:39',0),
+(2,1,1,'2026-05-02','19:20:00','21:30:00','HOLIDAY_WORK',120,0,NULL,0,1,'2026-05-30 00:32:39',1,'2026-05-30 00:32:39',0),
+(3,1,1,'2026-05-03','00:53:00','23:59:00','BUSINESS_TRIP',1298,818,NULL,0,1,'2026-05-30 00:53:09',1,'2026-05-30 00:53:09',0);
+
 /*Data for the table `att_request` */
 
 /*Data for the table `emp_account` */
 
+insert  into `emp_account`(`id`,`employee_id`,`username`,`password`,`last_login`,`status`,`created_by`,`created_at`,`updated_by`,`updated_at`,`is_deleted`) values 
+(1,1,'admin','$2a$10$oPWkFACn8eIs8cBzNkKiqewN9qvbme/ClFwYfzCgA3Dwvv6RgaRyq',NULL,1,NULL,'2026-05-27 23:19:16',NULL,'2026-05-27 23:19:16',0);
+
 /*Data for the table `emp_employee` */
+
+insert  into `emp_employee`(`id`,`company_id`,`employee_code`,`last_name`,`first_name`,`last_name_kana`,`first_name_kana`,`email`,`phone`,`gender`,`birth_date`,`hire_date`,`leave_date`,`status`,`created_by`,`created_at`,`updated_by`,`updated_at`,`is_deleted`) values 
+(1,1,'SUPER_ADMIN','Super','Admin',NULL,NULL,'admin@manpower.local',NULL,0,NULL,'2026-05-27',NULL,1,NULL,'2026-05-27 23:19:16',NULL,'2026-05-27 23:19:16',0);
 
 /*Data for the table `emp_employee_position` */
 
 /*Data for the table `org_company` */
+
+insert  into `org_company`(`id`,`parent_id`,`name`,`company_code`,`level`,`sort`,`status`,`created_by`,`created_at`,`updated_by`,`updated_at`,`is_deleted`) values 
+(1,NULL,'ManpowerGroup','MPG',1,0,1,NULL,'2026-05-27 23:19:16',NULL,'2026-05-27 23:19:16',0);
 
 /*Data for the table `org_grade` */
 
@@ -39,6 +53,9 @@ USE `manpower_kintai`;
 /*Data for the table `org_node_closure` */
 
 /*Data for the table `sys_employee_role` */
+
+insert  into `sys_employee_role`(`id`,`employee_id`,`role_id`,`company_id`,`start_date`,`end_date`,`created_by`,`created_at`,`updated_by`,`updated_at`,`is_deleted`) values 
+(1,1,1,1,'2026-05-27',NULL,NULL,'2026-05-27 23:19:16',NULL,'2026-05-27 23:19:16',0);
 
 /*Data for the table `sys_enum_type` */
 
@@ -141,13 +158,63 @@ insert  into `sys_i18n`(`id`,`ref_type`,`ref_id`,`language`,`content`,`created_b
 
 /*Data for the table `sys_menu` */
 
+insert  into `sys_menu`(`id`,`parent_id`,`name`,`code`,`path`,`component`,`icon`,`type`,`sort`,`visible`,`status`,`created_by`,`created_at`,`updated_by`,`updated_at`,`is_deleted`) values 
+(1,NULL,'ホーム','home','/admin','DashboardView','Home',2,10,1,1,NULL,'2026-05-30 10:43:34',NULL,'2026-05-30 10:43:37',0),
+(2,NULL,'勤務表','timesheet','/admin/timesheet','timesheet/TimesheetView','Calendar',2,20,1,1,NULL,'2026-05-30 10:43:34',NULL,'2026-05-30 10:43:37',0),
+(3,NULL,'部下管理','manager-subordinates','/admin/subordinates','manager/SubordinatesView','Users',2,30,1,1,NULL,'2026-05-30 10:43:34',NULL,'2026-05-30 10:43:37',0),
+(4,NULL,'入社登録','hr-onboarding','/admin/hr/onboarding','hr/OnboardingView','UserPlus',2,40,1,1,NULL,'2026-05-30 10:43:34',NULL,'2026-05-30 10:43:37',0);
+
 /*Data for the table `sys_permission` */
+
+insert  into `sys_permission`(`id`,`menu_id`,`code`,`name`,`method`,`path`,`remark`,`sort`,`status`,`created_by`,`created_at`,`updated_by`,`updated_at`,`is_deleted`) values 
+(1,NULL,'admin:employee:read','社員参照','GET','/admin/emp/employees/**','管理者向け社員参照権限',100,1,NULL,'2026-05-30 10:22:51',NULL,'2026-05-30 10:43:37',0),
+(2,NULL,'admin:employee:write','社員更新','POST','/admin/emp/employees/**','管理者向け社員更新権限',110,1,NULL,'2026-05-30 10:22:51',NULL,'2026-05-30 10:43:37',0),
+(3,NULL,'admin:menu:read','メニュー参照','GET','/admin/sys/menus/**','管理者向けメニュー参照権限',200,1,NULL,'2026-05-30 10:22:51',NULL,'2026-05-30 10:43:37',0),
+(4,NULL,'admin:menu:write','メニュー更新','POST','/admin/sys/menus/**','管理者向けメニュー更新権限',210,1,NULL,'2026-05-30 10:22:51',NULL,'2026-05-30 10:43:37',0),
+(5,NULL,'admin:permission:read','権限参照','GET','/admin/sys/permissions/**','管理者向け権限参照権限',250,1,NULL,'2026-05-30 10:22:51',NULL,'2026-05-30 10:43:37',0),
+(6,NULL,'admin:permission:write','権限更新','POST','/admin/sys/permissions/**','管理者向け権限更新権限',260,1,NULL,'2026-05-30 10:22:51',NULL,'2026-05-30 10:43:37',0),
+(7,NULL,'admin:role:read','ロール参照','GET','/admin/sys/roles/**','管理者向けロール参照権限',300,1,NULL,'2026-05-30 10:22:51',NULL,'2026-05-30 10:43:37',0),
+(8,NULL,'admin:role:write','ロール更新','POST','/admin/sys/roles/**','管理者向けロール更新権限',310,1,NULL,'2026-05-30 10:22:51',NULL,'2026-05-30 10:43:37',0),
+(9,NULL,'employee:timesheet:read','勤務表参照','GET','/employee/att/timesheet/**','社員向け勤務表参照権限',400,1,NULL,'2026-05-30 10:22:51',NULL,'2026-05-30 10:43:37',0),
+(10,NULL,'employee:timesheet:write','勤務表更新','PUT','/employee/att/timesheet/**','社員向け勤務表更新権限',410,1,NULL,'2026-05-30 10:22:51',NULL,'2026-05-30 10:43:37',0),
+(11,NULL,'manager:subordinate:read','部下参照','GET','/manager/emp/subordinates/**','部門管理者向け部下参照権限',500,1,NULL,'2026-05-30 10:43:34',NULL,'2026-05-30 10:43:37',0),
+(12,NULL,'hr:employee:onboard','入社登録','POST','/admin/hr/onboarding/employees','本部人事向け入社登録権限',600,1,NULL,'2026-05-30 10:43:34',NULL,'2026-05-30 10:43:37',0);
 
 /*Data for the table `sys_role` */
 
+insert  into `sys_role`(`id`,`company_id`,`code`,`name`,`remark`,`sort`,`status`,`created_by`,`created_at`,`updated_by`,`updated_at`,`is_deleted`) values 
+(1,1,'SUPER_ADMIN','スーパー管理者','全権限管理者',0,1,NULL,'2026-05-27 23:19:16',NULL,'2026-05-27 23:19:16',0),
+(2,1,'EMPLOYEE','一般社員','一般社員ロール',10,1,NULL,'2026-05-30 10:43:34',NULL,'2026-05-30 10:43:34',0),
+(3,1,'DEPT_MANAGER','部門管理者','部下勤務状況を参照できる部門管理者ロール',20,1,NULL,'2026-05-30 10:43:34',NULL,'2026-05-30 10:43:34',0),
+(4,1,'HR_ADMIN','人事管理者','入社社員を登録できる本部人事ロール',30,1,NULL,'2026-05-30 10:43:34',NULL,'2026-05-30 10:43:34',0);
+
 /*Data for the table `sys_role_menu` */
 
+insert  into `sys_role_menu`(`role_id`,`menu_id`,`created_by`,`created_at`) values 
+(1,1,NULL,'2026-05-30 10:43:34'),
+(1,2,NULL,'2026-05-30 10:43:34'),
+(2,1,NULL,'2026-05-30 10:43:34'),
+(2,2,NULL,'2026-05-30 10:43:34'),
+(3,1,NULL,'2026-05-30 10:43:34'),
+(3,2,NULL,'2026-05-30 10:43:34'),
+(4,1,NULL,'2026-05-30 10:43:34'),
+(4,2,NULL,'2026-05-30 10:43:34');
+
 /*Data for the table `sys_role_permission` */
+
+insert  into `sys_role_permission`(`role_id`,`permission_id`,`created_by`,`created_at`) values 
+(1,1,NULL,'2026-05-30 10:22:52'),
+(1,2,NULL,'2026-05-30 10:22:52'),
+(1,3,NULL,'2026-05-30 10:22:52'),
+(1,4,NULL,'2026-05-30 10:22:52'),
+(1,5,NULL,'2026-05-30 10:22:52'),
+(1,6,NULL,'2026-05-30 10:22:52'),
+(1,7,NULL,'2026-05-30 10:22:52'),
+(1,8,NULL,'2026-05-30 10:22:52'),
+(1,9,NULL,'2026-05-30 10:22:52'),
+(1,10,NULL,'2026-05-30 10:22:52'),
+(1,11,NULL,'2026-05-30 10:43:34'),
+(1,12,NULL,'2026-05-30 10:43:34');
 
 /*Data for the table `wf_approval` */
 

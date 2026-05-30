@@ -64,9 +64,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
             MDC.put("userId", String.valueOf(employeeId));
 
-            // 権限コードをロード
-            final List<String> permissionCodes = employeeAuthorityProvider.loadPermissionCodes(employeeId);
-            final List<SimpleGrantedAuthority> authorities = permissionCodes.stream()
+            // 権限コードとロール権限をロード
+            final List<String> authorityCodes = employeeAuthorityProvider.loadAuthorityCodes(employeeId, accountId);
+            final List<SimpleGrantedAuthority> authorities = authorityCodes.stream()
                     .filter(Objects::nonNull)
                     .map(String::trim)
                     .filter(s -> !s.isBlank())

@@ -71,14 +71,15 @@ public class SecurityConfig {
                         .requestMatchers("/api/system/auth/login").permitAll()
 
                         // 基本リソース
-                        .requestMatchers("/error/**", "/favicon.ico").permitAll()
+                        .requestMatchers("/error/**", "/favicon.ico", "/actuator/health").permitAll()
+                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
 
                         // 認証必須API
                         .requestMatchers("/api/system/**").authenticated()
                         .requestMatchers("/admin/**", "/employee/**").authenticated()
 
-                        // その他は許可
-                        .anyRequest().permitAll()
+                        // その他は認証必須
+                        .anyRequest().authenticated()
                 )
 
                 // JWTフィルタ適用

@@ -49,7 +49,6 @@ import MenuItem from '@/components/layouts/MenuItem.vue'
 import { useAuthStore } from '@/stores/auth'
 import { usePermissionStore } from '@/stores/permissionStore'
 import { useUserStore } from '@/stores/userStore'
-import type { CurrentMenu } from '@/types/menu'
 
 interface HeaderMenu {
   name: string
@@ -57,18 +56,6 @@ interface HeaderMenu {
   path?: string | null
   chevron?: boolean
 }
-
-const fallbackMenus: HeaderMenu[] = [
-  { name: 'ホーム', code: 'home', path: '/admin' },
-  { name: '勤務表', code: 'timesheet', path: '/admin/timesheet' },
-  { name: '事前申請', code: 'request' },
-  { name: '経費精算', code: 'expense' },
-  { name: '工数実績', code: 'worklog' },
-  { name: '管理メニュー', code: 'admin-menu' },
-  { name: '実績', code: 'actuals', chevron: true },
-  { name: 'ファイル', code: 'files', chevron: true },
-  { name: 'レポート', code: 'reports', chevron: true },
-]
 
 const authStore = useAuthStore()
 const userStore = useUserStore()
@@ -81,10 +68,9 @@ const userInitial = computed(() => {
 
 const displayMenus = computed<HeaderMenu[]>(() => {
   const menus = permissionStore.menus
-  if (menus.length === 0) return fallbackMenus
 
   return menus
-    .filter((menu: CurrentMenu) => menu.visible !== 0)
+    .filter((menu) => menu.visible !== 0)
     .sort((a, b) => (a.sort ?? 0) - (b.sort ?? 0))
     .map((menu) => ({
       name: menu.name,

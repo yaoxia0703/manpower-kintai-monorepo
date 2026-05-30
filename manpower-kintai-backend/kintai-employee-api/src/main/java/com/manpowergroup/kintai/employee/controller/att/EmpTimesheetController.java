@@ -4,10 +4,13 @@ import com.manpowergroup.kintai.attendance.application.dto.TimesheetMonthRespons
 import com.manpowergroup.kintai.attendance.application.dto.TimesheetSaveRequest;
 import com.manpowergroup.kintai.attendance.application.service.att.AttTimesheetService;
 import com.manpowergroup.kintai.common.result.Result;
+import com.manpowergroup.kintai.common.security.SecurityPermissions;
 import com.manpowergroup.kintai.framework.security.jwt.LoginPrincipal;
 import com.manpowergroup.kintai.system.application.service.emp.EmpEmployeeService;
 import com.manpowergroup.kintai.system.domain.entity.emp.EmpEmployee;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,6 +30,7 @@ public class EmpTimesheetController {
     private final EmpEmployeeService employeeService;
 
     @GetMapping
+    @PreAuthorize(SecurityPermissions.HAS_EMPLOYEE_TIMESHEET_READ)
     public Result<TimesheetMonthResponse> getMonthlyTimesheet(
             @AuthenticationPrincipal LoginPrincipal principal,
             @RequestParam int year,
@@ -36,15 +40,17 @@ public class EmpTimesheetController {
     }
 
     @PutMapping
+    @PreAuthorize(SecurityPermissions.HAS_EMPLOYEE_TIMESHEET_WRITE)
     public Result<Void> saveRecord(
             @AuthenticationPrincipal LoginPrincipal principal,
-            @RequestBody TimesheetSaveRequest request) {
+            @RequestBody @Valid TimesheetSaveRequest request) {
         EmpEmployee employee = employeeService.getById(principal.employeeId());
         timesheetService.saveRecord(employee.getId(), employee.getCompanyId(), request);
         return Result.ok();
     }
 
     @DeleteMapping("/{recordId}")
+    @PreAuthorize(SecurityPermissions.HAS_EMPLOYEE_TIMESHEET_WRITE)
     public Result<Void> deleteRecord(
             @AuthenticationPrincipal LoginPrincipal principal,
             @PathVariable Long recordId) {

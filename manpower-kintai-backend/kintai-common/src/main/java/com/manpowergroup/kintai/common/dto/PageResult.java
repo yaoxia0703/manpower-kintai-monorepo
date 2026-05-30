@@ -39,4 +39,16 @@ public class PageResult<T> {
         result.setPages(page.getPages());
         return result;
     }
+
+    public <R> PageResult<R> map(Function<T, R> converter) {
+        PageResult<R> result = new PageResult<>();
+        result.setRecords(records == null
+                ? List.of()
+                : records.stream().map(converter).collect(Collectors.toList()));
+        result.setTotal(total);
+        result.setPage(page);
+        result.setSize(size);
+        result.setPages(pages);
+        return result;
+    }
 }

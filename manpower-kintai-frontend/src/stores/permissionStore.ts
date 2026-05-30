@@ -20,7 +20,7 @@ export const usePermissionStore = defineStore('permission', () => {
   }
 
   function hasPermission(permission: string) {
-    return permissions.value.includes(permission)
+    return permissions.value.includes('*') || permissions.value.includes(permission)
   }
 
   function findMenuPath(path: string) {

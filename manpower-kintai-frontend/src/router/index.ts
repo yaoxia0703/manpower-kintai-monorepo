@@ -1,10 +1,14 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import SystemLayout from '@/components/layouts/SystemLayout.vue'
 import { useAuthStore } from '@/stores/auth'
+import { usePermissionStore } from '@/stores/permissionStore'
 import { useUserStore } from '@/stores/userStore'
 import LoginView from '@/views/login/LoginView.vue'
 import DashboardView from '@/views/DashboardView.vue'
 import TimesheetView from '@/views/timesheet/TimesheetView.vue'
+import SubordinatesView from '@/views/manager/SubordinatesView.vue'
+import OnboardingView from '@/views/hr/OnboardingView.vue'
+import ForbiddenView from '@/views/errors/ForbiddenView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -35,8 +39,26 @@ const router = createRouter({
           path: 'timesheet',
           name: 'timesheet',
           component: TimesheetView,
+          meta: { permission: 'employee:timesheet:read' },
+        },
+        {
+          path: 'subordinates',
+          name: 'manager-subordinates',
+          component: SubordinatesView,
+          meta: { permission: 'manager:subordinate:read' },
+        },
+        {
+          path: 'hr/onboarding',
+          name: 'hr-onboarding',
+          component: OnboardingView,
+          meta: { permission: 'hr:employee:onboard' },
         },
       ],
+    },
+    {
+      path: '/403',
+      name: 'forbidden',
+      component: ForbiddenView,
     },
     {
       path: '/dashboard',
@@ -51,6 +73,7 @@ const router = createRouter({
 
 router.beforeEach(async (to) => {
   const authStore = useAuthStore()
+  const permissionStore = usePermissionStore()
   const userStore = useUserStore()
   const token = authStore.token
 
@@ -71,6 +94,11 @@ router.beforeEach(async (to) => {
         query: { redirect: to.fullPath },
       }
     }
+  }
+
+  const requiredPermission = to.meta.permission
+  if (typeof requiredPermission === 'string' && !permissionStore.hasPermission(requiredPermission)) {
+    return '/403'
   }
 
   if (to.meta.guestOnly && token) {
