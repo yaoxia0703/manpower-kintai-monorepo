@@ -5,23 +5,27 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.manpowergroup.kintai.common.enums.Status;
 import com.manpowergroup.kintai.common.exception.BaseErrorCode;
 import com.manpowergroup.kintai.common.exception.BizException;
+import com.manpowergroup.kintai.system.application.service.sys.SysMenuService;
 import com.manpowergroup.kintai.system.domain.entity.sys.SysEmployeeRole;
 import com.manpowergroup.kintai.system.domain.entity.sys.SysMenu;
+import com.manpowergroup.kintai.system.domain.entity.sys.SysPermission;
 import com.manpowergroup.kintai.system.domain.entity.sys.SysRoleMenu;
 import com.manpowergroup.kintai.system.infrastructure.mapper.sys.SysEmployeeRoleMapper;
 import com.manpowergroup.kintai.system.infrastructure.mapper.sys.SysMenuMapper;
+import com.manpowergroup.kintai.system.infrastructure.mapper.sys.SysPermissionMapper;
 import com.manpowergroup.kintai.system.infrastructure.mapper.sys.SysRoleMenuMapper;
-import com.manpowergroup.kintai.system.application.service.sys.SysMenuService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
-// メニューマスタサービス実装（アプリケーション層）
 @Service
 @RequiredArgsConstructor
 public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu>
@@ -29,6 +33,7 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu>
 
     private final SysEmployeeRoleMapper employeeRoleMapper;
     private final SysRoleMenuMapper roleMenuMapper;
+    private final SysPermissionMapper permissionMapper;
 
     @Override
     public SysMenu getById(Long id) {
@@ -44,7 +49,6 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu>
 
     @Override
     public List<SysMenu> listByEmployeeId(Long employeeId) {
-        // 有効期間内のロールIDを取得
         List<Long> roleIds = employeeRoleMapper.selectList(Wrappers.<SysEmployeeRole>lambdaQuery()
                         .eq(SysEmployeeRole::getEmployeeId, employeeId)
                         .and(w -> w.isNull(SysEmployeeRole::getStartDate)
@@ -53,11 +57,12 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu>
                                 .or().ge(SysEmployeeRole::getEndDate, LocalDate.now())))
                 .stream().map(SysEmployeeRole::getRoleId).collect(Collectors.toList());
         if (roleIds.isEmpty()) return Collections.emptyList();
-        // ロールに紐づくメニューIDを取得
+
         List<Long> menuIds = roleMenuMapper.selectList(Wrappers.<SysRoleMenu>lambdaQuery()
                         .in(SysRoleMenu::getRoleId, roleIds))
                 .stream().map(SysRoleMenu::getMenuId).distinct().collect(Collectors.toList());
         if (menuIds.isEmpty()) return Collections.emptyList();
+
         return lambdaQuery()
                 .in(SysMenu::getId, menuIds)
                 .orderByAsc(SysMenu::getSort)
@@ -89,6 +94,7 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu>
                 .setIcon(menu.getIcon())
                 .setType(menu.getType())
                 .setSort(menu.getSort())
+                .setVisible(menu.getVisible())
                 .setParentId(menu.getParentId());
         updateById(existing);
         return existing;
@@ -130,12 +136,40 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu>
     @Transactional
     public void remove(Long id) {
         getById(id);
-        removeById(id);
+        List<Long> menuIds = collectDescendantIds(id);
+        boolean hasPermissions = permissionMapper.selectCount(Wrappers.<SysPermission>lambdaQuery()
+                .in(SysPermission::getMenuId, menuIds)) > 0;
+        if (hasPermissions) throw new BizException(SystemErrorCode.MENU_HAS_PERMISSIONS);
+
+        roleMenuMapper.delete(Wrappers.<SysRoleMenu>lambdaQuery().in(SysRoleMenu::getMenuId, menuIds));
+        menuIds.forEach(this::removeById);
+    }
+
+    private List<Long> collectDescendantIds(Long rootId) {
+        List<SysMenu> menus = listAll();
+        Set<Long> collected = new HashSet<>();
+        collected.add(rootId);
+
+        boolean changed;
+        do {
+            changed = false;
+            for (SysMenu menu : menus) {
+                if (menu.getId() != null
+                        && menu.getParentId() != null
+                        && collected.contains(menu.getParentId())
+                        && collected.add(menu.getId())) {
+                    changed = true;
+                }
+            }
+        } while (changed);
+
+        return new ArrayList<>(collected);
     }
 
     enum SystemErrorCode implements BaseErrorCode {
         MENU_NOT_FOUND(404, "error.menu.not_found"),
-        MENU_CODE_DUPLICATE(409, "error.menu.code_duplicate");
+        MENU_CODE_DUPLICATE(409, "error.menu.code_duplicate"),
+        MENU_HAS_PERMISSIONS(409, "error.menu.has_permissions");
 
         private final int code;
         private final String messageKey;
@@ -149,4 +183,3 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu>
         @Override public String messageKey() { return messageKey; }
     }
 }
-

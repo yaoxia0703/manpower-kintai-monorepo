@@ -153,7 +153,7 @@ CREATE TABLE `emp_account` (
   UNIQUE KEY `uk_username` (`username`,((case when (`is_deleted` = 0) then `is_deleted` else NULL end))),
   UNIQUE KEY `uk_employee_id` (`employee_id`,((case when (`is_deleted` = 0) then `is_deleted` else NULL end))),
   KEY `idx_employee_id` (`employee_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='社員アカウント';
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='社員アカウント';
 
 /*Table structure for table `emp_employee` */
 
@@ -184,7 +184,7 @@ CREATE TABLE `emp_employee` (
   UNIQUE KEY `uk_email` (`email`,((case when (`is_deleted` = 0) then `is_deleted` else NULL end))),
   KEY `idx_company_id` (`company_id`),
   KEY `idx_status` (`status`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='社員マスタ';
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='社員マスタ';
 
 /*Table structure for table `emp_employee_position` */
 
@@ -211,7 +211,7 @@ CREATE TABLE `emp_employee_position` (
   KEY `idx_node_id` (`node_id`),
   KEY `idx_grade_id` (`grade_id`),
   KEY `idx_is_primary` (`is_primary`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='社員職位関連（兼任対応）';
+) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='社員職位関連（兼任対応）';
 
 /*Table structure for table `org_company` */
 
@@ -233,7 +233,7 @@ CREATE TABLE `org_company` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_company_code` (`company_code`,((case when (`is_deleted` = 0) then `is_deleted` else NULL end))),
   KEY `idx_parent_id` (`parent_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='会社マスタ';
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='会社マスタ';
 
 /*Table structure for table `org_grade` */
 
@@ -256,7 +256,7 @@ CREATE TABLE `org_grade` (
   UNIQUE KEY `uk_grade_code` (`company_id`,`code`,((case when (`is_deleted` = 0) then `is_deleted` else NULL end))),
   KEY `idx_company_id` (`company_id`),
   KEY `idx_grade_level` (`grade_level`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='職級マスタ';
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='職級マスタ';
 
 /*Table structure for table `org_node` */
 
@@ -284,7 +284,7 @@ CREATE TABLE `org_node` (
   KEY `idx_company_id` (`company_id`),
   KEY `idx_parent_id` (`parent_id`),
   KEY `idx_manager_id` (`manager_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='組織ノード（無限階層）';
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='組織ノード（無限階層）';
 
 /*Table structure for table `org_node_closure` */
 
@@ -319,7 +319,7 @@ CREATE TABLE `sys_employee_role` (
   UNIQUE KEY `uk_employee_role` (`employee_id`,`role_id`,`company_id`,((case when (`is_deleted` = 0) then `is_deleted` else NULL end))),
   KEY `idx_employee_id` (`employee_id`),
   KEY `idx_role_id` (`role_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='社員個人追加ロール関連';
+) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='社員個人追加ロール関連';
 
 /*Table structure for table `sys_enum_type` */
 
@@ -465,7 +465,7 @@ CREATE TABLE `sys_role` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_role_code` (`company_id`,`code`,((case when (`is_deleted` = 0) then `is_deleted` else NULL end))),
   KEY `idx_company_id` (`company_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='ロールマスタ';
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='ロールマスタ';
 
 /*Table structure for table `sys_role_menu` */
 

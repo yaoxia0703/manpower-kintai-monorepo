@@ -30,6 +30,7 @@ export interface NodeOption {
   code: string
   typeCode: string
   level: number
+  children?: NodeOption[]
 }
 
 export interface GradeOption {

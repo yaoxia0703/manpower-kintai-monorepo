@@ -32,30 +32,112 @@ insert  into `att_record`(`id`,`employee_id`,`company_id`,`work_date`,`clock_in`
 /*Data for the table `emp_account` */
 
 insert  into `emp_account`(`id`,`employee_id`,`username`,`password`,`last_login`,`status`,`created_by`,`created_at`,`updated_by`,`updated_at`,`is_deleted`) values 
-(1,1,'admin','$2a$10$oPWkFACn8eIs8cBzNkKiqewN9qvbme/ClFwYfzCgA3Dwvv6RgaRyq',NULL,1,NULL,'2026-05-27 23:19:16',NULL,'2026-05-27 23:19:16',0);
+(1,1,'admin','$2a$10$oPWkFACn8eIs8cBzNkKiqewN9qvbme/ClFwYfzCgA3Dwvv6RgaRyq',NULL,1,NULL,'2026-05-27 23:19:16',NULL,'2026-05-27 23:19:16',0),
+(2,2,'testHR@manpower.jp','$2a$10$JU8LQtgNkeiljdkCVTLO5.dYc5ivOYhz5BumavSA58RcbSyB0..my',NULL,1,1,'2026-05-30 23:39:37',1,'2026-05-30 23:39:37',0),
+(3,3,'testManagerEXP@manpower.jp','$2a$10$JU8LQtgNkeiljdkCVTLO5.dYc5ivOYhz5BumavSA58RcbSyB0..my',NULL,1,1,'2026-05-30 23:39:37',1,'2026-05-30 23:39:37',0),
+(4,4,'testManagerSD@manpower.jp','$2a$10$JU8LQtgNkeiljdkCVTLO5.dYc5ivOYhz5BumavSA58RcbSyB0..my',NULL,1,1,'2026-05-30 23:39:37',1,'2026-05-30 23:39:37',0),
+(5,5,'testManagerWT@manpower.jp','$2a$10$JU8LQtgNkeiljdkCVTLO5.dYc5ivOYhz5BumavSA58RcbSyB0..my',NULL,1,1,'2026-05-30 23:39:37',1,'2026-05-30 23:39:37',0),
+(6,6,'testManagerSOL2@manpower.jp','$2a$10$JU8LQtgNkeiljdkCVTLO5.dYc5ivOYhz5BumavSA58RcbSyB0..my',NULL,1,1,'2026-05-30 23:39:37',1,'2026-05-30 23:39:37',0),
+(7,7,'testManagerIT@manpower.jp','$2a$10$JU8LQtgNkeiljdkCVTLO5.dYc5ivOYhz5BumavSA58RcbSyB0..my',NULL,1,1,'2026-05-30 23:39:37',1,'2026-05-30 23:39:37',0),
+(8,8,'testEmployeeHR@manpower.jp','$2a$10$JU8LQtgNkeiljdkCVTLO5.dYc5ivOYhz5BumavSA58RcbSyB0..my',NULL,1,1,'2026-05-30 23:39:37',1,'2026-05-30 23:39:37',0),
+(9,9,'testEmployeeSD@manpower.jp','$2a$10$JU8LQtgNkeiljdkCVTLO5.dYc5ivOYhz5BumavSA58RcbSyB0..my',NULL,1,1,'2026-05-30 23:39:37',1,'2026-05-30 23:39:37',0),
+(10,10,'testEmployeeWT@manpower.jp','$2a$10$JU8LQtgNkeiljdkCVTLO5.dYc5ivOYhz5BumavSA58RcbSyB0..my',NULL,1,1,'2026-05-30 23:39:37',1,'2026-05-30 23:39:37',0),
+(11,11,'testEmployeeSOL2@manpower.jp','$2a$10$JU8LQtgNkeiljdkCVTLO5.dYc5ivOYhz5BumavSA58RcbSyB0..my',NULL,1,1,'2026-05-30 23:39:37',1,'2026-05-30 23:39:37',0),
+(12,12,'testEmployeeIT1@manpower.jp','$2a$10$JU8LQtgNkeiljdkCVTLO5.dYc5ivOYhz5BumavSA58RcbSyB0..my',NULL,1,1,'2026-05-30 23:39:37',1,'2026-05-30 23:39:37',0),
+(13,13,'testEmployeeIT2@manpower.jp','$2a$10$JU8LQtgNkeiljdkCVTLO5.dYc5ivOYhz5BumavSA58RcbSyB0..my',NULL,1,1,'2026-05-30 23:39:37',1,'2026-05-30 23:39:37',0);
 
 /*Data for the table `emp_employee` */
 
 insert  into `emp_employee`(`id`,`company_id`,`employee_code`,`last_name`,`first_name`,`last_name_kana`,`first_name_kana`,`email`,`phone`,`gender`,`birth_date`,`hire_date`,`leave_date`,`status`,`created_by`,`created_at`,`updated_by`,`updated_at`,`is_deleted`) values 
-(1,1,'SUPER_ADMIN','Super','Admin',NULL,NULL,'admin@manpower.local',NULL,0,NULL,'2026-05-27',NULL,1,NULL,'2026-05-27 23:19:16',NULL,'2026-05-27 23:19:16',0);
+(1,1,'SUPER_ADMIN','Super','Admin',NULL,NULL,'admin@manpower.local',NULL,0,NULL,'2026-05-27',NULL,1,NULL,'2026-05-27 23:19:16',NULL,'2026-05-27 23:19:16',0),
+(2,3,'JP-HR-001','佐藤','花子','サトウ','ハナコ','testHR@manpower.jp',NULL,2,NULL,'2026-05-30',NULL,1,1,'2026-05-30 23:39:36',1,'2026-05-30 23:39:36',0),
+(3,3,'JP-MGR-EXP','田中','太郎','タナカ','タロウ','testManagerEXP@manpower.jp',NULL,1,NULL,'2026-05-30',NULL,1,1,'2026-05-30 23:39:36',1,'2026-05-30 23:39:36',0),
+(4,3,'JP-MGR-SD','鈴木','一郎','スズキ','イチロウ','testManagerSD@manpower.jp',NULL,1,NULL,'2026-05-30',NULL,1,1,'2026-05-30 23:39:36',1,'2026-05-30 23:39:36',0),
+(5,3,'JP-MGR-WT','高橋','健','タカハシ','ケン','testManagerWT@manpower.jp',NULL,1,NULL,'2026-05-30',NULL,1,1,'2026-05-30 23:39:36',1,'2026-05-30 23:39:36',0),
+(6,3,'JP-MGR-SOL2','伊藤','誠','イトウ','マコト','testManagerSOL2@manpower.jp',NULL,1,NULL,'2026-05-30',NULL,1,1,'2026-05-30 23:39:36',1,'2026-05-30 23:39:36',0),
+(7,3,'JP-MGR-ITENG','山本','拓也','ヤマモト','タクヤ','testManagerIT@manpower.jp',NULL,1,NULL,'2026-05-30',NULL,1,1,'2026-05-30 23:39:36',1,'2026-05-30 23:39:36',0),
+(8,3,'JP-EMP-HR-001','小林','優子','コバヤシ','ユウコ','testEmployeeHR@manpower.jp',NULL,2,NULL,'2026-05-30',NULL,1,1,'2026-05-30 23:39:36',1,'2026-05-30 23:39:36',0),
+(9,3,'JP-EMP-SD-001','加藤','翔','カトウ','ショウ','testEmployeeSD@manpower.jp',NULL,1,NULL,'2026-05-30',NULL,1,1,'2026-05-30 23:39:36',1,'2026-05-30 23:39:36',0),
+(10,3,'JP-EMP-WT-001','吉田','直樹','ヨシダ','ナオキ','testEmployeeWT@manpower.jp',NULL,1,NULL,'2026-05-30',NULL,1,1,'2026-05-30 23:39:36',1,'2026-05-30 23:39:36',0),
+(11,3,'JP-EMP-SOL2-001','松本','彩','マツモト','アヤ','testEmployeeSOL2@manpower.jp',NULL,2,NULL,'2026-05-30',NULL,1,1,'2026-05-30 23:39:36',1,'2026-05-30 23:39:36',0),
+(12,3,'JP-EMP-ITENG-001','中村','美咲','ナカムラ','ミサキ','testEmployeeIT1@manpower.jp',NULL,2,NULL,'2026-05-30',NULL,1,1,'2026-05-30 23:39:36',1,'2026-05-30 23:39:36',0),
+(13,3,'JP-EMP-ITENG-002','森','大輔','モリ','ダイスケ','testEmployeeIT2@manpower.jp',NULL,1,NULL,'2026-05-30',NULL,1,1,'2026-05-30 23:39:36',1,'2026-05-30 23:39:36',0);
 
 /*Data for the table `emp_employee_position` */
+
+insert  into `emp_employee_position`(`id`,`employee_id`,`company_id`,`node_id`,`grade_id`,`is_primary`,`start_date`,`end_date`,`status`,`created_by`,`created_at`,`updated_by`,`updated_at`,`is_deleted`) values 
+(1,2,3,2,1,1,'2026-05-30',NULL,1,1,'2026-05-30 23:39:37',1,'2026-05-30 23:39:37',0),
+(2,3,3,1,1,1,'2026-05-30',NULL,1,1,'2026-05-30 23:39:37',1,'2026-05-30 23:39:37',0),
+(3,4,3,3,1,1,'2026-05-30',NULL,1,1,'2026-05-30 23:39:37',1,'2026-05-30 23:39:37',0),
+(4,5,3,4,2,1,'2026-05-30',NULL,1,1,'2026-05-30 23:39:37',1,'2026-05-30 23:39:37',0),
+(5,6,3,5,2,1,'2026-05-30',NULL,1,1,'2026-05-30 23:39:37',1,'2026-05-30 23:39:37',0),
+(6,7,3,6,2,1,'2026-05-30',NULL,1,1,'2026-05-30 23:39:37',1,'2026-05-30 23:39:37',0),
+(7,8,3,2,3,1,'2026-05-30',NULL,1,1,'2026-05-30 23:39:37',1,'2026-05-30 23:39:37',0),
+(8,9,3,3,3,1,'2026-05-30',NULL,1,1,'2026-05-30 23:39:37',1,'2026-05-30 23:39:37',0),
+(9,10,3,4,3,1,'2026-05-30',NULL,1,1,'2026-05-30 23:39:37',1,'2026-05-30 23:39:37',0),
+(10,11,3,5,3,1,'2026-05-30',NULL,1,1,'2026-05-30 23:39:37',1,'2026-05-30 23:39:37',0),
+(11,12,3,6,3,1,'2026-05-30',NULL,1,1,'2026-05-30 23:39:37',1,'2026-05-30 23:39:37',0),
+(12,13,3,6,3,1,'2026-05-30',NULL,1,1,'2026-05-30 23:39:37',1,'2026-05-30 23:39:37',0);
 
 /*Data for the table `org_company` */
 
 insert  into `org_company`(`id`,`parent_id`,`name`,`company_code`,`level`,`sort`,`status`,`created_by`,`created_at`,`updated_by`,`updated_at`,`is_deleted`) values 
-(1,NULL,'ManpowerGroup','MPG',1,0,1,NULL,'2026-05-27 23:19:16',NULL,'2026-05-27 23:19:16',0);
+(1,NULL,'ManpowerGroup','MPG',1,0,1,NULL,'2026-05-27 23:19:16',1,'2026-05-30 23:24:07',0),
+(3,1,'マンパワーグループ株式会社','MPG_JP',2,10,1,1,'2026-05-30 23:24:07',1,'2026-05-30 23:24:07',0);
 
 /*Data for the table `org_grade` */
 
+insert  into `org_grade`(`id`,`company_id`,`name`,`code`,`grade_level`,`sort`,`status`,`created_by`,`created_at`,`updated_by`,`updated_at`,`is_deleted`) values 
+(1,3,'部長','JP_MANAGER','L2',20,1,1,'2026-05-30 23:39:36',1,'2026-05-30 23:39:36',0),
+(2,3,'リーダー','JP_LEADER','L3',30,1,1,'2026-05-30 23:39:36',1,'2026-05-30 23:39:36',0),
+(3,3,'一般社員','JP_STAFF','L5',50,1,1,'2026-05-30 23:39:36',1,'2026-05-30 23:39:36',0);
+
 /*Data for the table `org_node` */
 
+insert  into `org_node`(`id`,`company_id`,`parent_id`,`manager_id`,`name`,`type_code`,`dept_function`,`code`,`level`,`sort`,`status`,`created_by`,`created_at`,`updated_by`,`updated_at`,`is_deleted`) values 
+(1,3,NULL,3,'エクスペリス事業本部','DIVISION','GENERAL','JP_EXP_DIV',1,10,1,1,'2026-05-30 23:39:36',1,'2026-05-30 23:39:37',0),
+(2,3,NULL,2,'人事部','DEPT','HR','JP_HR_DEPT',1,20,1,1,'2026-05-30 23:39:36',1,'2026-05-30 23:39:37',0),
+(3,3,1,4,'サービスデリバリー','DEPT','GENERAL','JP_EXP_SERVICE_DELIVERY',2,10,1,1,'2026-05-30 23:39:36',1,'2026-05-30 23:39:37',0),
+(4,3,3,5,'西日本テクニカル','SECTION','GENERAL','JP_EXP_WEST_TECH',3,10,1,1,'2026-05-30 23:39:36',1,'2026-05-30 23:39:37',0),
+(5,3,4,6,'第2ソリューション','SECTION','GENERAL','JP_EXP_SOLUTION_2',4,10,1,1,'2026-05-30 23:39:36',1,'2026-05-30 23:39:37',0),
+(6,3,5,7,'ITエンジニアリング','TEAM','GENERAL','JP_EXP_IT_ENGINEERING',5,10,1,1,'2026-05-30 23:39:36',1,'2026-05-30 23:39:37',0);
+
 /*Data for the table `org_node_closure` */
+
+insert  into `org_node_closure`(`ancestor_id`,`descendant_id`,`depth`) values 
+(1,1,0),
+(2,2,0),
+(3,3,0),
+(4,4,0),
+(5,5,0),
+(6,6,0),
+(1,3,1),
+(3,4,1),
+(4,5,1),
+(5,6,1),
+(1,4,2),
+(3,5,2),
+(4,6,2),
+(1,5,3),
+(3,6,3),
+(1,6,4);
 
 /*Data for the table `sys_employee_role` */
 
 insert  into `sys_employee_role`(`id`,`employee_id`,`role_id`,`company_id`,`start_date`,`end_date`,`created_by`,`created_at`,`updated_by`,`updated_at`,`is_deleted`) values 
-(1,1,1,1,'2026-05-27',NULL,NULL,'2026-05-27 23:19:16',NULL,'2026-05-27 23:19:16',0);
+(1,1,1,1,'2026-05-27',NULL,NULL,'2026-05-27 23:19:16',NULL,'2026-05-27 23:19:16',0),
+(2,2,7,3,'2026-05-30',NULL,1,'2026-05-30 23:39:37',1,'2026-05-30 23:39:37',0),
+(3,3,6,3,'2026-05-30',NULL,1,'2026-05-30 23:39:37',1,'2026-05-30 23:39:37',0),
+(4,4,6,3,'2026-05-30',NULL,1,'2026-05-30 23:39:37',1,'2026-05-30 23:39:37',0),
+(5,5,6,3,'2026-05-30',NULL,1,'2026-05-30 23:39:37',1,'2026-05-30 23:39:37',0),
+(6,6,6,3,'2026-05-30',NULL,1,'2026-05-30 23:39:37',1,'2026-05-30 23:39:37',0),
+(7,7,6,3,'2026-05-30',NULL,1,'2026-05-30 23:39:37',1,'2026-05-30 23:39:37',0),
+(8,8,5,3,'2026-05-30',NULL,1,'2026-05-30 23:39:37',1,'2026-05-30 23:39:37',0),
+(9,9,5,3,'2026-05-30',NULL,1,'2026-05-30 23:39:37',1,'2026-05-30 23:39:37',0),
+(10,10,5,3,'2026-05-30',NULL,1,'2026-05-30 23:39:37',1,'2026-05-30 23:39:37',0),
+(11,11,5,3,'2026-05-30',NULL,1,'2026-05-30 23:39:37',1,'2026-05-30 23:39:37',0),
+(12,12,5,3,'2026-05-30',NULL,1,'2026-05-30 23:39:37',1,'2026-05-30 23:39:37',0),
+(13,13,5,3,'2026-05-30',NULL,1,'2026-05-30 23:39:37',1,'2026-05-30 23:39:37',0);
 
 /*Data for the table `sys_enum_type` */
 
@@ -186,19 +268,32 @@ insert  into `sys_role`(`id`,`company_id`,`code`,`name`,`remark`,`sort`,`status`
 (1,1,'SUPER_ADMIN','スーパー管理者','全権限管理者',0,1,NULL,'2026-05-27 23:19:16',NULL,'2026-05-27 23:19:16',0),
 (2,1,'EMPLOYEE','一般社員','一般社員ロール',10,1,NULL,'2026-05-30 10:43:34',NULL,'2026-05-30 10:43:34',0),
 (3,1,'DEPT_MANAGER','部門管理者','部下勤務状況を参照できる部門管理者ロール',20,1,NULL,'2026-05-30 10:43:34',NULL,'2026-05-30 10:43:34',0),
-(4,1,'HR_ADMIN','人事管理者','入社社員を登録できる本部人事ロール',30,1,NULL,'2026-05-30 10:43:34',NULL,'2026-05-30 10:43:34',0);
+(4,1,'HR_ADMIN','人事管理者','入社社員を登録できる本部人事ロール',30,1,NULL,'2026-05-30 10:43:34',NULL,'2026-05-30 10:43:34',0),
+(5,3,'EMPLOYEE','一般社員','日本会社一般社員ロール',10,1,1,'2026-05-30 23:39:36',1,'2026-05-30 23:39:36',0),
+(6,3,'DEPT_MANAGER','部門管理者','日本会社部門管理者ロール',20,1,1,'2026-05-30 23:39:36',1,'2026-05-30 23:39:36',0),
+(7,3,'HR_ADMIN','人事管理者','日本会社人事管理者ロール',30,1,1,'2026-05-30 23:39:36',1,'2026-05-30 23:39:36',0);
 
 /*Data for the table `sys_role_menu` */
 
 insert  into `sys_role_menu`(`role_id`,`menu_id`,`created_by`,`created_at`) values 
 (1,1,NULL,'2026-05-30 10:43:34'),
 (1,2,NULL,'2026-05-30 10:43:34'),
+(1,3,1,'2026-05-30 23:39:36'),
+(1,4,1,'2026-05-30 23:39:36'),
 (2,1,NULL,'2026-05-30 10:43:34'),
 (2,2,NULL,'2026-05-30 10:43:34'),
 (3,1,NULL,'2026-05-30 10:43:34'),
 (3,2,NULL,'2026-05-30 10:43:34'),
 (4,1,NULL,'2026-05-30 10:43:34'),
-(4,2,NULL,'2026-05-30 10:43:34');
+(4,2,NULL,'2026-05-30 10:43:34'),
+(5,1,1,'2026-05-30 23:39:36'),
+(5,2,1,'2026-05-30 23:39:36'),
+(6,1,1,'2026-05-30 23:39:36'),
+(6,2,1,'2026-05-30 23:39:36'),
+(6,3,1,'2026-05-30 23:39:36'),
+(7,1,1,'2026-05-30 23:39:36'),
+(7,2,1,'2026-05-30 23:39:36'),
+(7,4,1,'2026-05-30 23:39:36');
 
 /*Data for the table `sys_role_permission` */
 
@@ -214,7 +309,15 @@ insert  into `sys_role_permission`(`role_id`,`permission_id`,`created_by`,`creat
 (1,9,NULL,'2026-05-30 10:22:52'),
 (1,10,NULL,'2026-05-30 10:22:52'),
 (1,11,NULL,'2026-05-30 10:43:34'),
-(1,12,NULL,'2026-05-30 10:43:34');
+(1,12,NULL,'2026-05-30 10:43:34'),
+(5,9,1,'2026-05-30 23:39:36'),
+(5,10,1,'2026-05-30 23:39:36'),
+(6,9,1,'2026-05-30 23:39:36'),
+(6,10,1,'2026-05-30 23:39:36'),
+(6,11,1,'2026-05-30 23:39:36'),
+(7,9,1,'2026-05-30 23:39:36'),
+(7,10,1,'2026-05-30 23:39:36'),
+(7,12,1,'2026-05-30 23:39:36');
 
 /*Data for the table `wf_approval` */
 

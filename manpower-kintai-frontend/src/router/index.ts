@@ -8,6 +8,9 @@ import DashboardView from '@/views/DashboardView.vue'
 import TimesheetView from '@/views/timesheet/TimesheetView.vue'
 import SubordinatesView from '@/views/manager/SubordinatesView.vue'
 import OnboardingView from '@/views/hr/OnboardingView.vue'
+import MenuManagementView from '@/views/system/MenuManagementView.vue'
+import PermissionManagementView from '@/views/system/PermissionManagementView.vue'
+import RoleManagementView from '@/views/system/RoleManagementView.vue'
 import ForbiddenView from '@/views/errors/ForbiddenView.vue'
 
 const router = createRouter({
@@ -52,6 +55,24 @@ const router = createRouter({
           name: 'hr-onboarding',
           component: OnboardingView,
           meta: { permission: 'hr:employee:onboard' },
+        },
+        {
+          path: 'system/menus',
+          name: 'system-menus',
+          component: MenuManagementView,
+          meta: { permission: 'admin:menu:read' },
+        },
+        {
+          path: 'system/permissions',
+          name: 'system-permissions',
+          component: PermissionManagementView,
+          meta: { permission: 'admin:permission:read' },
+        },
+        {
+          path: 'system/roles',
+          name: 'system-roles',
+          component: RoleManagementView,
+          meta: { permission: 'admin:role:read' },
         },
       ],
     },

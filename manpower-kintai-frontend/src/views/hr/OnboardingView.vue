@@ -98,14 +98,16 @@
         <el-row :gutter="16">
           <el-col :xs="24" :md="12">
             <el-form-item label="所属組織" prop="nodeId">
-              <el-select v-model="form.nodeId" filterable :loading="loadingOptions">
-                <el-option
-                  v-for="node in nodeOptions"
-                  :key="node.id"
-                  :label="nodeLabel(node)"
-                  :value="node.id"
-                />
-              </el-select>
+              <el-tree-select
+                v-model="form.nodeId"
+                :data="nodeTreeOptions"
+                filterable
+                :loading="loadingOptions"
+                node-key="id"
+                :props="{ label: 'treeLabel', children: 'children' }"
+                check-strictly
+                default-expand-all
+              />
             </el-form-item>
           </el-col>
           <el-col :xs="24" :md="12">
@@ -197,6 +199,7 @@ const form = reactive<EmployeeOnboardingRequest>({
 
 const companyOptions = computed(() => options.value.companies)
 const nodeOptions = computed(() => options.value.nodes)
+const nodeTreeOptions = computed(() => buildNodeTree(options.value.nodes))
 const gradeOptions = computed(() => options.value.grades)
 const roleOptions = computed(() => options.value.roles)
 
@@ -230,6 +233,29 @@ const rules: FormRules<EmployeeOnboardingRequest> = {
 
 function nodeLabel(node: NodeOption) {
   return `${'　'.repeat(Math.max(node.level - 1, 0))}${node.name}（${node.typeCode}）`
+}
+
+function buildNodeTree(nodes: NodeOption[]) {
+  const map = new Map<number, NodeOption & { treeLabel: string; children: NodeOption[] }>()
+  const roots: Array<NodeOption & { treeLabel: string; children: NodeOption[] }> = []
+
+  nodes.forEach((node) => {
+    map.set(node.id, {
+      ...node,
+      treeLabel: `${node.name} (${node.typeCode})`,
+      children: [],
+    })
+  })
+
+  map.forEach((node) => {
+    if (node.parentId && map.has(node.parentId)) {
+      map.get(node.parentId)?.children.push(node)
+      return
+    }
+    roots.push(node)
+  })
+
+  return roots
 }
 
 async function loadOptions(companyId?: number) {

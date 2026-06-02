@@ -4,6 +4,8 @@ import com.manpowergroup.kintai.common.dto.PageRequest;
 import com.manpowergroup.kintai.common.dto.PageResult;
 import com.manpowergroup.kintai.common.result.Result;
 import com.manpowergroup.kintai.common.security.SecurityPermissions;
+import com.manpowergroup.kintai.system.application.dto.sys.RoleAuthorizationRequest;
+import com.manpowergroup.kintai.system.application.dto.sys.RoleAuthorizationResponse;
 import com.manpowergroup.kintai.system.application.dto.sys.RoleRequest;
 import com.manpowergroup.kintai.system.application.dto.sys.RoleResponse;
 import com.manpowergroup.kintai.system.application.service.sys.SysRoleService;
@@ -48,6 +50,12 @@ public class AdminSysRoleController {
         return Result.ok(RoleResponse.from(service.getById(id)));
     }
 
+    @GetMapping("/{id}/authorization")
+    @PreAuthorize(SecurityPermissions.HAS_ADMIN_ROLE_READ)
+    public Result<RoleAuthorizationResponse> getAuthorization(@PathVariable Long id) {
+        return Result.ok(service.getAuthorization(id));
+    }
+
     // ロールを新規作成
     @PostMapping
     @PreAuthorize(SecurityPermissions.HAS_ADMIN_ROLE_WRITE)
@@ -75,6 +83,13 @@ public class AdminSysRoleController {
     @PreAuthorize(SecurityPermissions.HAS_ADMIN_ROLE_WRITE)
     public Result<Void> assignPermissions(@PathVariable Long id, @RequestBody @Valid AssignRequest request) {
         service.assignPermissions(id, request.getIds());
+        return Result.ok();
+    }
+
+    @PutMapping("/{id}/authorization")
+    @PreAuthorize(SecurityPermissions.HAS_ADMIN_ROLE_WRITE)
+    public Result<Void> saveAuthorization(@PathVariable Long id, @RequestBody @Valid RoleAuthorizationRequest request) {
+        service.saveAuthorization(id, request);
         return Result.ok();
     }
 
