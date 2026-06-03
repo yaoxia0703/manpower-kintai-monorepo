@@ -2,9 +2,11 @@ package com.manpowergroup.kintai.system.application.service.impl.sys;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.manpowergroup.kintai.common.enums.Status;
 import com.manpowergroup.kintai.common.exception.BaseErrorCode;
 import com.manpowergroup.kintai.common.exception.BizException;
+import com.manpowergroup.kintai.common.enums.Status;
+import com.manpowergroup.kintai.system.application.command.sys.MenuCreateCommand;
+import com.manpowergroup.kintai.system.application.command.sys.MenuUpdateCommand;
 import com.manpowergroup.kintai.system.application.service.sys.SysMenuService;
 import com.manpowergroup.kintai.system.domain.entity.sys.SysEmployeeRole;
 import com.manpowergroup.kintai.system.domain.entity.sys.SysMenu;
@@ -37,6 +39,10 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu>
 
     @Override
     public SysMenu getById(Long id) {
+        return requireMenu(id);
+    }
+
+    private SysMenu requireMenu(Long id) {
         SysMenu menu = super.getById(id);
         if (menu == null) throw new BizException(SystemErrorCode.MENU_NOT_FOUND);
         return menu;
@@ -71,31 +77,42 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu>
 
     @Override
     @Transactional
-    public SysMenu create(SysMenu menu) {
-        boolean exists = lambdaQuery().eq(SysMenu::getCode, menu.getCode()).count() > 0;
+    public SysMenu create(MenuCreateCommand command) {
+        boolean exists = lambdaQuery().eq(SysMenu::getCode, command.code()).count() > 0;
         if (exists) throw new BizException(SystemErrorCode.MENU_CODE_DUPLICATE);
+        SysMenu menu = new SysMenu()
+                .setParentId(command.parentId())
+                .setName(command.name())
+                .setCode(command.code())
+                .setPath(command.path())
+                .setComponent(command.component())
+                .setIcon(command.icon())
+                .setType(command.type())
+                .setSort(command.sort())
+                .setVisible(command.visible() == null ? 1 : command.visible())
+                .setStatus(Status.ENABLED);
         save(menu);
         return menu;
     }
 
     @Override
     @Transactional
-    public SysMenu update(Long id, SysMenu menu) {
-        SysMenu existing = getById(id);
+    public SysMenu update(Long id, MenuUpdateCommand command) {
+        SysMenu existing = requireMenu(id);
         boolean exists = lambdaQuery()
-                .eq(SysMenu::getCode, menu.getCode())
+                .eq(SysMenu::getCode, command.code())
                 .ne(SysMenu::getId, id)
                 .count() > 0;
         if (exists) throw new BizException(SystemErrorCode.MENU_CODE_DUPLICATE);
-        existing.setName(menu.getName())
-                .setCode(menu.getCode())
-                .setPath(menu.getPath())
-                .setComponent(menu.getComponent())
-                .setIcon(menu.getIcon())
-                .setType(menu.getType())
-                .setSort(menu.getSort())
-                .setVisible(menu.getVisible())
-                .setParentId(menu.getParentId());
+        existing.setName(command.name())
+                .setCode(command.code())
+                .setPath(command.path())
+                .setComponent(command.component())
+                .setIcon(command.icon())
+                .setType(command.type())
+                .setSort(command.sort())
+                .setVisible(command.visible() == null ? 1 : command.visible())
+                .setParentId(command.parentId());
         updateById(existing);
         return existing;
     }
@@ -103,39 +120,39 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu>
     @Override
     @Transactional
     public void show(Long id) {
-        SysMenu menu = getById(id);
-        menu.setVisible(1);
+        SysMenu menu = requireMenu(id);
+        menu.show();
         updateById(menu);
     }
 
     @Override
     @Transactional
     public void hide(Long id) {
-        SysMenu menu = getById(id);
-        menu.setVisible(0);
+        SysMenu menu = requireMenu(id);
+        menu.hide();
         updateById(menu);
     }
 
     @Override
     @Transactional
     public void enable(Long id) {
-        SysMenu menu = getById(id);
-        menu.setStatus(Status.ENABLED);
+        SysMenu menu = requireMenu(id);
+        menu.enable();
         updateById(menu);
     }
 
     @Override
     @Transactional
     public void disable(Long id) {
-        SysMenu menu = getById(id);
-        menu.setStatus(Status.DISABLED);
+        SysMenu menu = requireMenu(id);
+        menu.disable();
         updateById(menu);
     }
 
     @Override
     @Transactional
     public void remove(Long id) {
-        getById(id);
+        requireMenu(id);
         List<Long> menuIds = collectDescendantIds(id);
         boolean hasPermissions = permissionMapper.selectCount(Wrappers.<SysPermission>lambdaQuery()
                 .in(SysPermission::getMenuId, menuIds)) > 0;

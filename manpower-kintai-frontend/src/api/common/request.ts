@@ -19,7 +19,7 @@ request.interceptors.response.use(
   (response) => {
     const data = response.data
     if (data?.code && data.code !== 200) {
-      return Promise.reject(new Error(data.message || 'Request failed'))
+      return Promise.reject(new Error(resolveErrorMessage(data)))
     }
     return response
   },
@@ -37,5 +37,17 @@ request.interceptors.response.use(
     return Promise.reject(error)
   },
 )
+
+function resolveErrorMessage(data: any) {
+  const errors = data?.data?.errors
+  if (Array.isArray(errors) && errors.length > 0) {
+    return errors
+      .map((item) => item?.message || item?.key)
+      .filter(Boolean)
+      .slice(0, 3)
+      .join('\n')
+  }
+  return data?.message || 'Request failed'
+}
 
 export default request

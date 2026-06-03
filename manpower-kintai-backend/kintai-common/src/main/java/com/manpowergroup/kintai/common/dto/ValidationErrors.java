@@ -34,7 +34,7 @@ public record ValidationErrors(List<ValidationErrors.ErrorItem> errors) {
      * @param key   エラーメッセージキー（i18n対応用）
      * @param args  メッセージに埋め込むパラメータ（可変長）
      */
-    public record ErrorItem(String field, String key, Object[] args) {
+    public record ErrorItem(String field, String key, String message, Object[] args) {
 
         /**
          * ErrorItemインスタンスを生成するファクトリメソッド。
@@ -45,7 +45,11 @@ public record ValidationErrors(List<ValidationErrors.ErrorItem> errors) {
          * @return ErrorItemインスタンス
          */
         public static ErrorItem of(String field, String key, Object... args) {
-            return new ErrorItem(field, key, args);
+            return new ErrorItem(field, key, key, args);
+        }
+
+        public static ErrorItem ofMessage(String field, String key, String message, Object... args) {
+            return new ErrorItem(field, key, message, args);
         }
     }
 }

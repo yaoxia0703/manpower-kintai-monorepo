@@ -1,6 +1,8 @@
 package com.manpowergroup.kintai.system.application.service.emp;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.manpowergroup.kintai.system.application.command.emp.AccountCreateCommand;
+import com.manpowergroup.kintai.system.application.command.emp.AccountUpdateCommand;
 import com.manpowergroup.kintai.system.domain.entity.emp.EmpAccount;
 
 // 社員アカウントサービス（アプリケーション層）
@@ -13,10 +15,10 @@ public interface EmpAccountService extends IService<EmpAccount> {
     EmpAccount getByEmployeeId(Long employeeId);
 
     // アカウントを新規作成（パスワードはBCryptでハッシュ化）
-    EmpAccount create(EmpAccount account, String rawPassword);
+    EmpAccount create(AccountCreateCommand command);
 
     // アカウント情報を更新（ユーザー名等）
-    EmpAccount update(Long id, EmpAccount account);
+    EmpAccount update(Long id, AccountUpdateCommand command);
 
     // パスワードを変更
     void changePassword(Long id, String oldPassword, String newPassword);

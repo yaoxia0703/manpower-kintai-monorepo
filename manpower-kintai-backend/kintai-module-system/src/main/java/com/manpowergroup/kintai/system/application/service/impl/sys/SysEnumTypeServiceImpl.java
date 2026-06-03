@@ -7,9 +7,11 @@ import com.manpowergroup.kintai.common.dto.PageResult;
 import com.manpowergroup.kintai.common.enums.Status;
 import com.manpowergroup.kintai.common.exception.BaseErrorCode;
 import com.manpowergroup.kintai.common.exception.BizException;
+import com.manpowergroup.kintai.system.application.command.sys.EnumTypeCreateCommand;
+import com.manpowergroup.kintai.system.application.command.sys.EnumTypeUpdateCommand;
+import com.manpowergroup.kintai.system.application.service.sys.SysEnumTypeService;
 import com.manpowergroup.kintai.system.domain.entity.sys.SysEnumType;
 import com.manpowergroup.kintai.system.infrastructure.mapper.sys.SysEnumTypeMapper;
-import com.manpowergroup.kintai.system.application.service.sys.SysEnumTypeService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -51,26 +53,32 @@ public class SysEnumTypeServiceImpl extends ServiceImpl<SysEnumTypeMapper, SysEn
 
     @Override
     @Transactional
-    public SysEnumType create(SysEnumType enumType) {
-        boolean exists = lambdaQuery().eq(SysEnumType::getCode, enumType.getCode()).count() > 0;
+    public SysEnumType create(EnumTypeCreateCommand command) {
+        boolean exists = lambdaQuery().eq(SysEnumType::getCode, command.code()).count() > 0;
         if (exists) throw new BizException(SystemErrorCode.ENUM_TYPE_CODE_DUPLICATE);
+        SysEnumType enumType = new SysEnumType()
+                .setCode(command.code())
+                .setName(command.name())
+                .setRemark(command.remark())
+                .setSort(command.sort())
+                .setStatus(command.status() == null ? Status.ENABLED : command.status());
         save(enumType);
         return enumType;
     }
 
     @Override
     @Transactional
-    public SysEnumType update(Long id, SysEnumType enumType) {
+    public SysEnumType update(Long id, EnumTypeUpdateCommand command) {
         SysEnumType existing = getById(id);
         boolean exists = lambdaQuery()
-                .eq(SysEnumType::getCode, enumType.getCode())
+                .eq(SysEnumType::getCode, command.code())
                 .ne(SysEnumType::getId, id)
                 .count() > 0;
         if (exists) throw new BizException(SystemErrorCode.ENUM_TYPE_CODE_DUPLICATE);
-        existing.setName(enumType.getName())
-                .setCode(enumType.getCode())
-                .setRemark(enumType.getRemark())
-                .setSort(enumType.getSort());
+        existing.setName(command.name())
+                .setCode(command.code())
+                .setRemark(command.remark())
+                .setSort(command.sort());
         updateById(existing);
         return existing;
     }
@@ -79,7 +87,7 @@ public class SysEnumTypeServiceImpl extends ServiceImpl<SysEnumTypeMapper, SysEn
     @Transactional
     public void enable(Long id) {
         SysEnumType et = getById(id);
-        et.setStatus(Status.ENABLED);
+        et.enable();
         updateById(et);
     }
 
@@ -87,7 +95,7 @@ public class SysEnumTypeServiceImpl extends ServiceImpl<SysEnumTypeMapper, SysEn
     @Transactional
     public void disable(Long id) {
         SysEnumType et = getById(id);
-        et.setStatus(Status.DISABLED);
+        et.disable();
         updateById(et);
     }
 

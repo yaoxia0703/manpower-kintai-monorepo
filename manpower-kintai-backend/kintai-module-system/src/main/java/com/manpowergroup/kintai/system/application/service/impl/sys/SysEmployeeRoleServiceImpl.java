@@ -3,9 +3,11 @@ package com.manpowergroup.kintai.system.application.service.impl.sys;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.manpowergroup.kintai.common.exception.BaseErrorCode;
 import com.manpowergroup.kintai.common.exception.BizException;
+import com.manpowergroup.kintai.system.application.command.sys.EmployeeRoleAssignCommand;
+import com.manpowergroup.kintai.system.application.command.sys.EmployeeRoleUpdateCommand;
+import com.manpowergroup.kintai.system.application.service.sys.SysEmployeeRoleService;
 import com.manpowergroup.kintai.system.domain.entity.sys.SysEmployeeRole;
 import com.manpowergroup.kintai.system.infrastructure.mapper.sys.SysEmployeeRoleMapper;
-import com.manpowergroup.kintai.system.application.service.sys.SysEmployeeRoleService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,23 +38,29 @@ public class SysEmployeeRoleServiceImpl extends ServiceImpl<SysEmployeeRoleMappe
 
     @Override
     @Transactional
-    public SysEmployeeRole assign(SysEmployeeRole employeeRole) {
+    public SysEmployeeRole assign(EmployeeRoleAssignCommand command) {
         boolean exists = lambdaQuery()
-                .eq(SysEmployeeRole::getEmployeeId, employeeRole.getEmployeeId())
-                .eq(SysEmployeeRole::getRoleId, employeeRole.getRoleId())
-                .eq(SysEmployeeRole::getCompanyId, employeeRole.getCompanyId())
+                .eq(SysEmployeeRole::getEmployeeId, command.employeeId())
+                .eq(SysEmployeeRole::getRoleId, command.roleId())
+                .eq(SysEmployeeRole::getCompanyId, command.companyId())
                 .count() > 0;
         if (exists) throw new BizException(SystemErrorCode.EMPLOYEE_ROLE_ALREADY_EXISTS);
+        SysEmployeeRole employeeRole = new SysEmployeeRole()
+                .setEmployeeId(command.employeeId())
+                .setRoleId(command.roleId())
+                .setCompanyId(command.companyId())
+                .setStartDate(command.startDate())
+                .setEndDate(command.endDate());
         save(employeeRole);
         return employeeRole;
     }
 
     @Override
     @Transactional
-    public SysEmployeeRole update(Long id, SysEmployeeRole employeeRole) {
+    public SysEmployeeRole update(Long id, EmployeeRoleUpdateCommand command) {
         SysEmployeeRole existing = getById(id);
-        existing.setStartDate(employeeRole.getStartDate())
-                .setEndDate(employeeRole.getEndDate());
+        existing.setStartDate(command.startDate())
+                .setEndDate(command.endDate());
         updateById(existing);
         return existing;
     }

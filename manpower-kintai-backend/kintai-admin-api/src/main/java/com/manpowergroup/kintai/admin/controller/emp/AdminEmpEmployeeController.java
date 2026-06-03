@@ -4,8 +4,10 @@ import com.manpowergroup.kintai.common.dto.PageRequest;
 import com.manpowergroup.kintai.common.dto.PageResult;
 import com.manpowergroup.kintai.common.result.Result;
 import com.manpowergroup.kintai.common.security.SecurityPermissions;
-import com.manpowergroup.kintai.system.application.dto.emp.EmployeeRequest;
+import com.manpowergroup.kintai.system.application.assembler.emp.EmployeeAssembler;
 import com.manpowergroup.kintai.system.application.dto.emp.EmployeeResponse;
+import com.manpowergroup.kintai.system.application.dto.emp.request.EmployeeCreateRequest;
+import com.manpowergroup.kintai.system.application.dto.emp.request.EmployeeUpdateRequest;
 import com.manpowergroup.kintai.system.application.service.emp.EmpEmployeeService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +29,7 @@ public class AdminEmpEmployeeController {
             @RequestParam Long companyId,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size) {
-        return Result.ok(service.pageByCompany(companyId, PageRequest.of(page, size)).map(EmployeeResponse::from));
+        return Result.ok(service.pageByCompany(companyId, PageRequest.of(page, size)).map(EmployeeAssembler::toResponse));
     }
 
     // 氏名キーワードで社員を検索
@@ -38,28 +40,28 @@ public class AdminEmpEmployeeController {
             @RequestParam(required = false) String keyword,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size) {
-        return Result.ok(service.searchByName(companyId, keyword, PageRequest.of(page, size)).map(EmployeeResponse::from));
+        return Result.ok(service.searchByName(companyId, keyword, PageRequest.of(page, size)).map(EmployeeAssembler::toResponse));
     }
 
     // IDで社員を取得
     @GetMapping("/{id}")
     @PreAuthorize(SecurityPermissions.HAS_ADMIN_EMPLOYEE_READ)
     public Result<EmployeeResponse> getById(@PathVariable Long id) {
-        return Result.ok(EmployeeResponse.from(service.getById(id)));
+        return Result.ok(EmployeeAssembler.toResponse(service.getById(id)));
     }
 
     // 社員を新規作成
     @PostMapping
     @PreAuthorize(SecurityPermissions.HAS_ADMIN_EMPLOYEE_WRITE)
-    public Result<EmployeeResponse> create(@RequestBody @Valid EmployeeRequest request) {
-        return Result.ok(EmployeeResponse.from(service.create(request.toEntity())));
+    public Result<EmployeeResponse> create(@RequestBody @Valid EmployeeCreateRequest request) {
+        return Result.ok(EmployeeAssembler.toResponse(service.create(EmployeeAssembler.toCommand(request))));
     }
 
     // 社員情報を更新
     @PutMapping("/{id}")
     @PreAuthorize(SecurityPermissions.HAS_ADMIN_EMPLOYEE_WRITE)
-    public Result<EmployeeResponse> update(@PathVariable Long id, @RequestBody @Valid EmployeeRequest request) {
-        return Result.ok(EmployeeResponse.from(service.update(id, request.toEntity())));
+    public Result<EmployeeResponse> update(@PathVariable Long id, @RequestBody @Valid EmployeeUpdateRequest request) {
+        return Result.ok(EmployeeAssembler.toResponse(service.update(id, EmployeeAssembler.toCommand(request))));
     }
 
     // 社員を在職状態に変更

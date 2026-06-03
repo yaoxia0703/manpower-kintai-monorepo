@@ -3,9 +3,10 @@ package com.manpowergroup.kintai.system.application.service.impl.sys;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.manpowergroup.kintai.common.exception.BaseErrorCode;
 import com.manpowergroup.kintai.common.exception.BizException;
+import com.manpowergroup.kintai.system.application.command.sys.I18nUpsertCommand;
+import com.manpowergroup.kintai.system.application.service.sys.SysI18nService;
 import com.manpowergroup.kintai.system.domain.entity.sys.SysI18n;
 import com.manpowergroup.kintai.system.infrastructure.mapper.sys.SysI18nMapper;
-import com.manpowergroup.kintai.system.application.service.sys.SysI18nService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,18 +45,23 @@ public class SysI18nServiceImpl extends ServiceImpl<SysI18nMapper, SysI18n>
 
     @Override
     @Transactional
-    public SysI18n upsert(SysI18n i18n) {
+    public SysI18n upsert(I18nUpsertCommand command) {
         // 既存の翻訳があれば更新、なければ新規作成
         SysI18n existing = lambdaQuery()
-                .eq(SysI18n::getRefType, i18n.getRefType())
-                .eq(SysI18n::getRefId, i18n.getRefId())
-                .eq(SysI18n::getLanguage, i18n.getLanguage())
+                .eq(SysI18n::getRefType, command.refType())
+                .eq(SysI18n::getRefId, command.refId())
+                .eq(SysI18n::getLanguage, command.language())
                 .one();
         if (existing != null) {
-            existing.setContent(i18n.getContent());
+            existing.setContent(command.content());
             updateById(existing);
             return existing;
         }
+        SysI18n i18n = new SysI18n()
+                .setRefType(command.refType())
+                .setRefId(command.refId())
+                .setLanguage(command.language())
+                .setContent(command.content());
         save(i18n);
         return i18n;
     }

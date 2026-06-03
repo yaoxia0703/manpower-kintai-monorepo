@@ -131,11 +131,15 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public Result<ValidationErrors> handleMethodArgumentNotValid(MethodArgumentNotValidException e) {
         var items = e.getBindingResult().getFieldErrors().stream()
-                .map(fe -> ValidationErrors.ErrorItem.of(
-                        fe.getField(),
-                        fe.getDefaultMessage(),
-                        fe.getField()
-                ))
+                .map(fe -> {
+                    String message = i18n(fe.getDefaultMessage(), fe.getField());
+                    return ValidationErrors.ErrorItem.ofMessage(
+                            fe.getField(),
+                            fe.getCode(),
+                            message,
+                            fe.getField()
+                    );
+                })
                 .toList();
 
         String msg = i18n(ErrorCode.VALIDATION_ERROR.message());
@@ -155,7 +159,8 @@ public class GlobalExceptionHandler {
                 .map(v -> {
                     String path = v.getPropertyPath().toString();
                     String field = path.contains(".") ? path.substring(path.lastIndexOf('.') + 1) : path;
-                    return ValidationErrors.ErrorItem.of(field, v.getMessage(), field);
+                    String message = i18n(v.getMessage(), field);
+                    return ValidationErrors.ErrorItem.ofMessage(field, v.getMessageTemplate(), message, field);
                 })
                 .toList();
 
@@ -178,9 +183,10 @@ public class GlobalExceptionHandler {
         String detail = "Missing parameter: " + e.getParameterName();
         logError(msg, detail, e);
 
-        var item = ValidationErrors.ErrorItem.of(
+        var item = ValidationErrors.ErrorItem.ofMessage(
                 e.getParameterName(),
                 "error.missing_param",
+                msg,
                 e.getParameterName()
         );
 

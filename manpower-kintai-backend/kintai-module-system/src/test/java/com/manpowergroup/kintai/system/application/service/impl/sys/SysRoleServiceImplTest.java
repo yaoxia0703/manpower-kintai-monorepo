@@ -1,6 +1,6 @@
 package com.manpowergroup.kintai.system.application.service.impl.sys;
 
-import com.manpowergroup.kintai.system.application.dto.sys.RoleAuthorizationRequest;
+import com.manpowergroup.kintai.system.application.dto.sys.request.RoleAuthorizationSaveRequest;
 import com.manpowergroup.kintai.system.domain.entity.sys.SysRole;
 import com.manpowergroup.kintai.system.infrastructure.mapper.sys.SysEmployeeRoleMapper;
 import com.manpowergroup.kintai.system.infrastructure.mapper.sys.SysMenuMapper;
@@ -37,7 +37,7 @@ class SysRoleServiceImplTest {
         ReflectionTestUtils.setField(service, "baseMapper", roleMapper);
 
         when(roleMapper.selectById(7L)).thenReturn(new SysRole().setId(7L));
-        RoleAuthorizationRequest request = new RoleAuthorizationRequest();
+        RoleAuthorizationSaveRequest request = new RoleAuthorizationSaveRequest();
         request.setMenuIds(List.of(1L, 2L));
         request.setPermissionIds(List.of(10L, 11L));
 

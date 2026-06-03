@@ -3,6 +3,8 @@ package com.manpowergroup.kintai.system.application.service.sys;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.manpowergroup.kintai.common.dto.PageRequest;
 import com.manpowergroup.kintai.common.dto.PageResult;
+import com.manpowergroup.kintai.system.application.command.sys.PermissionCreateCommand;
+import com.manpowergroup.kintai.system.application.command.sys.PermissionUpdateCommand;
 import com.manpowergroup.kintai.system.domain.entity.sys.SysPermission;
 
 import java.util.List;
@@ -23,10 +25,10 @@ public interface SysPermissionService extends IService<SysPermission> {
     List<SysPermission> listByEmployeeId(Long employeeId);
 
     // 権限を新規作成
-    SysPermission create(SysPermission permission);
+    SysPermission create(PermissionCreateCommand command);
 
     // 権限を更新
-    SysPermission update(Long id, SysPermission permission);
+    SysPermission update(Long id, PermissionUpdateCommand command);
 
     // 権限を有効化
     void enable(Long id);

@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.manpowergroup.kintai.common.enums.Status;
 import com.manpowergroup.kintai.common.exception.BizException;
 import com.manpowergroup.kintai.common.exception.ErrorCode;
+import com.manpowergroup.kintai.system.application.assembler.hr.EmployeeOnboardingAssembler;
 import com.manpowergroup.kintai.system.application.dto.hr.EmployeeOnboardingOptionsResponse;
 import com.manpowergroup.kintai.system.application.dto.hr.EmployeeOnboardingRequest;
 import com.manpowergroup.kintai.system.application.dto.hr.EmployeeOnboardingResponse;
@@ -105,47 +106,18 @@ public class EmployeeOnboardingServiceImpl implements EmployeeOnboardingService 
             throw BizException.withDetail(ErrorCode.VALIDATION_ERROR, "roleIds contain invalid role");
         }
 
-        EmpEmployee employee = employeeService.create(new EmpEmployee()
-                .setCompanyId(request.getCompanyId())
-                .setEmployeeCode(request.getEmployeeCode())
-                .setLastName(request.getLastName())
-                .setFirstName(request.getFirstName())
-                .setLastNameKana(request.getLastNameKana())
-                .setFirstNameKana(request.getFirstNameKana())
-                .setEmail(request.getEmail())
-                .setPhone(request.getPhone())
-                .setGender(request.getGender())
-                .setHireDate(request.getHireDate())
-                .setStatus(Status.ENABLED)
-                .setCreatedBy(operatorEmployeeId)
-                .setUpdatedBy(operatorEmployeeId));
+        EmpEmployee employee = employeeService.create(
+                EmployeeOnboardingAssembler.toEmployee(request, operatorEmployeeId));
 
-        EmpAccount account = accountService.create(new EmpAccount()
-                        .setEmployeeId(employee.getId())
-                        .setUsername(request.getUsername())
-                        .setStatus(Status.ENABLED)
-                        .setCreatedBy(operatorEmployeeId)
-                        .setUpdatedBy(operatorEmployeeId),
+        EmpAccount account = accountService.create(
+                EmployeeOnboardingAssembler.toAccount(request, employee.getId(), operatorEmployeeId),
                 request.getPassword());
 
-        EmpEmployeePosition position = positionService.create(new EmpEmployeePosition()
-                .setEmployeeId(employee.getId())
-                .setCompanyId(request.getCompanyId())
-                .setNodeId(request.getNodeId())
-                .setGradeId(request.getGradeId())
-                .setIsPrimary(1)
-                .setStartDate(request.getHireDate())
-                .setStatus(Status.ENABLED)
-                .setCreatedBy(operatorEmployeeId)
-                .setUpdatedBy(operatorEmployeeId));
+        EmpEmployeePosition position = positionService.create(
+                EmployeeOnboardingAssembler.toPosition(request, employee.getId(), operatorEmployeeId));
 
-        request.getRoleIds().forEach(roleId -> employeeRoleService.assign(new SysEmployeeRole()
-                .setEmployeeId(employee.getId())
-                .setCompanyId(request.getCompanyId())
-                .setRoleId(roleId)
-                .setStartDate(request.getHireDate())
-                .setCreatedBy(operatorEmployeeId)
-                .setUpdatedBy(operatorEmployeeId)));
+        EmployeeOnboardingAssembler.toEmployeeRoles(request, employee.getId(), operatorEmployeeId)
+                .forEach(employeeRoleService::assign);
 
         return EmployeeOnboardingResponse.builder()
                 .employeeId(employee.getId())

@@ -7,9 +7,11 @@ import com.manpowergroup.kintai.common.dto.PageResult;
 import com.manpowergroup.kintai.common.enums.Status;
 import com.manpowergroup.kintai.common.exception.BaseErrorCode;
 import com.manpowergroup.kintai.common.exception.BizException;
+import com.manpowergroup.kintai.system.application.command.org.CompanyCreateCommand;
+import com.manpowergroup.kintai.system.application.command.org.CompanyUpdateCommand;
+import com.manpowergroup.kintai.system.application.service.org.OrgCompanyService;
 import com.manpowergroup.kintai.system.domain.entity.org.OrgCompany;
 import com.manpowergroup.kintai.system.infrastructure.mapper.org.OrgCompanyMapper;
-import com.manpowergroup.kintai.system.application.service.org.OrgCompanyService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,27 +46,34 @@ public class OrgCompanyServiceImpl extends ServiceImpl<OrgCompanyMapper, OrgComp
 
     @Override
     @Transactional
-    public OrgCompany create(OrgCompany company) {
-        boolean exists = lambdaQuery().eq(OrgCompany::getCompanyCode, company.getCompanyCode()).count() > 0;
+    public OrgCompany create(CompanyCreateCommand command) {
+        boolean exists = lambdaQuery().eq(OrgCompany::getCompanyCode, command.companyCode()).count() > 0;
         if (exists) throw new BizException(SystemErrorCode.COMPANY_CODE_DUPLICATE);
+        OrgCompany company = new OrgCompany()
+                .setParentId(command.parentId())
+                .setName(command.name())
+                .setCompanyCode(command.companyCode())
+                .setLevel(command.level())
+                .setSort(command.sort())
+                .setStatus(command.status() == null ? Status.ENABLED : command.status());
         save(company);
         return company;
     }
 
     @Override
     @Transactional
-    public OrgCompany update(Long id, OrgCompany company) {
+    public OrgCompany update(Long id, CompanyUpdateCommand command) {
         OrgCompany existing = getById(id);
         boolean exists = lambdaQuery()
-                .eq(OrgCompany::getCompanyCode, company.getCompanyCode())
+                .eq(OrgCompany::getCompanyCode, command.companyCode())
                 .ne(OrgCompany::getId, id)
                 .count() > 0;
         if (exists) throw new BizException(SystemErrorCode.COMPANY_CODE_DUPLICATE);
-        existing.setName(company.getName())
-                .setCompanyCode(company.getCompanyCode())
-                .setParentId(company.getParentId())
-                .setLevel(company.getLevel())
-                .setSort(company.getSort());
+        existing.setName(command.name())
+                .setCompanyCode(command.companyCode())
+                .setParentId(command.parentId())
+                .setLevel(command.level())
+                .setSort(command.sort());
         updateById(existing);
         return existing;
     }
@@ -73,7 +82,7 @@ public class OrgCompanyServiceImpl extends ServiceImpl<OrgCompanyMapper, OrgComp
     @Transactional
     public void enable(Long id) {
         OrgCompany company = getById(id);
-        company.setStatus(Status.ENABLED);
+        company.enable();
         updateById(company);
     }
 
@@ -81,7 +90,7 @@ public class OrgCompanyServiceImpl extends ServiceImpl<OrgCompanyMapper, OrgComp
     @Transactional
     public void disable(Long id) {
         OrgCompany company = getById(id);
-        company.setStatus(Status.DISABLED);
+        company.disable();
         updateById(company);
     }
 

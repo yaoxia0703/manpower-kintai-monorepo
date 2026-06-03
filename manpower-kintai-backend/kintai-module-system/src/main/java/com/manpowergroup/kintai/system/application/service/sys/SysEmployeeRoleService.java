@@ -1,6 +1,8 @@
 package com.manpowergroup.kintai.system.application.service.sys;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.manpowergroup.kintai.system.application.command.sys.EmployeeRoleAssignCommand;
+import com.manpowergroup.kintai.system.application.command.sys.EmployeeRoleUpdateCommand;
 import com.manpowergroup.kintai.system.domain.entity.sys.SysEmployeeRole;
 
 import java.util.List;
@@ -15,10 +17,10 @@ public interface SysEmployeeRoleService extends IService<SysEmployeeRole> {
     List<SysEmployeeRole> listActiveByEmployee(Long employeeId);
 
     // 社員ロールを追加（重複チェックあり）
-    SysEmployeeRole assign(SysEmployeeRole employeeRole);
+    SysEmployeeRole assign(EmployeeRoleAssignCommand command);
 
     // 社員ロールを更新（有効期間の変更等）
-    SysEmployeeRole update(Long id, SysEmployeeRole employeeRole);
+    SysEmployeeRole update(Long id, EmployeeRoleUpdateCommand command);
 
     // 社員からロールを剥奪（論理削除）
     void revoke(Long id);

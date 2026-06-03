@@ -6,10 +6,12 @@ import com.manpowergroup.kintai.common.dto.PageResult;
 import com.manpowergroup.kintai.common.enums.Status;
 import com.manpowergroup.kintai.common.exception.BaseErrorCode;
 import com.manpowergroup.kintai.common.exception.BizException;
+import com.manpowergroup.kintai.system.application.command.emp.EmployeeCreateCommand;
+import com.manpowergroup.kintai.system.application.command.emp.EmployeeUpdateCommand;
+import com.manpowergroup.kintai.system.application.service.emp.EmpEmployeeService;
 import com.manpowergroup.kintai.system.domain.entity.emp.EmpEmployee;
 import com.manpowergroup.kintai.system.domain.repository.emp.EmpEmployeeRepository;
 import com.manpowergroup.kintai.system.infrastructure.mapper.emp.EmpEmployeeMapper;
-import com.manpowergroup.kintai.system.application.service.emp.EmpEmployeeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,7 +42,21 @@ public class EmpEmployeeServiceImpl extends ServiceImpl<EmpEmployeeMapper, EmpEm
 
     @Override
     @Transactional
-    public EmpEmployee create(EmpEmployee employee) {
+    public EmpEmployee create(EmployeeCreateCommand command) {
+        EmpEmployee employee = new EmpEmployee()
+                .setCompanyId(command.companyId())
+                .setEmployeeCode(command.employeeCode())
+                .setLastName(command.lastName())
+                .setFirstName(command.firstName())
+                .setLastNameKana(command.lastNameKana())
+                .setFirstNameKana(command.firstNameKana())
+                .setEmail(command.email())
+                .setPhone(command.phone())
+                .setGender(command.gender())
+                .setBirthDate(command.birthDate())
+                .setHireDate(command.hireDate())
+                .setLeaveDate(command.leaveDate())
+                .setStatus(command.status() == null ? Status.ENABLED : command.status());
         if (repository.existsByEmail(employee.getEmail(), null)) {
             throw new BizException(SystemErrorCode.EMPLOYEE_EMAIL_DUPLICATE);
         }
@@ -49,19 +65,19 @@ public class EmpEmployeeServiceImpl extends ServiceImpl<EmpEmployeeMapper, EmpEm
 
     @Override
     @Transactional
-    public EmpEmployee update(Long id, EmpEmployee employee) {
+    public EmpEmployee update(Long id, EmployeeUpdateCommand command) {
         EmpEmployee existing = getById(id);
-        if (repository.existsByEmail(employee.getEmail(), id)) {
+        if (repository.existsByEmail(command.email(), id)) {
             throw new BizException(SystemErrorCode.EMPLOYEE_EMAIL_DUPLICATE);
         }
-        existing.setLastName(employee.getLastName())
-                .setFirstName(employee.getFirstName())
-                .setLastNameKana(employee.getLastNameKana())
-                .setFirstNameKana(employee.getFirstNameKana())
-                .setEmail(employee.getEmail())
-                .setPhone(employee.getPhone())
-                .setGender(employee.getGender())
-                .setBirthDate(employee.getBirthDate());
+        existing.setLastName(command.lastName())
+                .setFirstName(command.firstName())
+                .setLastNameKana(command.lastNameKana())
+                .setFirstNameKana(command.firstNameKana())
+                .setEmail(command.email())
+                .setPhone(command.phone())
+                .setGender(command.gender())
+                .setBirthDate(command.birthDate());
         return repository.update(existing);
     }
 
@@ -69,7 +85,7 @@ public class EmpEmployeeServiceImpl extends ServiceImpl<EmpEmployeeMapper, EmpEm
     @Transactional
     public void enable(Long id) {
         EmpEmployee employee = getById(id);
-        employee.setStatus(Status.ENABLED);
+        employee.enable();
         repository.update(employee);
     }
 
@@ -77,7 +93,7 @@ public class EmpEmployeeServiceImpl extends ServiceImpl<EmpEmployeeMapper, EmpEm
     @Transactional
     public void disable(Long id) {
         EmpEmployee employee = getById(id);
-        employee.setStatus(Status.DISABLED);
+        employee.disable();
         repository.update(employee);
     }
 

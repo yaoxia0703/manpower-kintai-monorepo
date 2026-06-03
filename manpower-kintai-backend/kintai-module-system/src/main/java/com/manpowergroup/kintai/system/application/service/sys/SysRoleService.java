@@ -3,8 +3,10 @@ package com.manpowergroup.kintai.system.application.service.sys;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.manpowergroup.kintai.common.dto.PageRequest;
 import com.manpowergroup.kintai.common.dto.PageResult;
-import com.manpowergroup.kintai.system.application.dto.sys.RoleAuthorizationRequest;
+import com.manpowergroup.kintai.system.application.command.sys.RoleCreateCommand;
+import com.manpowergroup.kintai.system.application.command.sys.RoleUpdateCommand;
 import com.manpowergroup.kintai.system.application.dto.sys.RoleAuthorizationResponse;
+import com.manpowergroup.kintai.system.application.dto.sys.request.RoleAuthorizationSaveRequest;
 import com.manpowergroup.kintai.system.domain.entity.sys.SysRole;
 
 import java.util.List;
@@ -17,9 +19,9 @@ public interface SysRoleService extends IService<SysRole> {
 
     List<SysRole> listByCompany(Long companyId);
 
-    SysRole create(SysRole role);
+    SysRole create(RoleCreateCommand command);
 
-    SysRole update(Long id, SysRole role);
+    SysRole update(Long id, RoleUpdateCommand command);
 
     void assignMenus(Long roleId, List<Long> menuIds);
 
@@ -27,7 +29,7 @@ public interface SysRoleService extends IService<SysRole> {
 
     RoleAuthorizationResponse getAuthorization(Long roleId);
 
-    void saveAuthorization(Long roleId, RoleAuthorizationRequest request);
+    void saveAuthorization(Long roleId, RoleAuthorizationSaveRequest request);
 
     void enable(Long id);
 

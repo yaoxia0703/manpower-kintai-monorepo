@@ -7,9 +7,11 @@ import com.manpowergroup.kintai.common.dto.PageResult;
 import com.manpowergroup.kintai.common.enums.Status;
 import com.manpowergroup.kintai.common.exception.BaseErrorCode;
 import com.manpowergroup.kintai.common.exception.BizException;
+import com.manpowergroup.kintai.system.application.command.org.GradeCreateCommand;
+import com.manpowergroup.kintai.system.application.command.org.GradeUpdateCommand;
+import com.manpowergroup.kintai.system.application.service.org.OrgGradeService;
 import com.manpowergroup.kintai.system.domain.entity.org.OrgGrade;
 import com.manpowergroup.kintai.system.infrastructure.mapper.org.OrgGradeMapper;
-import com.manpowergroup.kintai.system.application.service.org.OrgGradeService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -55,30 +57,37 @@ public class OrgGradeServiceImpl extends ServiceImpl<OrgGradeMapper, OrgGrade>
 
     @Override
     @Transactional
-    public OrgGrade create(OrgGrade grade) {
+    public OrgGrade create(GradeCreateCommand command) {
         boolean exists = lambdaQuery()
-                .eq(OrgGrade::getCompanyId, grade.getCompanyId())
-                .eq(OrgGrade::getCode, grade.getCode())
+                .eq(OrgGrade::getCompanyId, command.companyId())
+                .eq(OrgGrade::getCode, command.code())
                 .count() > 0;
         if (exists) throw new BizException(SystemErrorCode.GRADE_CODE_DUPLICATE);
+        OrgGrade grade = new OrgGrade()
+                .setCompanyId(command.companyId())
+                .setName(command.name())
+                .setCode(command.code())
+                .setGradeLevel(command.gradeLevel())
+                .setSort(command.sort())
+                .setStatus(command.status() == null ? Status.ENABLED : command.status());
         save(grade);
         return grade;
     }
 
     @Override
     @Transactional
-    public OrgGrade update(Long id, OrgGrade grade) {
+    public OrgGrade update(Long id, GradeUpdateCommand command) {
         OrgGrade existing = getById(id);
         boolean exists = lambdaQuery()
-                .eq(OrgGrade::getCompanyId, grade.getCompanyId())
-                .eq(OrgGrade::getCode, grade.getCode())
+                .eq(OrgGrade::getCompanyId, command.companyId())
+                .eq(OrgGrade::getCode, command.code())
                 .ne(OrgGrade::getId, id)
                 .count() > 0;
         if (exists) throw new BizException(SystemErrorCode.GRADE_CODE_DUPLICATE);
-        existing.setName(grade.getName())
-                .setCode(grade.getCode())
-                .setGradeLevel(grade.getGradeLevel())
-                .setSort(grade.getSort());
+        existing.setName(command.name())
+                .setCode(command.code())
+                .setGradeLevel(command.gradeLevel())
+                .setSort(command.sort());
         updateById(existing);
         return existing;
     }
@@ -87,7 +96,7 @@ public class OrgGradeServiceImpl extends ServiceImpl<OrgGradeMapper, OrgGrade>
     @Transactional
     public void enable(Long id) {
         OrgGrade grade = getById(id);
-        grade.setStatus(Status.ENABLED);
+        grade.enable();
         updateById(grade);
     }
 
@@ -95,7 +104,7 @@ public class OrgGradeServiceImpl extends ServiceImpl<OrgGradeMapper, OrgGrade>
     @Transactional
     public void disable(Long id) {
         OrgGrade grade = getById(id);
-        grade.setStatus(Status.DISABLED);
+        grade.disable();
         updateById(grade);
     }
 

@@ -120,7 +120,19 @@ import {
   updateMenu,
 } from '@/api/system/menu'
 import { CommonStatus } from '@/types/enums'
-import type { SystemMenu, SystemMenuPayload } from '@/types/system'
+import type { MenuCreateRequest, SystemMenu } from '@/types/system'
+
+interface MenuFormState {
+  parentId: number | null
+  name: string
+  code: string
+  path: string
+  component: string
+  icon: string
+  type: number
+  sort: number
+  visible: number
+}
 
 const loading = ref(false)
 const saving = ref(false)
@@ -130,7 +142,7 @@ const editingId = ref<number>()
 const formRef = ref<FormInstance>()
 const rows = ref<SystemMenu[]>([])
 
-const form = reactive<SystemMenuPayload>({
+const form = reactive<MenuFormState>({
   parentId: null,
   name: '',
   code: '',
@@ -142,7 +154,7 @@ const form = reactive<SystemMenuPayload>({
   visible: 1,
 })
 
-const rules: FormRules<SystemMenuPayload> = {
+const rules: FormRules<MenuFormState> = {
   name: [{ required: true, message: '名称を入力してください', trigger: 'blur' }],
   code: [{ required: true, message: 'コードを入力してください', trigger: 'blur' }],
   type: [{ required: true, message: '種別を選択してください', trigger: 'change' }],
@@ -218,16 +230,31 @@ async function submit() {
   await formRef.value?.validate()
   saving.value = true
   try {
+    const request = toMenuRequest()
     if (editingId.value) {
-      await updateMenu(editingId.value, form)
+      await updateMenu(editingId.value, request)
     } else {
-      await createMenu(form)
+      await createMenu(request)
     }
     ElMessage.success('保存しました')
     dialogVisible.value = false
     await loadMenus()
   } finally {
     saving.value = false
+  }
+}
+
+function toMenuRequest(): MenuCreateRequest {
+  return {
+    parentId: form.parentId,
+    name: form.name,
+    code: form.code,
+    path: form.path,
+    component: form.component,
+    icon: form.icon,
+    type: form.type,
+    sort: form.sort,
+    visible: form.visible,
   }
 }
 

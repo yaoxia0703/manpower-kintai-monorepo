@@ -1,6 +1,7 @@
 package com.manpowergroup.kintai.system.application.service.sys;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.manpowergroup.kintai.system.application.command.sys.I18nUpsertCommand;
 import com.manpowergroup.kintai.system.domain.entity.sys.SysI18n;
 
 import java.util.List;
@@ -19,7 +20,7 @@ public interface SysI18nService extends IService<SysI18n> {
 
     // 翻訳を保存（新規作成または上書き更新）
     // IService#saveOrUpdate は boolean を返すため、エンティティを返す本メソッドは upsert に改名
-    SysI18n upsert(SysI18n i18n);
+    SysI18n upsert(I18nUpsertCommand command);
 
     // 翻訳を削除（論理削除）
     void remove(Long id);

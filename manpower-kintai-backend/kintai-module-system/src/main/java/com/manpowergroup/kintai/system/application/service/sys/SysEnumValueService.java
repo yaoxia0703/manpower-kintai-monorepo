@@ -1,6 +1,8 @@
 package com.manpowergroup.kintai.system.application.service.sys;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.manpowergroup.kintai.system.application.command.sys.EnumValueCreateCommand;
+import com.manpowergroup.kintai.system.application.command.sys.EnumValueUpdateCommand;
 import com.manpowergroup.kintai.system.domain.entity.sys.SysEnumValue;
 
 import java.util.List;
@@ -15,10 +17,10 @@ public interface SysEnumValueService extends IService<SysEnumValue> {
     List<SysEnumValue> listByEnumTypeCode(String enumTypeCode);
 
     // 列挙値を新規作成
-    SysEnumValue create(SysEnumValue enumValue);
+    SysEnumValue create(EnumValueCreateCommand command);
 
     // 列挙値を更新
-    SysEnumValue update(Long id, SysEnumValue enumValue);
+    SysEnumValue update(Long id, EnumValueUpdateCommand command);
 
     // 列挙値を有効化
     void enable(Long id);

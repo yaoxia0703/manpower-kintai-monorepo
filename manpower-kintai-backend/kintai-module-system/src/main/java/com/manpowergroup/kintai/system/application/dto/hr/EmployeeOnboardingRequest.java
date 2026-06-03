@@ -13,54 +13,54 @@ import java.util.List;
 @Data
 public class EmployeeOnboardingRequest {
 
-    @NotNull
+    @NotNull(message = "会社は必須です")
     private Long companyId;
 
-    @NotBlank
-    @Size(max = 50)
+    @NotBlank(message = "社員番号は必須です")
+    @Size(max = 50, message = "社員番号は50文字以内で入力してください")
     private String employeeCode;
 
-    @NotBlank
-    @Size(max = 50)
+    @NotBlank(message = "姓は必須です")
+    @Size(max = 50, message = "姓は50文字以内で入力してください")
     private String lastName;
 
-    @NotBlank
-    @Size(max = 50)
+    @NotBlank(message = "名は必須です")
+    @Size(max = 50, message = "名は50文字以内で入力してください")
     private String firstName;
 
-    @Size(max = 50)
+    @Size(max = 50, message = "姓（カナ）は50文字以内で入力してください")
     private String lastNameKana;
 
-    @Size(max = 50)
+    @Size(max = 50, message = "名（カナ）は50文字以内で入力してください")
     private String firstNameKana;
 
-    @NotBlank
-    @Email
-    @Size(max = 100)
+    @NotBlank(message = "メールアドレスは必須です")
+    @Email(message = "メールアドレスの形式が正しくありません")
+    @Size(max = 100, message = "メールアドレスは100文字以内で入力してください")
     private String email;
 
-    @Size(max = 20)
+    @Size(max = 20, message = "電話番号は20文字以内で入力してください")
     private String phone;
 
     private Integer gender;
 
-    @NotNull
+    @NotNull(message = "入社日は必須です")
     private LocalDate hireDate;
 
-    @NotNull
+    @NotNull(message = "所属組織は必須です")
     private Long nodeId;
 
-    @NotNull
+    @NotNull(message = "職級は必須です")
     private Long gradeId;
 
-    @NotEmpty
+    @NotEmpty(message = "ロールは1件以上選択してください")
     private List<Long> roleIds;
 
-    @NotBlank
-    @Size(max = 50)
+    @NotBlank(message = "ユーザー名は必須です")
+    @Size(max = 50, message = "ユーザー名は50文字以内で入力してください")
     private String username;
 
-    @NotBlank
-    @Size(min = 8, max = 100)
+    @NotBlank(message = "初期パスワードは必須です")
+    @Size(min = 8, max = 100, message = "初期パスワードは8文字以上100文字以内で入力してください")
     private String password;
 }

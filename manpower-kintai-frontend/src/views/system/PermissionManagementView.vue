@@ -129,7 +129,17 @@ import {
   updatePermission,
 } from '@/api/system/permission'
 import { CommonStatus } from '@/types/enums'
-import type { SystemMenu, SystemPermission, SystemPermissionPayload } from '@/types/system'
+import type { PermissionCreateRequest, SystemMenu, SystemPermission } from '@/types/system'
+
+interface PermissionFormState {
+  menuId: number | null
+  code: string
+  name: string
+  method: string
+  path: string
+  remark: string
+  sort: number
+}
 
 const loading = ref(false)
 const saving = ref(false)
@@ -144,7 +154,7 @@ const page = ref(1)
 const size = ref(10)
 const total = ref(0)
 
-const form = reactive<SystemPermissionPayload>({
+const form = reactive<PermissionFormState>({
   menuId: null,
   code: '',
   name: '',
@@ -154,7 +164,7 @@ const form = reactive<SystemPermissionPayload>({
   sort: 0,
 })
 
-const rules: FormRules<SystemPermissionPayload> = {
+const rules: FormRules<PermissionFormState> = {
   name: [{ required: true, message: '名称を入力してください', trigger: 'blur' }],
   code: [{ required: true, message: 'コードを入力してください', trigger: 'blur' }],
   method: [{ required: true, message: 'メソッドを選択してください', trigger: 'change' }],
@@ -236,16 +246,29 @@ async function submit() {
   await formRef.value?.validate()
   saving.value = true
   try {
+    const request = toPermissionRequest()
     if (editingId.value) {
-      await updatePermission(editingId.value, form)
+      await updatePermission(editingId.value, request)
     } else {
-      await createPermission(form)
+      await createPermission(request)
     }
     ElMessage.success('保存しました')
     dialogVisible.value = false
     await loadData()
   } finally {
     saving.value = false
+  }
+}
+
+function toPermissionRequest(): PermissionCreateRequest {
+  return {
+    menuId: form.menuId,
+    code: form.code,
+    name: form.name,
+    method: form.method,
+    path: form.path,
+    remark: form.remark,
+    sort: form.sort,
   }
 }
 

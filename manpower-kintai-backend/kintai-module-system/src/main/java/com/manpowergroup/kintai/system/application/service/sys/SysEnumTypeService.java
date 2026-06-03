@@ -3,6 +3,8 @@ package com.manpowergroup.kintai.system.application.service.sys;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.manpowergroup.kintai.common.dto.PageRequest;
 import com.manpowergroup.kintai.common.dto.PageResult;
+import com.manpowergroup.kintai.system.application.command.sys.EnumTypeCreateCommand;
+import com.manpowergroup.kintai.system.application.command.sys.EnumTypeUpdateCommand;
 import com.manpowergroup.kintai.system.domain.entity.sys.SysEnumType;
 
 import java.util.List;
@@ -23,10 +25,10 @@ public interface SysEnumTypeService extends IService<SysEnumType> {
     PageResult<SysEnumType> page(PageRequest request);
 
     // 列挙型を新規作成
-    SysEnumType create(SysEnumType enumType);
+    SysEnumType create(EnumTypeCreateCommand command);
 
     // 列挙型を更新
-    SysEnumType update(Long id, SysEnumType enumType);
+    SysEnumType update(Long id, EnumTypeUpdateCommand command);
 
     // 列挙型を有効化
     void enable(Long id);

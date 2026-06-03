@@ -53,5 +53,9 @@ public class EmpEmployeePosition {
 
     @TableLogic
     private Integer isDeleted;
+
+    public void terminate(LocalDate endDate) {
+        this.endDate = endDate;
+    }
 }
 

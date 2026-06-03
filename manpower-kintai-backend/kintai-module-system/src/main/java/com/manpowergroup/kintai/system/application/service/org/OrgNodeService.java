@@ -3,6 +3,8 @@ package com.manpowergroup.kintai.system.application.service.org;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.manpowergroup.kintai.common.dto.PageRequest;
 import com.manpowergroup.kintai.common.dto.PageResult;
+import com.manpowergroup.kintai.system.application.command.org.NodeCreateCommand;
+import com.manpowergroup.kintai.system.application.command.org.NodeUpdateCommand;
 import com.manpowergroup.kintai.system.domain.entity.org.OrgNode;
 
 import java.util.List;
@@ -20,10 +22,10 @@ public interface OrgNodeService extends IService<OrgNode> {
     List<OrgNode> listEnabledByCompany(Long companyId);
 
     // 組織ノードを新規作成（Closure Tableも同時更新）
-    OrgNode create(OrgNode node);
+    OrgNode create(NodeCreateCommand command);
 
     // 組織ノードを更新
-    OrgNode update(Long id, OrgNode node);
+    OrgNode update(Long id, NodeUpdateCommand command);
 
     // 組織ノードを有効化
     void enable(Long id);

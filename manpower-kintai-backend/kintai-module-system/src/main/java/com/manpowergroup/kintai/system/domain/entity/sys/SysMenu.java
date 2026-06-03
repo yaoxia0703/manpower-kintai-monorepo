@@ -58,5 +58,21 @@ public class SysMenu {
 
     @TableLogic
     private Integer isDeleted;
+
+    public void show() {
+        this.visible = 1;
+    }
+
+    public void hide() {
+        this.visible = 0;
+    }
+
+    public void enable() {
+        this.status = Status.ENABLED;
+    }
+
+    public void disable() {
+        this.status = Status.DISABLED;
+    }
 }
 

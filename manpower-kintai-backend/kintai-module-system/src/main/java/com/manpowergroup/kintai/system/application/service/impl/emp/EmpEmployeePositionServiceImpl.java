@@ -1,11 +1,14 @@
 package com.manpowergroup.kintai.system.application.service.impl.emp;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.manpowergroup.kintai.common.enums.Status;
 import com.manpowergroup.kintai.common.exception.BaseErrorCode;
 import com.manpowergroup.kintai.common.exception.BizException;
+import com.manpowergroup.kintai.system.application.command.emp.EmployeePositionCreateCommand;
+import com.manpowergroup.kintai.system.application.command.emp.EmployeePositionUpdateCommand;
+import com.manpowergroup.kintai.system.application.service.emp.EmpEmployeePositionService;
 import com.manpowergroup.kintai.system.domain.entity.emp.EmpEmployeePosition;
 import com.manpowergroup.kintai.system.infrastructure.mapper.emp.EmpEmployeePositionMapper;
-import com.manpowergroup.kintai.system.application.service.emp.EmpEmployeePositionService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,6 +22,10 @@ public class EmpEmployeePositionServiceImpl extends ServiceImpl<EmpEmployeePosit
 
     @Override
     public EmpEmployeePosition getById(Long id) {
+        return requirePosition(id);
+    }
+
+    private EmpEmployeePosition requirePosition(Long id) {
         EmpEmployeePosition pos = super.getById(id);
         if (pos == null) throw new BizException(SystemErrorCode.POSITION_NOT_FOUND);
         return pos;
@@ -57,20 +64,29 @@ public class EmpEmployeePositionServiceImpl extends ServiceImpl<EmpEmployeePosit
 
     @Override
     @Transactional
-    public EmpEmployeePosition create(EmpEmployeePosition position) {
+    public EmpEmployeePosition create(EmployeePositionCreateCommand command) {
+        EmpEmployeePosition position = new EmpEmployeePosition()
+                .setEmployeeId(command.employeeId())
+                .setCompanyId(command.companyId())
+                .setNodeId(command.nodeId())
+                .setGradeId(command.gradeId())
+                .setIsPrimary(command.isPrimary())
+                .setStartDate(command.startDate())
+                .setEndDate(command.endDate())
+                .setStatus(command.status() == null ? Status.ENABLED : command.status());
         save(position);
         return position;
     }
 
     @Override
     @Transactional
-    public EmpEmployeePosition update(Long id, EmpEmployeePosition position) {
-        EmpEmployeePosition existing = getById(id);
-        existing.setNodeId(position.getNodeId())
-                .setGradeId(position.getGradeId())
-                .setIsPrimary(position.getIsPrimary())
-                .setStartDate(position.getStartDate())
-                .setEndDate(position.getEndDate());
+    public EmpEmployeePosition update(Long id, EmployeePositionUpdateCommand command) {
+        EmpEmployeePosition existing = requirePosition(id);
+        existing.setNodeId(command.nodeId())
+                .setGradeId(command.gradeId())
+                .setIsPrimary(command.isPrimary())
+                .setStartDate(command.startDate())
+                .setEndDate(command.endDate());
         updateById(existing);
         return existing;
     }
@@ -78,16 +94,16 @@ public class EmpEmployeePositionServiceImpl extends ServiceImpl<EmpEmployeePosit
     @Override
     @Transactional
     public void terminate(Long id) {
-        EmpEmployeePosition position = getById(id);
+        EmpEmployeePosition position = requirePosition(id);
         // 離任日を本日に設定して終了
-        position.setEndDate(LocalDate.now());
+        position.terminate(LocalDate.now());
         updateById(position);
     }
 
     @Override
     @Transactional
     public void remove(Long id) {
-        getById(id);
+        requirePosition(id);
         removeById(id);
     }
 

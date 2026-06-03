@@ -3,6 +3,8 @@ package com.manpowergroup.kintai.system.application.service.org;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.manpowergroup.kintai.common.dto.PageRequest;
 import com.manpowergroup.kintai.common.dto.PageResult;
+import com.manpowergroup.kintai.system.application.command.org.CompanyCreateCommand;
+import com.manpowergroup.kintai.system.application.command.org.CompanyUpdateCommand;
 import com.manpowergroup.kintai.system.domain.entity.org.OrgCompany;
 
 import java.util.List;
@@ -20,10 +22,10 @@ public interface OrgCompanyService extends IService<OrgCompany> {
     List<OrgCompany> listEnabled();
 
     // 会社を新規作成
-    OrgCompany create(OrgCompany company);
+    OrgCompany create(CompanyCreateCommand command);
 
     // 会社を更新
-    OrgCompany update(Long id, OrgCompany company);
+    OrgCompany update(Long id, CompanyUpdateCommand command);
 
     // 会社を有効化
     void enable(Long id);

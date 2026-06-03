@@ -3,6 +3,8 @@ package com.manpowergroup.kintai.system.application.service.org;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.manpowergroup.kintai.common.dto.PageRequest;
 import com.manpowergroup.kintai.common.dto.PageResult;
+import com.manpowergroup.kintai.system.application.command.org.GradeCreateCommand;
+import com.manpowergroup.kintai.system.application.command.org.GradeUpdateCommand;
 import com.manpowergroup.kintai.system.domain.entity.org.OrgGrade;
 
 import java.util.List;
@@ -23,10 +25,10 @@ public interface OrgGradeService extends IService<OrgGrade> {
     List<OrgGrade> listByGradeLevel(String gradeLevel);
 
     // 職級を新規作成
-    OrgGrade create(OrgGrade grade);
+    OrgGrade create(GradeCreateCommand command);
 
     // 職級を更新
-    OrgGrade update(Long id, OrgGrade grade);
+    OrgGrade update(Long id, GradeUpdateCommand command);
 
     // 職級を有効化
     void enable(Long id);

@@ -43,5 +43,13 @@ public class SysEnumType {
 
     @TableLogic
     private Integer isDeleted;
+
+    public void enable() {
+        this.status = Status.ENABLED;
+    }
+
+    public void disable() {
+        this.status = Status.DISABLED;
+    }
 }
 

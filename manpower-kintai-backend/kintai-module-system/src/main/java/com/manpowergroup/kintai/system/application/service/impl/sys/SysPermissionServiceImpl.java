@@ -8,6 +8,8 @@ import com.manpowergroup.kintai.common.dto.PageResult;
 import com.manpowergroup.kintai.common.enums.Status;
 import com.manpowergroup.kintai.common.exception.BaseErrorCode;
 import com.manpowergroup.kintai.common.exception.BizException;
+import com.manpowergroup.kintai.system.application.command.sys.PermissionCreateCommand;
+import com.manpowergroup.kintai.system.application.command.sys.PermissionUpdateCommand;
 import com.manpowergroup.kintai.system.application.service.sys.SysPermissionService;
 import com.manpowergroup.kintai.system.domain.entity.sys.SysEmployeeRole;
 import com.manpowergroup.kintai.system.domain.entity.sys.SysPermission;
@@ -34,6 +36,10 @@ public class SysPermissionServiceImpl extends ServiceImpl<SysPermissionMapper, S
 
     @Override
     public SysPermission getById(Long id) {
+        return requirePermission(id);
+    }
+
+    private SysPermission requirePermission(Long id) {
         SysPermission permission = super.getById(id);
         if (permission == null) throw new BizException(SystemErrorCode.PERMISSION_NOT_FOUND);
         return permission;
@@ -78,24 +84,33 @@ public class SysPermissionServiceImpl extends ServiceImpl<SysPermissionMapper, S
 
     @Override
     @Transactional
-    public SysPermission create(SysPermission permission) {
-        ensureCodeUnique(permission.getCode(), null);
+    public SysPermission create(PermissionCreateCommand command) {
+        ensureCodeUnique(command.code(), null);
+        SysPermission permission = new SysPermission()
+                .setMenuId(command.menuId())
+                .setCode(command.code())
+                .setName(command.name())
+                .setMethod(command.method())
+                .setPath(command.path())
+                .setRemark(command.remark())
+                .setSort(command.sort())
+                .setStatus(Status.ENABLED);
         save(permission);
         return permission;
     }
 
     @Override
     @Transactional
-    public SysPermission update(Long id, SysPermission permission) {
-        SysPermission existing = getById(id);
-        ensureCodeUnique(permission.getCode(), id);
-        existing.setCode(permission.getCode())
-                .setName(permission.getName())
-                .setMethod(permission.getMethod())
-                .setPath(permission.getPath())
-                .setRemark(permission.getRemark())
-                .setMenuId(permission.getMenuId())
-                .setSort(permission.getSort());
+    public SysPermission update(Long id, PermissionUpdateCommand command) {
+        SysPermission existing = requirePermission(id);
+        ensureCodeUnique(command.code(), id);
+        existing.setCode(command.code())
+                .setName(command.name())
+                .setMethod(command.method())
+                .setPath(command.path())
+                .setRemark(command.remark())
+                .setMenuId(command.menuId())
+                .setSort(command.sort());
         updateById(existing);
         return existing;
     }
@@ -103,23 +118,23 @@ public class SysPermissionServiceImpl extends ServiceImpl<SysPermissionMapper, S
     @Override
     @Transactional
     public void enable(Long id) {
-        SysPermission permission = getById(id);
-        permission.setStatus(Status.ENABLED);
+        SysPermission permission = requirePermission(id);
+        permission.enable();
         updateById(permission);
     }
 
     @Override
     @Transactional
     public void disable(Long id) {
-        SysPermission permission = getById(id);
-        permission.setStatus(Status.DISABLED);
+        SysPermission permission = requirePermission(id);
+        permission.disable();
         updateById(permission);
     }
 
     @Override
     @Transactional
     public void remove(Long id) {
-        getById(id);
+        requirePermission(id);
         boolean assignedToRole = rolePermissionMapper.selectCount(Wrappers.<SysRolePermission>lambdaQuery()
                 .eq(SysRolePermission::getPermissionId, id)) > 0;
         if (assignedToRole) throw new BizException(SystemErrorCode.PERMISSION_ASSIGNED_TO_ROLE);

@@ -8,9 +8,12 @@ import com.manpowergroup.kintai.common.dto.PageResult;
 import com.manpowergroup.kintai.common.enums.Status;
 import com.manpowergroup.kintai.common.exception.BaseErrorCode;
 import com.manpowergroup.kintai.common.exception.BizException;
+import com.manpowergroup.kintai.system.application.assembler.sys.PermissionAssembler;
+import com.manpowergroup.kintai.system.application.command.sys.RoleCreateCommand;
+import com.manpowergroup.kintai.system.application.command.sys.RoleUpdateCommand;
 import com.manpowergroup.kintai.system.application.dto.sys.MenuResponse;
-import com.manpowergroup.kintai.system.application.dto.sys.RoleAuthorizationRequest;
 import com.manpowergroup.kintai.system.application.dto.sys.RoleAuthorizationResponse;
+import com.manpowergroup.kintai.system.application.dto.sys.request.RoleAuthorizationSaveRequest;
 import com.manpowergroup.kintai.system.application.service.sys.SysRoleService;
 import com.manpowergroup.kintai.system.domain.entity.sys.SysEmployeeRole;
 import com.manpowergroup.kintai.system.domain.entity.sys.SysMenu;
@@ -45,6 +48,10 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole>
 
     @Override
     public SysRole getById(Long id) {
+        return requireRole(id);
+    }
+
+    private SysRole requireRole(Long id) {
         SysRole role = super.getById(id);
         if (role == null) throw new BizException(SystemErrorCode.ROLE_NOT_FOUND);
         return role;
@@ -70,33 +77,40 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole>
 
     @Override
     @Transactional
-    public SysRole create(SysRole role) {
+    public SysRole create(RoleCreateCommand command) {
         boolean exists = lambdaQuery()
-                .eq(role.getCompanyId() != null, SysRole::getCompanyId, role.getCompanyId())
-                .isNull(role.getCompanyId() == null, SysRole::getCompanyId)
-                .eq(SysRole::getCode, role.getCode())
+                .eq(command.companyId() != null, SysRole::getCompanyId, command.companyId())
+                .isNull(command.companyId() == null, SysRole::getCompanyId)
+                .eq(SysRole::getCode, command.code())
                 .count() > 0;
         if (exists) throw new BizException(SystemErrorCode.ROLE_CODE_DUPLICATE);
+        SysRole role = new SysRole()
+                .setCompanyId(command.companyId())
+                .setCode(command.code())
+                .setName(command.name())
+                .setRemark(command.remark())
+                .setSort(command.sort())
+                .setStatus(Status.ENABLED);
         save(role);
         return role;
     }
 
     @Override
     @Transactional
-    public SysRole update(Long id, SysRole role) {
-        SysRole existing = getById(id);
+    public SysRole update(Long id, RoleUpdateCommand command) {
+        SysRole existing = requireRole(id);
         boolean exists = lambdaQuery()
-                .eq(role.getCompanyId() != null, SysRole::getCompanyId, role.getCompanyId())
-                .isNull(role.getCompanyId() == null, SysRole::getCompanyId)
-                .eq(SysRole::getCode, role.getCode())
+                .eq(command.companyId() != null, SysRole::getCompanyId, command.companyId())
+                .isNull(command.companyId() == null, SysRole::getCompanyId)
+                .eq(SysRole::getCode, command.code())
                 .ne(SysRole::getId, id)
                 .count() > 0;
         if (exists) throw new BizException(SystemErrorCode.ROLE_CODE_DUPLICATE);
-        existing.setCompanyId(role.getCompanyId())
-                .setName(role.getName())
-                .setCode(role.getCode())
-                .setRemark(role.getRemark())
-                .setSort(role.getSort());
+        existing.setCompanyId(command.companyId())
+                .setName(command.name())
+                .setCode(command.code())
+                .setRemark(command.remark())
+                .setSort(command.sort());
         updateById(existing);
         return existing;
     }
@@ -104,20 +118,20 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole>
     @Override
     @Transactional
     public void assignMenus(Long roleId, List<Long> menuIds) {
-        getById(roleId);
+        requireRole(roleId);
         replaceMenus(roleId, normalizeIds(menuIds));
     }
 
     @Override
     @Transactional
     public void assignPermissions(Long roleId, List<Long> permissionIds) {
-        getById(roleId);
+        requireRole(roleId);
         replacePermissions(roleId, normalizeIds(permissionIds));
     }
 
     @Override
     public RoleAuthorizationResponse getAuthorization(Long roleId) {
-        getById(roleId);
+        requireRole(roleId);
         List<Long> selectedMenuIds = roleMenuMapper.selectList(Wrappers.<SysRoleMenu>lambdaQuery()
                         .eq(SysRoleMenu::getRoleId, roleId))
                 .stream()
@@ -142,7 +156,7 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole>
 
         return RoleAuthorizationResponse.builder()
                 .menus(menus)
-                .permissions(permissions)
+                .permissions(permissions.stream().map(PermissionAssembler::toResponse).toList())
                 .selectedMenuIds(selectedMenuIds)
                 .selectedPermissionIds(selectedPermissionIds)
                 .build();
@@ -150,8 +164,8 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole>
 
     @Override
     @Transactional
-    public void saveAuthorization(Long roleId, RoleAuthorizationRequest request) {
-        getById(roleId);
+    public void saveAuthorization(Long roleId, RoleAuthorizationSaveRequest request) {
+        requireRole(roleId);
         replaceMenus(roleId, normalizeIds(request == null ? null : request.getMenuIds()));
         replacePermissions(roleId, normalizeIds(request == null ? null : request.getPermissionIds()));
     }
@@ -159,23 +173,23 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole>
     @Override
     @Transactional
     public void enable(Long id) {
-        SysRole role = getById(id);
-        role.setStatus(Status.ENABLED);
+        SysRole role = requireRole(id);
+        role.enable();
         updateById(role);
     }
 
     @Override
     @Transactional
     public void disable(Long id) {
-        SysRole role = getById(id);
-        role.setStatus(Status.DISABLED);
+        SysRole role = requireRole(id);
+        role.disable();
         updateById(role);
     }
 
     @Override
     @Transactional
     public void remove(Long id) {
-        getById(id);
+        requireRole(id);
         boolean assignedToEmployee = employeeRoleMapper.selectCount(Wrappers.<SysEmployeeRole>lambdaQuery()
                 .eq(SysEmployeeRole::getRoleId, id)) > 0;
         if (assignedToEmployee) throw new BizException(SystemErrorCode.ROLE_ASSIGNED_TO_EMPLOYEE);

@@ -1,6 +1,8 @@
 package com.manpowergroup.kintai.system.application.service.sys;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.manpowergroup.kintai.system.application.command.sys.MenuCreateCommand;
+import com.manpowergroup.kintai.system.application.command.sys.MenuUpdateCommand;
 import com.manpowergroup.kintai.system.domain.entity.sys.SysMenu;
 
 import java.util.List;
@@ -18,10 +20,10 @@ public interface SysMenuService extends IService<SysMenu> {
     List<SysMenu> listByEmployeeId(Long employeeId);
 
     // メニューを新規作成
-    SysMenu create(SysMenu menu);
+    SysMenu create(MenuCreateCommand command);
 
     // メニューを更新
-    SysMenu update(Long id, SysMenu menu);
+    SysMenu update(Long id, MenuUpdateCommand command);
 
     // メニューを表示
     void show(Long id);

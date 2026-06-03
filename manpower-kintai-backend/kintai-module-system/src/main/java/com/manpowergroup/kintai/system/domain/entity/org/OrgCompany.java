@@ -47,5 +47,13 @@ public class OrgCompany {
     // 論理削除（0=有効 1=削除）
     @TableLogic
     private Integer isDeleted;
+
+    public void enable() {
+        this.status = Status.ENABLED;
+    }
+
+    public void disable() {
+        this.status = Status.DISABLED;
+    }
 }
 

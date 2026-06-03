@@ -2,17 +2,25 @@ package com.manpowergroup.kintai.admin.controller.sys;
 
 import com.manpowergroup.kintai.common.result.Result;
 import com.manpowergroup.kintai.common.security.SecurityPermissions;
-import com.manpowergroup.kintai.system.application.dto.sys.MenuRequest;
+import com.manpowergroup.kintai.system.application.assembler.sys.MenuAssembler;
 import com.manpowergroup.kintai.system.application.dto.sys.MenuResponse;
+import com.manpowergroup.kintai.system.application.dto.sys.request.MenuCreateRequest;
+import com.manpowergroup.kintai.system.application.dto.sys.request.MenuUpdateRequest;
 import com.manpowergroup.kintai.system.application.service.sys.SysMenuService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-// メニューマスタ管理Controller（管理者用）
 @RestController
 @RequestMapping("/admin/sys/menus")
 @RequiredArgsConstructor
@@ -20,35 +28,30 @@ public class AdminSysMenuController {
 
     private final SysMenuService service;
 
-    // 全メニューを取得（ツリー構築用）
     @GetMapping
     @PreAuthorize(SecurityPermissions.HAS_ADMIN_MENU_READ)
     public Result<List<MenuResponse>> listAll() {
-        return Result.ok(service.listAll().stream().map(MenuResponse::from).toList());
+        return Result.ok(service.listAll().stream().map(MenuAssembler::toResponse).toList());
     }
 
-    // IDでメニューを取得
     @GetMapping("/{id}")
     @PreAuthorize(SecurityPermissions.HAS_ADMIN_MENU_READ)
     public Result<MenuResponse> getById(@PathVariable Long id) {
-        return Result.ok(MenuResponse.from(service.getById(id)));
+        return Result.ok(MenuAssembler.toResponse(service.getById(id)));
     }
 
-    // メニューを新規作成
     @PostMapping
     @PreAuthorize(SecurityPermissions.HAS_ADMIN_MENU_WRITE)
-    public Result<MenuResponse> create(@RequestBody @Valid MenuRequest request) {
-        return Result.ok(MenuResponse.from(service.create(request.toEntity())));
+    public Result<MenuResponse> create(@RequestBody @Valid MenuCreateRequest request) {
+        return Result.ok(MenuAssembler.toResponse(service.create(MenuAssembler.toCommand(request))));
     }
 
-    // メニューを更新
     @PutMapping("/{id}")
     @PreAuthorize(SecurityPermissions.HAS_ADMIN_MENU_WRITE)
-    public Result<MenuResponse> update(@PathVariable Long id, @RequestBody @Valid MenuRequest request) {
-        return Result.ok(MenuResponse.from(service.update(id, request.toEntity())));
+    public Result<MenuResponse> update(@PathVariable Long id, @RequestBody @Valid MenuUpdateRequest request) {
+        return Result.ok(MenuAssembler.toResponse(service.update(id, MenuAssembler.toCommand(request))));
     }
 
-    // メニューを表示
     @PutMapping("/{id}/show")
     @PreAuthorize(SecurityPermissions.HAS_ADMIN_MENU_WRITE)
     public Result<Void> show(@PathVariable Long id) {
@@ -56,7 +59,6 @@ public class AdminSysMenuController {
         return Result.ok();
     }
 
-    // メニューを非表示
     @PutMapping("/{id}/hide")
     @PreAuthorize(SecurityPermissions.HAS_ADMIN_MENU_WRITE)
     public Result<Void> hide(@PathVariable Long id) {
@@ -64,7 +66,6 @@ public class AdminSysMenuController {
         return Result.ok();
     }
 
-    // メニューを有効化
     @PutMapping("/{id}/enable")
     @PreAuthorize(SecurityPermissions.HAS_ADMIN_MENU_WRITE)
     public Result<Void> enable(@PathVariable Long id) {
@@ -72,7 +73,6 @@ public class AdminSysMenuController {
         return Result.ok();
     }
 
-    // メニューを無効化
     @PutMapping("/{id}/disable")
     @PreAuthorize(SecurityPermissions.HAS_ADMIN_MENU_WRITE)
     public Result<Void> disable(@PathVariable Long id) {
@@ -80,7 +80,6 @@ public class AdminSysMenuController {
         return Result.ok();
     }
 
-    // メニューを削除（論理削除）
     @DeleteMapping("/{id}")
     @PreAuthorize(SecurityPermissions.HAS_ADMIN_MENU_WRITE)
     public Result<Void> remove(@PathVariable Long id) {
@@ -88,5 +87,3 @@ public class AdminSysMenuController {
         return Result.ok();
     }
 }
-
-

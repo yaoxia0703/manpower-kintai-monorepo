@@ -7,11 +7,13 @@ import com.manpowergroup.kintai.common.dto.PageResult;
 import com.manpowergroup.kintai.common.enums.Status;
 import com.manpowergroup.kintai.common.exception.BaseErrorCode;
 import com.manpowergroup.kintai.common.exception.BizException;
+import com.manpowergroup.kintai.system.application.command.org.NodeCreateCommand;
+import com.manpowergroup.kintai.system.application.command.org.NodeUpdateCommand;
+import com.manpowergroup.kintai.system.application.service.org.OrgNodeService;
 import com.manpowergroup.kintai.system.domain.entity.org.OrgNode;
 import com.manpowergroup.kintai.system.domain.entity.org.OrgNodeClosure;
 import com.manpowergroup.kintai.system.domain.repository.org.OrgNodeClosureRepository;
 import com.manpowergroup.kintai.system.infrastructure.mapper.org.OrgNodeMapper;
-import com.manpowergroup.kintai.system.application.service.org.OrgNodeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -55,12 +57,23 @@ public class OrgNodeServiceImpl extends ServiceImpl<OrgNodeMapper, OrgNode>
 
     @Override
     @Transactional
-    public OrgNode create(OrgNode node) {
+    public OrgNode create(NodeCreateCommand command) {
         boolean exists = lambdaQuery()
-                .eq(OrgNode::getCompanyId, node.getCompanyId())
-                .eq(OrgNode::getCode, node.getCode())
+                .eq(OrgNode::getCompanyId, command.companyId())
+                .eq(OrgNode::getCode, command.code())
                 .count() > 0;
         if (exists) throw new BizException(SystemErrorCode.NODE_CODE_DUPLICATE);
+        OrgNode node = new OrgNode()
+                .setCompanyId(command.companyId())
+                .setParentId(command.parentId())
+                .setManagerId(command.managerId())
+                .setName(command.name())
+                .setTypeCode(command.typeCode())
+                .setDeptFunction(command.deptFunction())
+                .setCode(command.code())
+                .setLevel(command.level())
+                .setSort(command.sort())
+                .setStatus(command.status() == null ? Status.ENABLED : command.status());
         save(node);
 
         // Closure Table更新：自分自身のレコード（depth=0）を追加
@@ -80,20 +93,20 @@ public class OrgNodeServiceImpl extends ServiceImpl<OrgNodeMapper, OrgNode>
 
     @Override
     @Transactional
-    public OrgNode update(Long id, OrgNode node) {
+    public OrgNode update(Long id, NodeUpdateCommand command) {
         OrgNode existing = getById(id);
         boolean exists = lambdaQuery()
-                .eq(OrgNode::getCompanyId, node.getCompanyId())
-                .eq(OrgNode::getCode, node.getCode())
+                .eq(OrgNode::getCompanyId, command.companyId())
+                .eq(OrgNode::getCode, command.code())
                 .ne(OrgNode::getId, id)
                 .count() > 0;
         if (exists) throw new BizException(SystemErrorCode.NODE_CODE_DUPLICATE);
-        existing.setName(node.getName())
-                .setTypeCode(node.getTypeCode())
-                .setDeptFunction(node.getDeptFunction())
-                .setCode(node.getCode())
-                .setManagerId(node.getManagerId())
-                .setSort(node.getSort());
+        existing.setName(command.name())
+                .setTypeCode(command.typeCode())
+                .setDeptFunction(command.deptFunction())
+                .setCode(command.code())
+                .setManagerId(command.managerId())
+                .setSort(command.sort());
         updateById(existing);
         return existing;
     }
@@ -102,7 +115,7 @@ public class OrgNodeServiceImpl extends ServiceImpl<OrgNodeMapper, OrgNode>
     @Transactional
     public void enable(Long id) {
         OrgNode node = getById(id);
-        node.setStatus(Status.ENABLED);
+        node.enable();
         updateById(node);
     }
 
@@ -110,7 +123,7 @@ public class OrgNodeServiceImpl extends ServiceImpl<OrgNodeMapper, OrgNode>
     @Transactional
     public void disable(Long id) {
         OrgNode node = getById(id);
-        node.setStatus(Status.DISABLED);
+        node.disable();
         updateById(node);
     }
 

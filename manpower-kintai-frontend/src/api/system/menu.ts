@@ -1,16 +1,16 @@
 import request from '@/api/common/request'
 import type { ApiResponse } from '@/types/common'
-import type { SystemMenu, SystemMenuPayload } from '@/types/system'
+import type { MenuCreateRequest, MenuUpdateRequest, SystemMenu } from '@/types/system'
 
 export function fetchMenus() {
   return request.get<ApiResponse<SystemMenu[]>>('/admin/sys/menus')
 }
 
-export function createMenu(payload: SystemMenuPayload) {
+export function createMenu(payload: MenuCreateRequest) {
   return request.post<ApiResponse<SystemMenu>>('/admin/sys/menus', payload)
 }
 
-export function updateMenu(id: number, payload: SystemMenuPayload) {
+export function updateMenu(id: number, payload: MenuUpdateRequest) {
   return request.put<ApiResponse<SystemMenu>>(`/admin/sys/menus/${id}`, payload)
 }
 

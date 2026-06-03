@@ -140,7 +140,15 @@ import {
   updateRole,
 } from '@/api/system/role'
 import { CommonStatus } from '@/types/enums'
-import type { SystemMenu, SystemPermission, SystemRole, SystemRolePayload } from '@/types/system'
+import type { RoleCreateRequest, SystemMenu, SystemPermission, SystemRole } from '@/types/system'
+
+interface RoleFormState {
+  companyId: number | null
+  code: string
+  name: string
+  remark: string
+  sort: number
+}
 
 interface PermissionGroup {
   key: string
@@ -168,7 +176,7 @@ const authorizationPermissions = ref<SystemPermission[]>([])
 const selectedPermissionIds = ref<number[]>([])
 const menuTreeRef = ref()
 
-const form = reactive<SystemRolePayload>({
+const form = reactive<RoleFormState>({
   companyId: null,
   code: '',
   name: '',
@@ -176,7 +184,7 @@ const form = reactive<SystemRolePayload>({
   sort: 0,
 })
 
-const rules: FormRules<SystemRolePayload> = {
+const rules: FormRules<RoleFormState> = {
   name: [{ required: true, message: '名称を入力してください', trigger: 'blur' }],
   code: [{ required: true, message: 'コードを入力してください', trigger: 'blur' }],
   sort: [{ required: true, message: '表示順を入力してください', trigger: 'blur' }],
@@ -271,16 +279,27 @@ async function submit() {
   await formRef.value?.validate()
   saving.value = true
   try {
+    const request = toRoleRequest()
     if (editingId.value) {
-      await updateRole(editingId.value, form)
+      await updateRole(editingId.value, request)
     } else {
-      await createRole(form)
+      await createRole(request)
     }
     ElMessage.success('保存しました')
     dialogVisible.value = false
     await loadRoles()
   } finally {
     saving.value = false
+  }
+}
+
+function toRoleRequest(): RoleCreateRequest {
+  return {
+    companyId: form.companyId,
+    code: form.code,
+    name: form.name,
+    remark: form.remark,
+    sort: form.sort,
   }
 }
 

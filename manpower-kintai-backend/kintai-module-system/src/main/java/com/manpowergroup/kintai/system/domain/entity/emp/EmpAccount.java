@@ -43,5 +43,17 @@ public class EmpAccount {
 
     @TableLogic
     private Integer isDeleted;
+
+    public void changeUsername(String username) {
+        this.username = username;
+    }
+
+    public void enable() {
+        this.status = Status.ENABLED;
+    }
+
+    public void disable() {
+        this.status = Status.DISABLED;
+    }
 }
 

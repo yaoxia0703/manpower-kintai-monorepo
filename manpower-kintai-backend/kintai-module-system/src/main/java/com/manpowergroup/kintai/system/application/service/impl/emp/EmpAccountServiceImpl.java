@@ -4,9 +4,11 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.manpowergroup.kintai.common.enums.Status;
 import com.manpowergroup.kintai.common.exception.BaseErrorCode;
 import com.manpowergroup.kintai.common.exception.BizException;
+import com.manpowergroup.kintai.system.application.command.emp.AccountCreateCommand;
+import com.manpowergroup.kintai.system.application.command.emp.AccountUpdateCommand;
+import com.manpowergroup.kintai.system.application.service.emp.EmpAccountService;
 import com.manpowergroup.kintai.system.domain.entity.emp.EmpAccount;
 import com.manpowergroup.kintai.system.infrastructure.mapper.emp.EmpAccountMapper;
-import com.manpowergroup.kintai.system.application.service.emp.EmpAccountService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -22,13 +24,21 @@ public class EmpAccountServiceImpl extends ServiceImpl<EmpAccountMapper, EmpAcco
 
     @Override
     public EmpAccount getById(Long id) {
+        return requireAccount(id);
+    }
+
+    @Override
+    public EmpAccount getByEmployeeId(Long employeeId) {
+        return requireAccountByEmployeeId(employeeId);
+    }
+
+    private EmpAccount requireAccount(Long id) {
         EmpAccount account = super.getById(id);
         if (account == null) throw new BizException(SystemErrorCode.ACCOUNT_NOT_FOUND);
         return account;
     }
 
-    @Override
-    public EmpAccount getByEmployeeId(Long employeeId) {
+    private EmpAccount requireAccountByEmployeeId(Long employeeId) {
         EmpAccount account = lambdaQuery().eq(EmpAccount::getEmployeeId, employeeId).one();
         if (account == null) throw new BizException(SystemErrorCode.ACCOUNT_NOT_FOUND);
         return account;
@@ -36,24 +46,28 @@ public class EmpAccountServiceImpl extends ServiceImpl<EmpAccountMapper, EmpAcco
 
     @Override
     @Transactional
-    public EmpAccount create(EmpAccount account, String rawPassword) {
-        boolean exists = lambdaQuery().eq(EmpAccount::getUsername, account.getUsername()).count() > 0;
+    public EmpAccount create(AccountCreateCommand command) {
+        boolean exists = lambdaQuery().eq(EmpAccount::getUsername, command.username()).count() > 0;
         if (exists) throw new BizException(SystemErrorCode.ACCOUNT_USERNAME_DUPLICATE);
-        account.setPassword(passwordEncoder.encode(rawPassword));
+        EmpAccount account = new EmpAccount()
+                .setEmployeeId(command.employeeId())
+                .setUsername(command.username())
+                .setPassword(passwordEncoder.encode(command.password()))
+                .setStatus(Status.ENABLED);
         save(account);
         return account;
     }
 
     @Override
     @Transactional
-    public EmpAccount update(Long id, EmpAccount account) {
+    public EmpAccount update(Long id, AccountUpdateCommand command) {
         EmpAccount existing = getById(id);
         boolean exists = lambdaQuery()
-                .eq(EmpAccount::getUsername, account.getUsername())
+                .eq(EmpAccount::getUsername, command.username())
                 .ne(EmpAccount::getId, id)
                 .count() > 0;
         if (exists) throw new BizException(SystemErrorCode.ACCOUNT_USERNAME_DUPLICATE);
-        existing.setUsername(account.getUsername());
+        existing.changeUsername(command.username());
         updateById(existing);
         return existing;
     }
@@ -73,7 +87,7 @@ public class EmpAccountServiceImpl extends ServiceImpl<EmpAccountMapper, EmpAcco
     @Transactional
     public void enable(Long id) {
         EmpAccount account = getById(id);
-        account.setStatus(Status.ENABLED);
+        account.enable();
         updateById(account);
     }
 
@@ -81,7 +95,7 @@ public class EmpAccountServiceImpl extends ServiceImpl<EmpAccountMapper, EmpAcco
     @Transactional
     public void disable(Long id) {
         EmpAccount account = getById(id);
-        account.setStatus(Status.DISABLED);
+        account.disable();
         updateById(account);
     }
 

@@ -3,6 +3,8 @@ package com.manpowergroup.kintai.system.application.service.emp;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.manpowergroup.kintai.common.dto.PageRequest;
 import com.manpowergroup.kintai.common.dto.PageResult;
+import com.manpowergroup.kintai.system.application.command.emp.EmployeeCreateCommand;
+import com.manpowergroup.kintai.system.application.command.emp.EmployeeUpdateCommand;
 import com.manpowergroup.kintai.system.domain.entity.emp.EmpEmployee;
 
 // 社員マスタサービス（アプリケーション層）
@@ -18,10 +20,10 @@ public interface EmpEmployeeService extends IService<EmpEmployee> {
     PageResult<EmpEmployee> searchByName(Long companyId, String keyword, PageRequest request);
 
     // 社員を新規作成
-    EmpEmployee create(EmpEmployee employee);
+    EmpEmployee create(EmployeeCreateCommand command);
 
     // 社員情報を更新
-    EmpEmployee update(Long id, EmpEmployee employee);
+    EmpEmployee update(Long id, EmployeeUpdateCommand command);
 
     // 社員を有効化（在職）
     void enable(Long id);
