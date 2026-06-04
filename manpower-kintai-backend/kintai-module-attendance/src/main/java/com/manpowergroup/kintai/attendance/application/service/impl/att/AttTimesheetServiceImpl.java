@@ -6,15 +6,13 @@ import com.manpowergroup.kintai.attendance.application.dto.TimesheetMonthRespons
 import com.manpowergroup.kintai.attendance.application.dto.TimesheetSaveRequest;
 import com.manpowergroup.kintai.attendance.application.service.att.AttTimesheetService;
 import com.manpowergroup.kintai.attendance.domain.entity.att.AttRecord;
+import com.manpowergroup.kintai.attendance.domain.enums.AttRecordStatus;
 import com.manpowergroup.kintai.attendance.infrastructure.mapper.att.AttRecordMapper;
-import com.manpowergroup.kintai.common.exception.BizException;
-import com.manpowergroup.kintai.common.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.DayOfWeek;
-import java.time.Duration;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +23,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class AttTimesheetServiceImpl implements AttTimesheetService {
 
-    private static final int STANDARD_WORK_MINUTES = 480;
     private static final String[] JP_WEEKDAYS = {"日", "月", "火", "水", "木", "金", "土"};
 
     private final AttRecordMapper recordMapper;
@@ -91,12 +88,8 @@ public class AttTimesheetServiceImpl implements AttTimesheetService {
                 .setWorkMinutes(record.getWorkMinutes())
                 .setOvertimeMinutes(record.getOvertimeMinutes())
                 .setRemark(record.getRemark())
-                .setStatus(record.getStatus());
-
-        if (record.getClockIn() != null && record.getClockOut() != null && record.getWorkMinutes() != null) {
-            long spannedMinutes = Duration.between(record.getClockIn(), record.getClockOut()).toMinutes();
-            dto.setBreakMinutes(Math.max(0, (int) spannedMinutes - record.getWorkMinutes()));
-        }
+                .setStatus(record.getStatus())
+                .setBreakMinutes(record.calculateBreakMinutes());
 
         return dto;
     }
@@ -111,29 +104,13 @@ public class AttTimesheetServiceImpl implements AttTimesheetService {
                         .eq(AttRecord::getWorkDate, request.getWorkDate())
         );
 
-        Integer workMinutes = null;
-        Integer overtimeMinutes = 0;
-        if (request.getClockIn() != null && request.getClockOut() != null) {
-            int breakMinutes = request.getBreakMinutes() == null ? 0 : request.getBreakMinutes();
-            long spannedMinutes = Duration.between(request.getClockIn(), request.getClockOut()).toMinutes();
-            if (spannedMinutes <= 0) {
-                throw BizException.withDetail(ErrorCode.VALIDATION_ERROR, "clockOut must be after clockIn");
-            }
-            if (breakMinutes >= spannedMinutes) {
-                throw BizException.withDetail(ErrorCode.VALIDATION_ERROR, "breakMinutes must be less than working span minutes");
-            }
-            workMinutes = (int) Math.max(0, spannedMinutes - breakMinutes);
-            overtimeMinutes = Math.max(0, workMinutes - STANDARD_WORK_MINUTES);
-        }
-
         if (existing != null) {
             existing.setAttendanceType(request.getAttendanceType())
                     .setClockIn(request.getClockIn())
                     .setClockOut(request.getClockOut())
-                    .setWorkMinutes(workMinutes)
-                    .setOvertimeMinutes(overtimeMinutes)
                     .setRemark(request.getRemark())
                     .setUpdatedBy(employeeId);
+            existing.recalculate(request.getBreakMinutes());
             recordMapper.updateById(existing);
             return;
         }
@@ -145,12 +122,11 @@ public class AttTimesheetServiceImpl implements AttTimesheetService {
                 .setAttendanceType(request.getAttendanceType())
                 .setClockIn(request.getClockIn())
                 .setClockOut(request.getClockOut())
-                .setWorkMinutes(workMinutes)
-                .setOvertimeMinutes(overtimeMinutes)
                 .setRemark(request.getRemark())
-                .setStatus(0)
+                .setStatus(AttRecordStatus.DRAFT)
                 .setCreatedBy(employeeId)
                 .setUpdatedBy(employeeId);
+        record.recalculate(request.getBreakMinutes());
         recordMapper.insert(record);
     }
 

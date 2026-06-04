@@ -18,9 +18,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
-// 認証サービス実装（アプリケーション層）
 @Service
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
@@ -33,7 +33,6 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public LoginResponse login(LoginRequest request) {
-        // メールアドレスで社員を検索
         EmpEmployee employee = employeeRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new BizException(AuthErrorCode.INVALID_CREDENTIALS));
 
@@ -41,20 +40,11 @@ public class AuthServiceImpl implements AuthService {
             throw new BizException(AuthErrorCode.ACCOUNT_DISABLED);
         }
 
-        // 社員IDでアカウントを取得
         EmpAccount account = accountService.getByEmployeeId(employee.getId());
+        account.authenticate(request.getPassword(), passwordEncoder);
+        account.recordLogin(LocalDateTime.now());
+        accountService.updateById(account);
 
-        // アカウント有効チェック
-        if (account.getStatus() != Status.ENABLED) {
-            throw new BizException(AuthErrorCode.ACCOUNT_DISABLED);
-        }
-
-        // パスワード検証
-        if (!passwordEncoder.matches(request.getPassword(), account.getPassword())) {
-            throw new BizException(AuthErrorCode.INVALID_CREDENTIALS);
-        }
-
-        // JWTトークン生成
         String token = jwtTokenProvider.generateToken(employee.getId(), account.getId(), List.of());
 
         return LoginResponse.builder()

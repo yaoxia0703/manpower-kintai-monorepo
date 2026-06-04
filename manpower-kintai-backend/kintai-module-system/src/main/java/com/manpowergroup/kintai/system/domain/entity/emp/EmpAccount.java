@@ -2,8 +2,11 @@ package com.manpowergroup.kintai.system.domain.entity.emp;
 
 import com.baomidou.mybatisplus.annotation.*;
 import com.manpowergroup.kintai.common.enums.Status;
+import com.manpowergroup.kintai.common.exception.BizException;
+import com.manpowergroup.kintai.common.exception.ErrorCode;
 import lombok.Data;
 import lombok.experimental.Accessors;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDateTime;
 
@@ -46,6 +49,19 @@ public class EmpAccount {
 
     public void changeUsername(String username) {
         this.username = username;
+    }
+
+    public void authenticate(String rawPassword, PasswordEncoder passwordEncoder) {
+        if (this.status != Status.ENABLED) {
+            throw BizException.withDetail(ErrorCode.FORBIDDEN, "Account is disabled");
+        }
+        if (!passwordEncoder.matches(rawPassword, this.password)) {
+            throw BizException.withDetail(ErrorCode.UNAUTHORIZED, "Invalid credentials");
+        }
+    }
+
+    public void recordLogin(LocalDateTime loggedInAt) {
+        this.lastLogin = loggedInAt;
     }
 
     public void enable() {

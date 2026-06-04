@@ -117,6 +117,7 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole>
 
     @Override
     @Transactional
+    @Deprecated(since = "0.0.1", forRemoval = false)
     public void assignMenus(Long roleId, List<Long> menuIds) {
         requireRole(roleId);
         replaceMenus(roleId, normalizeIds(menuIds));
@@ -124,6 +125,7 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole>
 
     @Override
     @Transactional
+    @Deprecated(since = "0.0.1", forRemoval = false)
     public void assignPermissions(Long roleId, List<Long> permissionIds) {
         requireRole(roleId);
         replacePermissions(roleId, normalizeIds(permissionIds));

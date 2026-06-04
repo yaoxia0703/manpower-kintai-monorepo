@@ -23,8 +23,10 @@ public interface SysRoleService extends IService<SysRole> {
 
     SysRole update(Long id, RoleUpdateCommand command);
 
+    @Deprecated(since = "0.0.1", forRemoval = false)
     void assignMenus(Long roleId, List<Long> menuIds);
 
+    @Deprecated(since = "0.0.1", forRemoval = false)
     void assignPermissions(Long roleId, List<Long> permissionIds);
 
     RoleAuthorizationResponse getAuthorization(Long roleId);

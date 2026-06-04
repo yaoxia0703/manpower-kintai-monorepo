@@ -110,8 +110,7 @@ public class EmployeeOnboardingServiceImpl implements EmployeeOnboardingService 
                 EmployeeOnboardingAssembler.toEmployee(request, operatorEmployeeId));
 
         EmpAccount account = accountService.create(
-                EmployeeOnboardingAssembler.toAccount(request, employee.getId(), operatorEmployeeId),
-                request.getPassword());
+                EmployeeOnboardingAssembler.toAccount(request, employee.getId(), operatorEmployeeId));
 
         EmpEmployeePosition position = positionService.create(
                 EmployeeOnboardingAssembler.toPosition(request, employee.getId(), operatorEmployeeId));

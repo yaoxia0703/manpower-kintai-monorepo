@@ -1,11 +1,11 @@
 package com.manpowergroup.kintai.system.application.assembler.hr;
 
 import com.manpowergroup.kintai.common.enums.Status;
+import com.manpowergroup.kintai.system.application.command.emp.AccountCreateCommand;
+import com.manpowergroup.kintai.system.application.command.emp.EmployeeCreateCommand;
+import com.manpowergroup.kintai.system.application.command.emp.EmployeePositionCreateCommand;
+import com.manpowergroup.kintai.system.application.command.sys.EmployeeRoleAssignCommand;
 import com.manpowergroup.kintai.system.application.dto.hr.EmployeeOnboardingRequest;
-import com.manpowergroup.kintai.system.domain.entity.emp.EmpAccount;
-import com.manpowergroup.kintai.system.domain.entity.emp.EmpEmployee;
-import com.manpowergroup.kintai.system.domain.entity.emp.EmpEmployeePosition;
-import com.manpowergroup.kintai.system.domain.entity.sys.SysEmployeeRole;
 
 import java.util.List;
 
@@ -14,54 +14,54 @@ public final class EmployeeOnboardingAssembler {
     private EmployeeOnboardingAssembler() {
     }
 
-    public static EmpEmployee toEmployee(EmployeeOnboardingRequest request, Long operatorEmployeeId) {
-        return new EmpEmployee()
-                .setCompanyId(request.getCompanyId())
-                .setEmployeeCode(request.getEmployeeCode())
-                .setLastName(request.getLastName())
-                .setFirstName(request.getFirstName())
-                .setLastNameKana(request.getLastNameKana())
-                .setFirstNameKana(request.getFirstNameKana())
-                .setEmail(request.getEmail())
-                .setPhone(request.getPhone())
-                .setGender(request.getGender())
-                .setHireDate(request.getHireDate())
-                .setStatus(Status.ENABLED)
-                .setCreatedBy(operatorEmployeeId)
-                .setUpdatedBy(operatorEmployeeId);
+    public static EmployeeCreateCommand toEmployee(EmployeeOnboardingRequest request, Long operatorEmployeeId) {
+        return new EmployeeCreateCommand(
+                request.getCompanyId(),
+                request.getEmployeeCode(),
+                request.getLastName(),
+                request.getFirstName(),
+                request.getLastNameKana(),
+                request.getFirstNameKana(),
+                request.getEmail(),
+                request.getPhone(),
+                request.getGender(),
+                null,
+                request.getHireDate(),
+                null,
+                Status.ENABLED
+        );
     }
 
-    public static EmpAccount toAccount(EmployeeOnboardingRequest request, Long employeeId, Long operatorEmployeeId) {
-        return new EmpAccount()
-                .setEmployeeId(employeeId)
-                .setUsername(request.getUsername())
-                .setStatus(Status.ENABLED)
-                .setCreatedBy(operatorEmployeeId)
-                .setUpdatedBy(operatorEmployeeId);
+    public static AccountCreateCommand toAccount(EmployeeOnboardingRequest request, Long employeeId, Long operatorEmployeeId) {
+        return new AccountCreateCommand(
+                employeeId,
+                request.getUsername(),
+                request.getPassword()
+        );
     }
 
-    public static EmpEmployeePosition toPosition(EmployeeOnboardingRequest request, Long employeeId, Long operatorEmployeeId) {
-        return new EmpEmployeePosition()
-                .setEmployeeId(employeeId)
-                .setCompanyId(request.getCompanyId())
-                .setNodeId(request.getNodeId())
-                .setGradeId(request.getGradeId())
-                .setIsPrimary(1)
-                .setStartDate(request.getHireDate())
-                .setStatus(Status.ENABLED)
-                .setCreatedBy(operatorEmployeeId)
-                .setUpdatedBy(operatorEmployeeId);
+    public static EmployeePositionCreateCommand toPosition(EmployeeOnboardingRequest request, Long employeeId, Long operatorEmployeeId) {
+        return new EmployeePositionCreateCommand(
+                employeeId,
+                request.getCompanyId(),
+                request.getNodeId(),
+                request.getGradeId(),
+                1,
+                request.getHireDate(),
+                null,
+                Status.ENABLED
+        );
     }
 
-    public static List<SysEmployeeRole> toEmployeeRoles(EmployeeOnboardingRequest request, Long employeeId, Long operatorEmployeeId) {
+    public static List<EmployeeRoleAssignCommand> toEmployeeRoles(EmployeeOnboardingRequest request, Long employeeId, Long operatorEmployeeId) {
         return request.getRoleIds().stream()
-                .map(roleId -> new SysEmployeeRole()
-                        .setEmployeeId(employeeId)
-                        .setCompanyId(request.getCompanyId())
-                        .setRoleId(roleId)
-                        .setStartDate(request.getHireDate())
-                        .setCreatedBy(operatorEmployeeId)
-                        .setUpdatedBy(operatorEmployeeId))
+                .map(roleId -> new EmployeeRoleAssignCommand(
+                        employeeId,
+                        roleId,
+                        request.getCompanyId(),
+                        request.getHireDate(),
+                        null
+                ))
                 .toList();
     }
 }

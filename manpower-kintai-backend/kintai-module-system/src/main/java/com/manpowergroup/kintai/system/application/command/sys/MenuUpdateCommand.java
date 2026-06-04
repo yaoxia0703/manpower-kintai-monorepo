@@ -7,7 +7,7 @@ public record MenuUpdateCommand(
         String path,
         String component,
         String icon,
-        String type,
+        Integer type,
         Integer sort,
         Integer visible
 ) {

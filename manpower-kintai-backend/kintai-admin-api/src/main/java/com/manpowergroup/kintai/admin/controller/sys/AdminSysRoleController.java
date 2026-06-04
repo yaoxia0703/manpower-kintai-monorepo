@@ -75,6 +75,7 @@ public class AdminSysRoleController {
 
     @PutMapping("/{id}/menus")
     @PreAuthorize(SecurityPermissions.HAS_ADMIN_ROLE_WRITE)
+    @Deprecated(since = "0.0.1", forRemoval = false)
     public Result<Void> assignMenus(@PathVariable Long id, @RequestBody @Valid RoleAssignRequest request) {
         service.assignMenus(id, request.getIds());
         return Result.ok();
@@ -82,6 +83,7 @@ public class AdminSysRoleController {
 
     @PutMapping("/{id}/permissions")
     @PreAuthorize(SecurityPermissions.HAS_ADMIN_ROLE_WRITE)
+    @Deprecated(since = "0.0.1", forRemoval = false)
     public Result<Void> assignPermissions(@PathVariable Long id, @RequestBody @Valid RoleAssignRequest request) {
         service.assignPermissions(id, request.getIds());
         return Result.ok();

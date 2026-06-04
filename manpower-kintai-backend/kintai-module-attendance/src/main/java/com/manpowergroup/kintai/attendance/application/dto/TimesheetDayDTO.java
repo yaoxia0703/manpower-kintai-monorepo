@@ -1,6 +1,7 @@
 package com.manpowergroup.kintai.attendance.application.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.manpowergroup.kintai.attendance.domain.enums.AttRecordStatus;
 import com.manpowergroup.kintai.common.enums.AttendanceType;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -37,7 +38,7 @@ public class TimesheetDayDTO {
 
     private String remark;
 
-    private Integer status;
+    private AttRecordStatus status;
 
     private Long recordId;
 }

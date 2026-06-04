@@ -1,6 +1,14 @@
 package com.manpowergroup.kintai.attendance.domain.entity.att;
 
-import com.baomidou.mybatisplus.annotation.*;
+import com.baomidou.mybatisplus.annotation.FieldFill;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableLogic;
+import com.baomidou.mybatisplus.annotation.TableName;
+import com.manpowergroup.kintai.attendance.domain.enums.ApprovalStatus;
+import com.manpowergroup.kintai.common.exception.BizException;
+import com.manpowergroup.kintai.common.exception.ErrorCode;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -9,7 +17,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
-// 各種申請
 @Data
 @Accessors(chain = true)
 @TableName("att_request")
@@ -18,38 +25,27 @@ public class AttRequest {
     @TableId(type = IdType.AUTO)
     private Long id;
 
-    // 申請者社員ID
     private Long employeeId;
 
-    // 会社ID
     private Long companyId;
 
-    // 申請タイプ（REQUEST_TYPE参照）
     private String requestType;
 
-    // 開始日
     private LocalDate startDate;
 
-    // 終了日
     private LocalDate endDate;
 
-    // 開始時刻（残業申請等）
     private LocalTime startTime;
 
-    // 終了時刻（残業申請等）
     private LocalTime endTime;
 
-    // 申請日数
     private BigDecimal days;
 
-    // 申請時間（分）
     private Integer minutes;
 
-    // 申請理由
     private String reason;
 
-    // 承認ステータス（APPROVAL_STATUS参照）
-    private String status;
+    private ApprovalStatus status;
 
     private Long createdBy;
 
@@ -63,5 +59,29 @@ public class AttRequest {
 
     @TableLogic
     private Integer isDeleted;
-}
 
+    public static AttRequest pending() {
+        return new AttRequest().setStatus(ApprovalStatus.PENDING);
+    }
+
+    public void approve() {
+        requirePending();
+        this.status = ApprovalStatus.APPROVED;
+    }
+
+    public void reject() {
+        requirePending();
+        this.status = ApprovalStatus.REJECTED;
+    }
+
+    public void cancel() {
+        requirePending();
+        this.status = ApprovalStatus.CANCELLED;
+    }
+
+    private void requirePending() {
+        if (status != ApprovalStatus.PENDING) {
+            throw BizException.withDetail(ErrorCode.CONFLICT, "Only pending attendance requests can change status");
+        }
+    }
+}

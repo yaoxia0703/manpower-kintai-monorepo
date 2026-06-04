@@ -1,12 +1,17 @@
 package com.manpowergroup.kintai.attendance.domain.entity.wf;
 
-import com.baomidou.mybatisplus.annotation.*;
+import com.baomidou.mybatisplus.annotation.FieldFill;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableLogic;
+import com.baomidou.mybatisplus.annotation.TableName;
+import com.manpowergroup.kintai.attendance.domain.enums.ApprovalStatus;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
 import java.time.LocalDateTime;
 
-// 承認ステップ明細
 @Data
 @Accessors(chain = true)
 @TableName("wf_approval_step")
@@ -15,22 +20,16 @@ public class WfApprovalStep {
     @TableId(type = IdType.AUTO)
     private Long id;
 
-    // 承認フローID
     private Long approvalId;
 
-    // ステップ番号
     private Integer step;
 
-    // 承認者社員ID
     private Long approverId;
 
-    // ステータス
-    private String status;
+    private ApprovalStatus status;
 
-    // 承認コメント
     private String comment;
 
-    // 承認日時
     private LocalDateTime approvedAt;
 
     private Long createdBy;
@@ -46,4 +45,3 @@ public class WfApprovalStep {
     @TableLogic
     private Integer isDeleted;
 }
-
