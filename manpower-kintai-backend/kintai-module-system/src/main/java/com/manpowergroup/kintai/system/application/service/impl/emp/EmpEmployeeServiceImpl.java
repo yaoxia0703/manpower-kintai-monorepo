@@ -1,5 +1,8 @@
 package com.manpowergroup.kintai.system.application.service.impl.emp;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.manpowergroup.kintai.common.dto.PageRequest;
 import com.manpowergroup.kintai.common.dto.PageResult;
@@ -10,11 +13,13 @@ import com.manpowergroup.kintai.system.application.command.emp.EmployeeCreateCom
 import com.manpowergroup.kintai.system.application.command.emp.EmployeeUpdateCommand;
 import com.manpowergroup.kintai.system.application.service.emp.EmpEmployeeService;
 import com.manpowergroup.kintai.system.domain.entity.emp.EmpEmployee;
-import com.manpowergroup.kintai.system.domain.repository.emp.EmpEmployeeRepository;
 import com.manpowergroup.kintai.system.infrastructure.mapper.emp.EmpEmployeeMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
+
+import java.util.Optional;
 
 // 社員マスタサービス実装（アプリケーション層）
 @Service
@@ -22,22 +27,52 @@ import org.springframework.transaction.annotation.Transactional;
 public class EmpEmployeeServiceImpl extends ServiceImpl<EmpEmployeeMapper, EmpEmployee>
         implements EmpEmployeeService {
 
-    private final EmpEmployeeRepository repository;
+    @Override
+    public Optional<EmpEmployee> findById(Long id) {
+        return Optional.ofNullable(super.getById(id));
+    }
+
+    @Override
+    public Optional<EmpEmployee> findByEmail(String email) {
+        return Optional.ofNullable(lambdaQuery()
+                .eq(EmpEmployee::getEmail, email)
+                .one());
+    }
 
     @Override
     public EmpEmployee getById(Long id) {
-        return repository.findById(id)
+        return findById(id)
                 .orElseThrow(() -> new BizException(SystemErrorCode.EMPLOYEE_NOT_FOUND));
     }
 
     @Override
     public PageResult<EmpEmployee> pageByCompany(Long companyId, PageRequest request) {
-        return repository.findPageByCompanyId(companyId, request.page(), request.size());
+        Page<EmpEmployee> page = new Page<>(request.page(), request.size());
+        page(page, lambdaQuery()
+                .eq(EmpEmployee::getCompanyId, companyId)
+                .orderByAsc(EmpEmployee::getEmployeeCode)
+                .getWrapper());
+        return PageResult.of(page);
     }
 
     @Override
     public PageResult<EmpEmployee> searchByName(Long companyId, String keyword, PageRequest request) {
-        return repository.searchByName(companyId, keyword, request.page(), request.size());
+        Page<EmpEmployee> page = new Page<>(request.page(), request.size());
+        LambdaQueryWrapper<EmpEmployee> wrapper = Wrappers.<EmpEmployee>lambdaQuery()
+                .eq(EmpEmployee::getCompanyId, companyId);
+        if (StringUtils.hasText(keyword)) {
+            wrapper.and(q -> q
+                    .like(EmpEmployee::getLastName, keyword)
+                    .or()
+                    .like(EmpEmployee::getFirstName, keyword)
+                    .or()
+                    .like(EmpEmployee::getLastNameKana, keyword)
+                    .or()
+                    .like(EmpEmployee::getFirstNameKana, keyword));
+        }
+        wrapper.orderByAsc(EmpEmployee::getEmployeeCode);
+        page(page, wrapper);
+        return PageResult.of(page);
     }
 
     @Override
@@ -57,17 +92,18 @@ public class EmpEmployeeServiceImpl extends ServiceImpl<EmpEmployeeMapper, EmpEm
                 .setHireDate(command.hireDate())
                 .setLeaveDate(command.leaveDate())
                 .setStatus(command.status() == null ? Status.ENABLED : command.status());
-        if (repository.existsByEmail(employee.getEmail(), null)) {
+        if (existsByEmail(employee.getEmail(), null)) {
             throw new BizException(SystemErrorCode.EMPLOYEE_EMAIL_DUPLICATE);
         }
-        return repository.save(employee);
+        save(employee);
+        return employee;
     }
 
     @Override
     @Transactional
     public EmpEmployee update(Long id, EmployeeUpdateCommand command) {
         EmpEmployee existing = getById(id);
-        if (repository.existsByEmail(command.email(), id)) {
+        if (existsByEmail(command.email(), id)) {
             throw new BizException(SystemErrorCode.EMPLOYEE_EMAIL_DUPLICATE);
         }
         existing.setLastName(command.lastName())
@@ -78,7 +114,8 @@ public class EmpEmployeeServiceImpl extends ServiceImpl<EmpEmployeeMapper, EmpEm
                 .setPhone(command.phone())
                 .setGender(command.gender())
                 .setBirthDate(command.birthDate());
-        return repository.update(existing);
+        updateById(existing);
+        return existing;
     }
 
     @Override
@@ -86,7 +123,7 @@ public class EmpEmployeeServiceImpl extends ServiceImpl<EmpEmployeeMapper, EmpEm
     public void enable(Long id) {
         EmpEmployee employee = getById(id);
         employee.enable();
-        repository.update(employee);
+        updateById(employee);
     }
 
     @Override
@@ -94,14 +131,21 @@ public class EmpEmployeeServiceImpl extends ServiceImpl<EmpEmployeeMapper, EmpEm
     public void disable(Long id) {
         EmpEmployee employee = getById(id);
         employee.disable();
-        repository.update(employee);
+        updateById(employee);
     }
 
     @Override
     @Transactional
     public void remove(Long id) {
         getById(id);
-        repository.removeById(id);
+        removeById(id);
+    }
+
+    private boolean existsByEmail(String email, Long excludeId) {
+        return lambdaQuery()
+                .eq(EmpEmployee::getEmail, email)
+                .ne(excludeId != null, EmpEmployee::getId, excludeId)
+                .count() > 0;
     }
 
     enum SystemErrorCode implements BaseErrorCode {

@@ -6,7 +6,13 @@ import com.manpowergroup.kintai.system.application.command.emp.EmployeeCreateCom
 import com.manpowergroup.kintai.system.application.command.emp.EmployeeUpdateCommand;
 import com.manpowergroup.kintai.system.domain.entity.emp.EmpEmployee;
 
+import java.util.Optional;
+
 public interface EmpEmployeeService {
+
+    Optional<EmpEmployee> findById(Long id);
+
+    Optional<EmpEmployee> findByEmail(String email);
 
     EmpEmployee getById(Long id);
 

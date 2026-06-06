@@ -7,6 +7,7 @@ import com.manpowergroup.kintai.common.enums.Status;
 import com.manpowergroup.kintai.common.exception.BizException;
 import com.manpowergroup.kintai.common.exception.ErrorCode;
 import com.manpowergroup.kintai.system.application.service.auth.AccessContextService;
+import com.manpowergroup.kintai.system.application.service.emp.EmpEmployeeService;
 import com.manpowergroup.kintai.system.application.service.sys.SysMenuService;
 import com.manpowergroup.kintai.system.domain.entity.emp.EmpEmployee;
 import com.manpowergroup.kintai.system.domain.entity.sys.SysEmployeeRole;
@@ -14,7 +15,6 @@ import com.manpowergroup.kintai.system.domain.entity.sys.SysMenu;
 import com.manpowergroup.kintai.system.domain.entity.sys.SysPermission;
 import com.manpowergroup.kintai.system.domain.entity.sys.SysRole;
 import com.manpowergroup.kintai.system.domain.entity.sys.SysRolePermission;
-import com.manpowergroup.kintai.system.domain.repository.emp.EmpEmployeeRepository;
 import com.manpowergroup.kintai.system.infrastructure.mapper.sys.SysEmployeeRoleMapper;
 import com.manpowergroup.kintai.system.infrastructure.mapper.sys.SysPermissionMapper;
 import com.manpowergroup.kintai.system.infrastructure.mapper.sys.SysRoleMapper;
@@ -33,7 +33,7 @@ public class AccessContextServiceImpl implements AccessContextService {
 
     private static final String SUPER_ADMIN_ROLE = "SUPER_ADMIN";
 
-    private final EmpEmployeeRepository employeeRepository;
+    private final EmpEmployeeService employeeService;
     private final SysEmployeeRoleMapper employeeRoleMapper;
     private final SysRoleMapper roleMapper;
     private final SysRolePermissionMapper rolePermissionMapper;
@@ -42,7 +42,7 @@ public class AccessContextServiceImpl implements AccessContextService {
 
     @Override
     public AccessContext load(Long employeeId, Long accountId) {
-        EmpEmployee employee = employeeRepository.findById(employeeId)
+        EmpEmployee employee = employeeService.findById(employeeId)
                 .orElseThrow(() -> new BizException(ErrorCode.UNAUTHORIZED));
 
         List<Long> roleIds = loadActiveRoleIds(employeeId);

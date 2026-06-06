@@ -11,9 +11,9 @@ import com.manpowergroup.kintai.framework.security.jwt.JwtTokenProvider;
 import com.manpowergroup.kintai.system.application.service.auth.AccessContextService;
 import com.manpowergroup.kintai.system.application.service.auth.AuthService;
 import com.manpowergroup.kintai.system.application.service.emp.EmpAccountService;
+import com.manpowergroup.kintai.system.application.service.emp.EmpEmployeeService;
 import com.manpowergroup.kintai.system.domain.entity.emp.EmpAccount;
 import com.manpowergroup.kintai.system.domain.entity.emp.EmpEmployee;
-import com.manpowergroup.kintai.system.domain.repository.emp.EmpEmployeeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -25,7 +25,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
 
-    private final EmpEmployeeRepository employeeRepository;
+    private final EmpEmployeeService employeeService;
     private final EmpAccountService accountService;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
@@ -33,7 +33,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public LoginResponse login(LoginRequest request) {
-        EmpEmployee employee = employeeRepository.findByEmail(request.getEmail())
+        EmpEmployee employee = employeeService.findByEmail(request.getEmail())
                 .orElseThrow(() -> new BizException(AuthErrorCode.INVALID_CREDENTIALS));
 
         if (employee.getStatus() != Status.ENABLED) {
