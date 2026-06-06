@@ -2,8 +2,9 @@ package com.manpowergroup.kintai.employee.controller.emp;
 
 import com.manpowergroup.kintai.common.result.Result;
 import com.manpowergroup.kintai.framework.security.jwt.LoginPrincipal;
-import com.manpowergroup.kintai.system.domain.entity.emp.EmpAccount;
+import com.manpowergroup.kintai.system.application.dto.emp.AccountResponse;
 import com.manpowergroup.kintai.system.application.service.emp.EmpAccountService;
+import com.manpowergroup.kintai.system.domain.entity.emp.EmpAccount;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -19,8 +20,8 @@ public class EmpAccountController {
 
     // ログイン中の社員自身のアカウント情報を取得
     @GetMapping
-    public Result<EmpAccount> getMyAccount(@AuthenticationPrincipal LoginPrincipal principal) {
-        return Result.ok(service.getByEmployeeId(principal.employeeId()));
+    public Result<AccountResponse> getMyAccount(@AuthenticationPrincipal LoginPrincipal principal) {
+        return Result.ok(AccountResponse.from(service.getByEmployeeId(principal.employeeId())));
     }
 
     // パスワードを変更

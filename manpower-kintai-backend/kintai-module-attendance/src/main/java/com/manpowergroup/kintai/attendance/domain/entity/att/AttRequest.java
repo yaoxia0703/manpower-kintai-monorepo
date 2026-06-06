@@ -9,7 +9,9 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import com.manpowergroup.kintai.attendance.domain.enums.ApprovalStatus;
 import com.manpowergroup.kintai.common.exception.BizException;
 import com.manpowergroup.kintai.common.exception.ErrorCode;
-import lombok.Data;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.experimental.Accessors;
 
 import java.math.BigDecimal;
@@ -17,7 +19,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
-@Data
+@Getter
+@Setter(AccessLevel.PRIVATE)
 @Accessors(chain = true)
 @TableName("att_request")
 public class AttRequest {
@@ -59,6 +62,32 @@ public class AttRequest {
 
     @TableLogic
     private Integer isDeleted;
+
+    public static AttRequest create(
+            Long employeeId,
+            Long companyId,
+            String requestType,
+            LocalDate startDate,
+            LocalDate endDate,
+            LocalTime startTime,
+            LocalTime endTime,
+            BigDecimal days,
+            Integer minutes,
+            String reason
+    ) {
+        return new AttRequest()
+                .setEmployeeId(employeeId)
+                .setCompanyId(companyId)
+                .setRequestType(requestType)
+                .setStartDate(startDate)
+                .setEndDate(endDate)
+                .setStartTime(startTime)
+                .setEndTime(endTime)
+                .setDays(days)
+                .setMinutes(minutes)
+                .setReason(reason)
+                .setStatus(ApprovalStatus.PENDING);
+    }
 
     public static AttRequest pending() {
         return new AttRequest().setStatus(ApprovalStatus.PENDING);
