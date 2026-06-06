@@ -4,14 +4,17 @@ import com.baomidou.mybatisplus.annotation.*;
 import com.manpowergroup.kintai.common.enums.Status;
 import com.manpowergroup.kintai.common.exception.BizException;
 import com.manpowergroup.kintai.common.exception.ErrorCode;
-import lombok.Data;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDateTime;
 
 // 社員アカウント（ログイン用）
-@Data
+@Getter
+@Setter(AccessLevel.PRIVATE)
 @Accessors(chain = true)
 @TableName("emp_account")
 public class EmpAccount {
@@ -47,6 +50,14 @@ public class EmpAccount {
     @TableLogic
     private Integer isDeleted;
 
+    public static EmpAccount register(Long employeeId, String username, String rawPassword, PasswordEncoder passwordEncoder) {
+        return new EmpAccount()
+                .setEmployeeId(employeeId)
+                .setUsername(username)
+                .setPassword(passwordEncoder.encode(rawPassword))
+                .setStatus(Status.ENABLED);
+    }
+
     public void changeUsername(String username) {
         this.username = username;
     }
@@ -58,6 +69,13 @@ public class EmpAccount {
         if (!passwordEncoder.matches(rawPassword, this.password)) {
             throw BizException.withDetail(ErrorCode.UNAUTHORIZED, "Invalid credentials");
         }
+    }
+
+    public void changePassword(String oldRawPassword, String newRawPassword, PasswordEncoder passwordEncoder) {
+        if (!passwordEncoder.matches(oldRawPassword, this.password)) {
+            throw BizException.withDetail(ErrorCode.BAD_REQUEST, "Old password mismatch");
+        }
+        this.password = passwordEncoder.encode(newRawPassword);
     }
 
     public void recordLogin(LocalDateTime loggedInAt) {

@@ -1,7 +1,6 @@
 package com.manpowergroup.kintai.system.application.service.impl.emp;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.manpowergroup.kintai.common.enums.Status;
 import com.manpowergroup.kintai.common.exception.BaseErrorCode;
 import com.manpowergroup.kintai.common.exception.BizException;
 import com.manpowergroup.kintai.system.application.command.emp.AccountCreateCommand;
@@ -49,11 +48,12 @@ public class EmpAccountServiceImpl extends ServiceImpl<EmpAccountMapper, EmpAcco
     public EmpAccount create(AccountCreateCommand command) {
         boolean exists = lambdaQuery().eq(EmpAccount::getUsername, command.username()).count() > 0;
         if (exists) throw new BizException(SystemErrorCode.ACCOUNT_USERNAME_DUPLICATE);
-        EmpAccount account = new EmpAccount()
-                .setEmployeeId(command.employeeId())
-                .setUsername(command.username())
-                .setPassword(passwordEncoder.encode(command.password()))
-                .setStatus(Status.ENABLED);
+        EmpAccount account = EmpAccount.register(
+                command.employeeId(),
+                command.username(),
+                command.password(),
+                passwordEncoder
+        );
         save(account);
         return account;
     }
@@ -76,10 +76,7 @@ public class EmpAccountServiceImpl extends ServiceImpl<EmpAccountMapper, EmpAcco
     @Transactional
     public void changePassword(Long id, String oldPassword, String newPassword) {
         EmpAccount account = getById(id);
-        if (!passwordEncoder.matches(oldPassword, account.getPassword())) {
-            throw new BizException(SystemErrorCode.ACCOUNT_PASSWORD_MISMATCH);
-        }
-        account.setPassword(passwordEncoder.encode(newPassword));
+        account.changePassword(oldPassword, newPassword, passwordEncoder);
         updateById(account);
     }
 
@@ -108,8 +105,7 @@ public class EmpAccountServiceImpl extends ServiceImpl<EmpAccountMapper, EmpAcco
 
     enum SystemErrorCode implements BaseErrorCode {
         ACCOUNT_NOT_FOUND(404, "error.account.not_found"),
-        ACCOUNT_USERNAME_DUPLICATE(409, "error.account.username_duplicate"),
-        ACCOUNT_PASSWORD_MISMATCH(400, "error.account.password_mismatch");
+        ACCOUNT_USERNAME_DUPLICATE(409, "error.account.username_duplicate");
 
         private final int code;
         private final String messageKey;
