@@ -4,7 +4,7 @@ import com.manpowergroup.kintai.common.dto.PageRequest;
 import com.manpowergroup.kintai.common.dto.PageResult;
 import com.manpowergroup.kintai.common.result.Result;
 import com.manpowergroup.kintai.system.application.assembler.org.NodeAssembler;
-import com.manpowergroup.kintai.system.application.dto.org.NodeResponse;
+import com.manpowergroup.kintai.system.application.dto.org.response.NodeResponse;
 import com.manpowergroup.kintai.system.application.dto.org.request.NodeCreateRequest;
 import com.manpowergroup.kintai.system.application.dto.org.request.NodeUpdateRequest;
 import com.manpowergroup.kintai.system.application.service.org.OrgNodeService;

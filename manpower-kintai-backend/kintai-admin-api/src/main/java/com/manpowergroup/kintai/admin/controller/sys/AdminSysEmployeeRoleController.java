@@ -2,7 +2,7 @@ package com.manpowergroup.kintai.admin.controller.sys;
 
 import com.manpowergroup.kintai.common.result.Result;
 import com.manpowergroup.kintai.system.application.assembler.sys.EmployeeRoleAssembler;
-import com.manpowergroup.kintai.system.application.dto.sys.EmployeeRoleResponse;
+import com.manpowergroup.kintai.system.application.dto.sys.response.EmployeeRoleResponse;
 import com.manpowergroup.kintai.system.application.dto.sys.request.EmployeeRoleAssignRequest;
 import com.manpowergroup.kintai.system.application.dto.sys.request.EmployeeRoleUpdateRequest;
 import com.manpowergroup.kintai.system.application.service.sys.SysEmployeeRoleService;

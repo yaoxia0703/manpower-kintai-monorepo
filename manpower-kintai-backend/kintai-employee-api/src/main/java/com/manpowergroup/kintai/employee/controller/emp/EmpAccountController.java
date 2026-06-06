@@ -2,7 +2,7 @@ package com.manpowergroup.kintai.employee.controller.emp;
 
 import com.manpowergroup.kintai.common.result.Result;
 import com.manpowergroup.kintai.framework.security.jwt.LoginPrincipal;
-import com.manpowergroup.kintai.system.application.dto.emp.AccountResponse;
+import com.manpowergroup.kintai.system.application.dto.emp.response.AccountResponse;
 import com.manpowergroup.kintai.system.application.service.emp.EmpAccountService;
 import com.manpowergroup.kintai.system.domain.entity.emp.EmpAccount;
 import lombok.Data;

@@ -1,4 +1,4 @@
-package com.manpowergroup.kintai.system.application.dto.emp;
+package com.manpowergroup.kintai.system.application.dto.emp.response;
 
 import com.manpowergroup.kintai.common.enums.Status;
 import com.manpowergroup.kintai.system.domain.entity.emp.EmpAccount;

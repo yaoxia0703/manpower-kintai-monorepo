@@ -1,4 +1,4 @@
-package com.manpowergroup.kintai.system.application.dto.manager;
+package com.manpowergroup.kintai.system.application.dto.manager.response;
 
 import lombok.Builder;
 import lombok.Data;

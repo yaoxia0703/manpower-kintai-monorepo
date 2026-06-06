@@ -14,7 +14,6 @@ import com.manpowergroup.kintai.system.application.command.emp.EmployeeUpdateCom
 import com.manpowergroup.kintai.system.application.service.emp.EmpEmployeeService;
 import com.manpowergroup.kintai.system.domain.entity.emp.EmpEmployee;
 import com.manpowergroup.kintai.system.infrastructure.mapper.emp.EmpEmployeeMapper;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -23,7 +22,6 @@ import java.util.Optional;
 
 // 社員マスタサービス実装（アプリケーション層）
 @Service
-@RequiredArgsConstructor
 public class EmpEmployeeServiceImpl extends ServiceImpl<EmpEmployeeMapper, EmpEmployee>
         implements EmpEmployeeService {
 
@@ -164,4 +162,3 @@ public class EmpEmployeeServiceImpl extends ServiceImpl<EmpEmployeeMapper, EmpEm
         @Override public String messageKey() { return messageKey; }
     }
 }
-

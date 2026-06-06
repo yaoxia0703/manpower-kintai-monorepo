@@ -1,7 +1,7 @@
 package com.manpowergroup.kintai.system.application.assembler.sys;
 
 import com.manpowergroup.kintai.system.application.command.sys.I18nUpsertCommand;
-import com.manpowergroup.kintai.system.application.dto.sys.I18nResponse;
+import com.manpowergroup.kintai.system.application.dto.sys.response.I18nResponse;
 import com.manpowergroup.kintai.system.application.dto.sys.request.I18nUpsertRequest;
 import com.manpowergroup.kintai.system.domain.entity.sys.SysI18n;
 

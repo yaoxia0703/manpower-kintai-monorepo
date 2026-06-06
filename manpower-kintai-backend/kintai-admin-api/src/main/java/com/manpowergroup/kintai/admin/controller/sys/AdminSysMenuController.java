@@ -3,7 +3,7 @@ package com.manpowergroup.kintai.admin.controller.sys;
 import com.manpowergroup.kintai.common.result.Result;
 import com.manpowergroup.kintai.common.security.SecurityPermissions;
 import com.manpowergroup.kintai.system.application.assembler.sys.MenuAssembler;
-import com.manpowergroup.kintai.system.application.dto.sys.MenuResponse;
+import com.manpowergroup.kintai.system.application.dto.sys.response.MenuResponse;
 import com.manpowergroup.kintai.system.application.dto.sys.request.MenuCreateRequest;
 import com.manpowergroup.kintai.system.application.dto.sys.request.MenuUpdateRequest;
 import com.manpowergroup.kintai.system.application.service.sys.SysMenuService;

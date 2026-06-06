@@ -2,7 +2,7 @@ package com.manpowergroup.kintai.system.application.assembler.org;
 
 import com.manpowergroup.kintai.system.application.command.org.GradeCreateCommand;
 import com.manpowergroup.kintai.system.application.command.org.GradeUpdateCommand;
-import com.manpowergroup.kintai.system.application.dto.org.GradeResponse;
+import com.manpowergroup.kintai.system.application.dto.org.response.GradeResponse;
 import com.manpowergroup.kintai.system.application.dto.org.request.GradeCreateRequest;
 import com.manpowergroup.kintai.system.application.dto.org.request.GradeUpdateRequest;
 import com.manpowergroup.kintai.system.domain.entity.org.OrgGrade;

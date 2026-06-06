@@ -2,7 +2,7 @@ package com.manpowergroup.kintai.system.application.assembler.org;
 
 import com.manpowergroup.kintai.system.application.command.org.CompanyCreateCommand;
 import com.manpowergroup.kintai.system.application.command.org.CompanyUpdateCommand;
-import com.manpowergroup.kintai.system.application.dto.org.CompanyResponse;
+import com.manpowergroup.kintai.system.application.dto.org.response.CompanyResponse;
 import com.manpowergroup.kintai.system.application.dto.org.request.CompanyCreateRequest;
 import com.manpowergroup.kintai.system.application.dto.org.request.CompanyUpdateRequest;
 import com.manpowergroup.kintai.system.domain.entity.org.OrgCompany;

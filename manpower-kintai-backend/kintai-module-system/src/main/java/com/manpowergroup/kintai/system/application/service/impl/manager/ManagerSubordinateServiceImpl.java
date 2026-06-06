@@ -2,7 +2,7 @@ package com.manpowergroup.kintai.system.application.service.impl.manager;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.manpowergroup.kintai.common.enums.Status;
-import com.manpowergroup.kintai.system.application.dto.manager.SubordinateEmployeeResponse;
+import com.manpowergroup.kintai.system.application.dto.manager.response.SubordinateEmployeeResponse;
 import com.manpowergroup.kintai.system.application.service.manager.ManagerSubordinateService;
 import com.manpowergroup.kintai.system.domain.entity.emp.EmpEmployee;
 import com.manpowergroup.kintai.system.domain.entity.emp.EmpEmployeePosition;

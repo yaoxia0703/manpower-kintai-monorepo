@@ -2,7 +2,7 @@ package com.manpowergroup.kintai.admin.controller.sys;
 
 import com.manpowergroup.kintai.common.result.Result;
 import com.manpowergroup.kintai.system.application.assembler.sys.I18nAssembler;
-import com.manpowergroup.kintai.system.application.dto.sys.I18nResponse;
+import com.manpowergroup.kintai.system.application.dto.sys.response.I18nResponse;
 import com.manpowergroup.kintai.system.application.dto.sys.request.I18nUpsertRequest;
 import com.manpowergroup.kintai.system.application.service.sys.SysI18nService;
 import jakarta.validation.Valid;

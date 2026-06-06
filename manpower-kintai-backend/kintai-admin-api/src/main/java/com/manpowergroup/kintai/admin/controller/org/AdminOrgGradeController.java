@@ -4,7 +4,7 @@ import com.manpowergroup.kintai.common.dto.PageRequest;
 import com.manpowergroup.kintai.common.dto.PageResult;
 import com.manpowergroup.kintai.common.result.Result;
 import com.manpowergroup.kintai.system.application.assembler.org.GradeAssembler;
-import com.manpowergroup.kintai.system.application.dto.org.GradeResponse;
+import com.manpowergroup.kintai.system.application.dto.org.response.GradeResponse;
 import com.manpowergroup.kintai.system.application.dto.org.request.GradeCreateRequest;
 import com.manpowergroup.kintai.system.application.dto.org.request.GradeUpdateRequest;
 import com.manpowergroup.kintai.system.application.service.org.OrgGradeService;

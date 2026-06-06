@@ -2,7 +2,7 @@ package com.manpowergroup.kintai.system.application.assembler.org;
 
 import com.manpowergroup.kintai.system.application.command.org.NodeCreateCommand;
 import com.manpowergroup.kintai.system.application.command.org.NodeUpdateCommand;
-import com.manpowergroup.kintai.system.application.dto.org.NodeResponse;
+import com.manpowergroup.kintai.system.application.dto.org.response.NodeResponse;
 import com.manpowergroup.kintai.system.application.dto.org.request.NodeCreateRequest;
 import com.manpowergroup.kintai.system.application.dto.org.request.NodeUpdateRequest;
 import com.manpowergroup.kintai.system.domain.entity.org.OrgNode;

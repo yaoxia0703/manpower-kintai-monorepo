@@ -5,7 +5,7 @@ import com.manpowergroup.kintai.common.dto.PageRequest;
 import com.manpowergroup.kintai.common.dto.PageResult;
 import com.manpowergroup.kintai.system.application.command.sys.RoleCreateCommand;
 import com.manpowergroup.kintai.system.application.command.sys.RoleUpdateCommand;
-import com.manpowergroup.kintai.system.application.dto.sys.RoleAuthorizationResponse;
+import com.manpowergroup.kintai.system.application.dto.sys.response.RoleAuthorizationResponse;
 import com.manpowergroup.kintai.system.application.dto.sys.request.RoleAuthorizationSaveRequest;
 import com.manpowergroup.kintai.system.domain.entity.sys.SysRole;
 

@@ -1,7 +1,5 @@
 package com.manpowergroup.kintai.system.application.service.impl.org;
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.manpowergroup.kintai.common.dto.PageRequest;
 import com.manpowergroup.kintai.common.dto.PageResult;
 import com.manpowergroup.kintai.common.enums.Status;
@@ -13,7 +11,7 @@ import com.manpowergroup.kintai.system.application.service.org.OrgNodeService;
 import com.manpowergroup.kintai.system.domain.entity.org.OrgNode;
 import com.manpowergroup.kintai.system.domain.entity.org.OrgNodeClosure;
 import com.manpowergroup.kintai.system.domain.repository.org.OrgNodeClosureRepository;
-import com.manpowergroup.kintai.system.infrastructure.mapper.org.OrgNodeMapper;
+import com.manpowergroup.kintai.system.domain.repository.org.OrgNodeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,45 +22,33 @@ import java.util.List;
 // 組織ノードサービス実装（アプリケーション層）
 @Service
 @RequiredArgsConstructor
-public class OrgNodeServiceImpl extends ServiceImpl<OrgNodeMapper, OrgNode>
-        implements OrgNodeService {
+public class OrgNodeServiceImpl implements OrgNodeService {
 
+    private final OrgNodeRepository nodeRepository;
     private final OrgNodeClosureRepository closureRepository;
 
     @Override
     public OrgNode getById(Long id) {
-        OrgNode node = super.getById(id);
-        if (node == null) throw new BizException(SystemErrorCode.NODE_NOT_FOUND);
-        return node;
+        return nodeRepository.findById(id)
+                .orElseThrow(() -> new BizException(SystemErrorCode.NODE_NOT_FOUND));
     }
 
     @Override
     public PageResult<OrgNode> pageByCompany(Long companyId, PageRequest request) {
-        Page<OrgNode> p = new Page<>(request.page(), request.size());
-        page(p, lambdaQuery()
-                .eq(OrgNode::getCompanyId, companyId)
-                .orderByAsc(OrgNode::getSort)
-                .getWrapper());
-        return PageResult.of(p);
+        return nodeRepository.findPageByCompany(companyId, request.page(), request.size());
     }
 
     @Override
     public List<OrgNode> listEnabledByCompany(Long companyId) {
-        return lambdaQuery()
-                .eq(OrgNode::getCompanyId, companyId)
-                .eq(OrgNode::getStatus, Status.ENABLED)
-                .orderByAsc(OrgNode::getSort)
-                .list();
+        return nodeRepository.listEnabledByCompany(companyId);
     }
 
     @Override
     @Transactional
     public OrgNode create(NodeCreateCommand command) {
-        boolean exists = lambdaQuery()
-                .eq(OrgNode::getCompanyId, command.companyId())
-                .eq(OrgNode::getCode, command.code())
-                .count() > 0;
-        if (exists) throw new BizException(SystemErrorCode.NODE_CODE_DUPLICATE);
+        if (nodeRepository.existsByCompanyAndCode(command.companyId(), command.code())) {
+            throw new BizException(SystemErrorCode.NODE_CODE_DUPLICATE);
+        }
         OrgNode node = new OrgNode()
                 .setCompanyId(command.companyId())
                 .setParentId(command.parentId())
@@ -74,13 +60,11 @@ public class OrgNodeServiceImpl extends ServiceImpl<OrgNodeMapper, OrgNode>
                 .setLevel(command.level())
                 .setSort(command.sort())
                 .setStatus(command.status() == null ? Status.ENABLED : command.status());
-        save(node);
+        nodeRepository.save(node);
 
-        // Closure Table更新：自分自身のレコード（depth=0）を追加
         List<OrgNodeClosure> closures = new ArrayList<>();
         closures.add(new OrgNodeClosure(node.getId(), node.getId(), 0));
 
-        // 親ノードが存在する場合、祖先レコードを継承
         if (node.getParentId() != null) {
             List<OrgNodeClosure> parentAncestors = closureRepository.findAncestors(node.getParentId());
             for (OrgNodeClosure ancestor : parentAncestors) {
@@ -95,20 +79,16 @@ public class OrgNodeServiceImpl extends ServiceImpl<OrgNodeMapper, OrgNode>
     @Transactional
     public OrgNode update(Long id, NodeUpdateCommand command) {
         OrgNode existing = getById(id);
-        boolean exists = lambdaQuery()
-                .eq(OrgNode::getCompanyId, command.companyId())
-                .eq(OrgNode::getCode, command.code())
-                .ne(OrgNode::getId, id)
-                .count() > 0;
-        if (exists) throw new BizException(SystemErrorCode.NODE_CODE_DUPLICATE);
+        if (nodeRepository.existsByCompanyAndCodeExcludingId(command.companyId(), command.code(), id)) {
+            throw new BizException(SystemErrorCode.NODE_CODE_DUPLICATE);
+        }
         existing.setName(command.name())
                 .setTypeCode(command.typeCode())
                 .setDeptFunction(command.deptFunction())
                 .setCode(command.code())
                 .setManagerId(command.managerId())
                 .setSort(command.sort());
-        updateById(existing);
-        return existing;
+        return nodeRepository.update(existing);
     }
 
     @Override
@@ -116,7 +96,7 @@ public class OrgNodeServiceImpl extends ServiceImpl<OrgNodeMapper, OrgNode>
     public void enable(Long id) {
         OrgNode node = getById(id);
         node.enable();
-        updateById(node);
+        nodeRepository.update(node);
     }
 
     @Override
@@ -124,16 +104,15 @@ public class OrgNodeServiceImpl extends ServiceImpl<OrgNodeMapper, OrgNode>
     public void disable(Long id) {
         OrgNode node = getById(id);
         node.disable();
-        updateById(node);
+        nodeRepository.update(node);
     }
 
     @Override
     @Transactional
     public void remove(Long id) {
         getById(id);
-        // Closure Tableから削除してからノードを論理削除
         closureRepository.deleteByDescendantId(id);
-        removeById(id);
+        nodeRepository.deleteById(id);
     }
 
     enum SystemErrorCode implements BaseErrorCode {
@@ -152,4 +131,3 @@ public class OrgNodeServiceImpl extends ServiceImpl<OrgNodeMapper, OrgNode>
         @Override public String messageKey() { return messageKey; }
     }
 }
-

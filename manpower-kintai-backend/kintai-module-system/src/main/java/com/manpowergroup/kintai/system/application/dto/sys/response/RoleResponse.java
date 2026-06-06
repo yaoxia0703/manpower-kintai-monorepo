@@ -1,4 +1,4 @@
-package com.manpowergroup.kintai.system.application.dto.sys;
+package com.manpowergroup.kintai.system.application.dto.sys.response;
 
 import com.manpowergroup.kintai.common.enums.Status;
 import com.manpowergroup.kintai.system.domain.entity.sys.SysRole;

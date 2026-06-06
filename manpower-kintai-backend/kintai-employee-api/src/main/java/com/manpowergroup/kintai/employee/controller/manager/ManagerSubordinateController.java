@@ -3,7 +3,7 @@ package com.manpowergroup.kintai.employee.controller.manager;
 import com.manpowergroup.kintai.common.result.Result;
 import com.manpowergroup.kintai.common.security.SecurityPermissions;
 import com.manpowergroup.kintai.framework.security.jwt.LoginPrincipal;
-import com.manpowergroup.kintai.system.application.dto.manager.SubordinateEmployeeResponse;
+import com.manpowergroup.kintai.system.application.dto.manager.response.SubordinateEmployeeResponse;
 import com.manpowergroup.kintai.system.application.service.manager.ManagerSubordinateService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;

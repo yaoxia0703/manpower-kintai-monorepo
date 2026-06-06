@@ -2,7 +2,7 @@ package com.manpowergroup.kintai.system.application.assembler.sys;
 
 import com.manpowergroup.kintai.system.application.command.sys.MenuCreateCommand;
 import com.manpowergroup.kintai.system.application.command.sys.MenuUpdateCommand;
-import com.manpowergroup.kintai.system.application.dto.sys.MenuResponse;
+import com.manpowergroup.kintai.system.application.dto.sys.response.MenuResponse;
 import com.manpowergroup.kintai.system.application.dto.sys.request.MenuCreateRequest;
 import com.manpowergroup.kintai.system.application.dto.sys.request.MenuUpdateRequest;
 import com.manpowergroup.kintai.system.domain.entity.sys.SysMenu;

@@ -2,7 +2,7 @@ package com.manpowergroup.kintai.admin.controller.emp;
 
 import com.manpowergroup.kintai.common.result.Result;
 import com.manpowergroup.kintai.system.application.assembler.emp.AccountAssembler;
-import com.manpowergroup.kintai.system.application.dto.emp.AccountResponse;
+import com.manpowergroup.kintai.system.application.dto.emp.response.AccountResponse;
 import com.manpowergroup.kintai.system.application.dto.emp.request.AccountCreateRequest;
 import com.manpowergroup.kintai.system.application.dto.emp.request.AccountUpdateRequest;
 import com.manpowergroup.kintai.system.application.service.emp.EmpAccountService;

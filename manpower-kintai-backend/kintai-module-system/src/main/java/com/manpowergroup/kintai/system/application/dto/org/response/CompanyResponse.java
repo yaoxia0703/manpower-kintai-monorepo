@@ -1,4 +1,4 @@
-package com.manpowergroup.kintai.system.application.dto.org;
+package com.manpowergroup.kintai.system.application.dto.org.response;
 
 import com.manpowergroup.kintai.common.enums.Status;
 import com.manpowergroup.kintai.system.domain.entity.org.OrgCompany;

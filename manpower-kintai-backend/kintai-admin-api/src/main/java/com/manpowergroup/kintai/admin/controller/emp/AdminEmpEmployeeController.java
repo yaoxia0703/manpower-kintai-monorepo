@@ -5,7 +5,7 @@ import com.manpowergroup.kintai.common.dto.PageResult;
 import com.manpowergroup.kintai.common.result.Result;
 import com.manpowergroup.kintai.common.security.SecurityPermissions;
 import com.manpowergroup.kintai.system.application.assembler.emp.EmployeeAssembler;
-import com.manpowergroup.kintai.system.application.dto.emp.EmployeeResponse;
+import com.manpowergroup.kintai.system.application.dto.emp.response.EmployeeResponse;
 import com.manpowergroup.kintai.system.application.dto.emp.request.EmployeeCreateRequest;
 import com.manpowergroup.kintai.system.application.dto.emp.request.EmployeeUpdateRequest;
 import com.manpowergroup.kintai.system.application.service.emp.EmpEmployeeService;

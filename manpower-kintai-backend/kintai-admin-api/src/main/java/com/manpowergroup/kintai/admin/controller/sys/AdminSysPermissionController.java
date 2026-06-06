@@ -5,7 +5,7 @@ import com.manpowergroup.kintai.common.dto.PageResult;
 import com.manpowergroup.kintai.common.result.Result;
 import com.manpowergroup.kintai.common.security.SecurityPermissions;
 import com.manpowergroup.kintai.system.application.assembler.sys.PermissionAssembler;
-import com.manpowergroup.kintai.system.application.dto.sys.PermissionResponse;
+import com.manpowergroup.kintai.system.application.dto.sys.response.PermissionResponse;
 import com.manpowergroup.kintai.system.application.dto.sys.request.PermissionCreateRequest;
 import com.manpowergroup.kintai.system.application.dto.sys.request.PermissionUpdateRequest;
 import com.manpowergroup.kintai.system.application.service.sys.SysPermissionService;

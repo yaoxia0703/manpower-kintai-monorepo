@@ -1,4 +1,4 @@
-package com.manpowergroup.kintai.system.application.dto.hr;
+package com.manpowergroup.kintai.system.application.dto.hr.response;
 
 import com.manpowergroup.kintai.system.domain.entity.org.OrgCompany;
 import com.manpowergroup.kintai.system.domain.entity.org.OrgGrade;

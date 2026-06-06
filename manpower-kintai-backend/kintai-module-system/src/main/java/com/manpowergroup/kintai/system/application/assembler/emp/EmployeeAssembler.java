@@ -2,7 +2,7 @@ package com.manpowergroup.kintai.system.application.assembler.emp;
 
 import com.manpowergroup.kintai.system.application.command.emp.EmployeeCreateCommand;
 import com.manpowergroup.kintai.system.application.command.emp.EmployeeUpdateCommand;
-import com.manpowergroup.kintai.system.application.dto.emp.EmployeeResponse;
+import com.manpowergroup.kintai.system.application.dto.emp.response.EmployeeResponse;
 import com.manpowergroup.kintai.system.application.dto.emp.request.EmployeeCreateRequest;
 import com.manpowergroup.kintai.system.application.dto.emp.request.EmployeeUpdateRequest;
 import com.manpowergroup.kintai.system.domain.entity.emp.EmpEmployee;
