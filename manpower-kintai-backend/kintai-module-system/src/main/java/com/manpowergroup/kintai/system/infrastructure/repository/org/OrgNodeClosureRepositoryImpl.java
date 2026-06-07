@@ -18,12 +18,16 @@ public class OrgNodeClosureRepositoryImpl implements OrgNodeClosureRepository {
 
     @Override
     public List<OrgNodeClosure> findDescendants(Long ancestorId) {
-        return mapper.selectDescendants(ancestorId);
+        return mapper.selectList(Wrappers.<OrgNodeClosure>lambdaQuery()
+                .eq(OrgNodeClosure::getAncestorId, ancestorId)
+                .orderByAsc(OrgNodeClosure::getDepth));
     }
 
     @Override
     public List<OrgNodeClosure> findAncestors(Long descendantId) {
-        return mapper.selectAncestors(descendantId);
+        return mapper.selectList(Wrappers.<OrgNodeClosure>lambdaQuery()
+                .eq(OrgNodeClosure::getDescendantId, descendantId)
+                .orderByAsc(OrgNodeClosure::getDepth));
     }
 
     @Override
@@ -33,7 +37,8 @@ public class OrgNodeClosureRepositoryImpl implements OrgNodeClosureRepository {
 
     @Override
     public void deleteByDescendantId(Long descendantId) {
-        mapper.deleteByDescendantId(descendantId);
+        mapper.delete(Wrappers.<OrgNodeClosure>lambdaQuery()
+                .eq(OrgNodeClosure::getDescendantId, descendantId));
     }
 }
 

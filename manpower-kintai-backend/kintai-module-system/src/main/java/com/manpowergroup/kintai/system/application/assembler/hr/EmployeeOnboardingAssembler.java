@@ -5,7 +5,7 @@ import com.manpowergroup.kintai.system.application.command.emp.AccountCreateComm
 import com.manpowergroup.kintai.system.application.command.emp.EmployeeCreateCommand;
 import com.manpowergroup.kintai.system.application.command.emp.EmployeePositionCreateCommand;
 import com.manpowergroup.kintai.system.application.command.sys.EmployeeRoleAssignCommand;
-import com.manpowergroup.kintai.system.application.dto.hr.EmployeeOnboardingRequest;
+import com.manpowergroup.kintai.system.application.dto.hr.request.EmployeeOnboardingRequest;
 
 import java.util.List;
 

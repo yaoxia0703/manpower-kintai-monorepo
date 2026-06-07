@@ -1,6 +1,7 @@
 package com.manpowergroup.kintai.system.application.service.impl.org;
 
 import com.manpowergroup.kintai.common.enums.Status;
+import com.manpowergroup.kintai.common.exception.BizException;
 import com.manpowergroup.kintai.system.application.command.org.NodeCreateCommand;
 import com.manpowergroup.kintai.system.domain.entity.org.OrgNode;
 import com.manpowergroup.kintai.system.domain.entity.org.OrgNodeClosure;
@@ -10,9 +11,12 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -74,5 +78,22 @@ class OrgNodeServiceImplTest {
         assertEquals(1L, closures.get(2).getAncestorId());
         assertEquals(200L, closures.get(2).getDescendantId());
         assertEquals(2, closures.get(2).getDepth());
+    }
+
+    @Test
+    void removeRejectsNodeWithDescendants() {
+        OrgNodeRepository nodeRepository = mock(OrgNodeRepository.class);
+        OrgNodeClosureRepository closureRepository = mock(OrgNodeClosureRepository.class);
+        OrgNodeServiceImpl service = new OrgNodeServiceImpl(nodeRepository, closureRepository);
+        when(nodeRepository.findById(10L)).thenReturn(Optional.of(new OrgNode().setId(10L)));
+        when(closureRepository.findDescendants(10L)).thenReturn(List.of(
+                new OrgNodeClosure(10L, 10L, 0),
+                new OrgNodeClosure(10L, 20L, 1)
+        ));
+
+        assertThrows(BizException.class, () -> service.remove(10L));
+
+        verify(closureRepository, never()).deleteByDescendantId(10L);
+        verify(nodeRepository, never()).deleteById(10L);
     }
 }

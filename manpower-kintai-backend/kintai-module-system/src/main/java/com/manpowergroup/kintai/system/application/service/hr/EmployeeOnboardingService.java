@@ -1,6 +1,6 @@
 package com.manpowergroup.kintai.system.application.service.hr;
 
-import com.manpowergroup.kintai.system.application.dto.hr.EmployeeOnboardingRequest;
+import com.manpowergroup.kintai.system.application.dto.hr.request.EmployeeOnboardingRequest;
 import com.manpowergroup.kintai.system.application.dto.hr.response.EmployeeOnboardingOptionsResponse;
 import com.manpowergroup.kintai.system.application.dto.hr.response.EmployeeOnboardingResponse;
 

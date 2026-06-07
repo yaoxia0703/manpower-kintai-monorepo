@@ -6,7 +6,7 @@ import com.manpowergroup.kintai.common.exception.BizException;
 import com.manpowergroup.kintai.common.exception.ErrorCode;
 import com.manpowergroup.kintai.system.application.assembler.hr.EmployeeOnboardingAssembler;
 import com.manpowergroup.kintai.system.application.dto.hr.response.EmployeeOnboardingOptionsResponse;
-import com.manpowergroup.kintai.system.application.dto.hr.EmployeeOnboardingRequest;
+import com.manpowergroup.kintai.system.application.dto.hr.request.EmployeeOnboardingRequest;
 import com.manpowergroup.kintai.system.application.dto.hr.response.EmployeeOnboardingResponse;
 import com.manpowergroup.kintai.system.application.service.emp.EmpAccountService;
 import com.manpowergroup.kintai.system.application.service.emp.EmpEmployeePositionService;

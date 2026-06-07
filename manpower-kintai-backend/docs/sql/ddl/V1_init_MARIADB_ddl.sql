@@ -1,7 +1,6 @@
-﻿/*
-SQLyog Community v13.3.1 (64 bit)
-MariaDB - 11.4 : Database - manpower_kintai
-*********************************************************************
+/*
+MariaDB 11.4 compatible schema generated from MySQL schema.
+Database - manpower_kintai
 */
 
 /*!40101 SET NAMES utf8mb4 */;
@@ -16,9 +15,32 @@ CREATE DATABASE IF NOT EXISTS `manpower_kintai` DEFAULT CHARACTER SET utf8mb4 CO
 
 USE `manpower_kintai`;
 
-/*Table structure for table `att_monthly_summary` */
-
+DROP TABLE IF EXISTS `wf_approval_step`;
+DROP TABLE IF EXISTS `wf_approval_rule`;
+DROP TABLE IF EXISTS `wf_approval`;
+DROP TABLE IF EXISTS `sys_role_permission`;
+DROP TABLE IF EXISTS `sys_role_menu`;
+DROP TABLE IF EXISTS `sys_role`;
+DROP TABLE IF EXISTS `sys_permission`;
+DROP TABLE IF EXISTS `sys_menu`;
+DROP TABLE IF EXISTS `sys_i18n`;
+DROP TABLE IF EXISTS `sys_grade_role`;
+DROP TABLE IF EXISTS `sys_enum_value`;
+DROP TABLE IF EXISTS `sys_enum_type`;
+DROP TABLE IF EXISTS `sys_employee_role`;
+DROP TABLE IF EXISTS `org_node_closure`;
+DROP TABLE IF EXISTS `org_node`;
+DROP TABLE IF EXISTS `org_grade`;
+DROP TABLE IF EXISTS `org_company`;
+DROP TABLE IF EXISTS `emp_employee_position`;
+DROP TABLE IF EXISTS `emp_employee`;
+DROP TABLE IF EXISTS `emp_account`;
+DROP TABLE IF EXISTS `att_request`;
+DROP TABLE IF EXISTS `att_record`;
+DROP TABLE IF EXISTS `att_paid_leave_balance`;
 DROP TABLE IF EXISTS `att_monthly_summary`;
+
+/*Table structure for table `att_monthly_summary` */
 
 CREATE TABLE `att_monthly_summary` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '月次集計ID',
@@ -40,9 +62,9 @@ CREATE TABLE `att_monthly_summary` (
   `updated_by` bigint DEFAULT NULL COMMENT '更新者ID',
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新日時',
   `is_deleted` tinyint NOT NULL DEFAULT '0' COMMENT '論理削除（0=有効 1=削除）',
-  `active_flag` tinyint(1) AS (CASE WHEN `is_deleted` = 0 THEN 0 ELSE NULL END) VIRTUAL COMMENT '論理削除対応ユニークキー用',
+  `active_deleted` tinyint GENERATED ALWAYS AS (case when `is_deleted` = 0 then `is_deleted` else NULL end) VIRTUAL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uk_employee_summary_month` (`employee_id`,`summary_month`,`active_flag`),
+  UNIQUE KEY `uk_employee_summary_month` (`employee_id`,`summary_month`,`active_deleted`),
   KEY `idx_company_id` (`company_id`),
   KEY `idx_employee_id` (`employee_id`),
   KEY `idx_summary_month` (`summary_month`),
@@ -50,8 +72,6 @@ CREATE TABLE `att_monthly_summary` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='月次勤怠集計';
 
 /*Table structure for table `att_paid_leave_balance` */
-
-DROP TABLE IF EXISTS `att_paid_leave_balance`;
 
 CREATE TABLE `att_paid_leave_balance` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '有給残数ID',
@@ -68,17 +88,15 @@ CREATE TABLE `att_paid_leave_balance` (
   `updated_by` bigint DEFAULT NULL COMMENT '更新者ID',
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新日時',
   `is_deleted` tinyint NOT NULL DEFAULT '0' COMMENT '論理削除（0=有効 1=削除）',
-  `active_flag` tinyint(1) AS (CASE WHEN `is_deleted` = 0 THEN 0 ELSE NULL END) VIRTUAL COMMENT '論理削除対応ユニークキー用',
+  `active_deleted` tinyint GENERATED ALWAYS AS (case when `is_deleted` = 0 then `is_deleted` else NULL end) VIRTUAL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uk_employee_fiscal_year` (`employee_id`,`fiscal_year`,`active_flag`),
+  UNIQUE KEY `uk_employee_fiscal_year` (`employee_id`,`fiscal_year`,`active_deleted`),
   KEY `idx_company_id` (`company_id`),
   KEY `idx_employee_id` (`employee_id`),
   KEY `idx_expire_date` (`expire_date`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='有給休暇残数管理';
 
 /*Table structure for table `att_record` */
-
-DROP TABLE IF EXISTS `att_record`;
 
 CREATE TABLE `att_record` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '打刻記録ID',
@@ -97,18 +115,16 @@ CREATE TABLE `att_record` (
   `updated_by` bigint DEFAULT NULL COMMENT '更新者ID',
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新日時',
   `is_deleted` tinyint NOT NULL DEFAULT '0' COMMENT '論理削除（0=有効 1=削除）',
-  `active_flag` tinyint(1) AS (CASE WHEN `is_deleted` = 0 THEN 0 ELSE NULL END) VIRTUAL COMMENT '論理削除対応ユニークキー用',
+  `active_deleted` tinyint GENERATED ALWAYS AS (case when `is_deleted` = 0 then `is_deleted` else NULL end) VIRTUAL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uk_employee_work_date` (`employee_id`,`work_date`,`active_flag`),
+  UNIQUE KEY `uk_employee_work_date` (`employee_id`,`work_date`,`active_deleted`),
   KEY `idx_company_id` (`company_id`),
   KEY `idx_employee_id` (`employee_id`),
   KEY `idx_work_date` (`work_date`),
   KEY `idx_status` (`status`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='打刻記録';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='打刻記録';
 
 /*Table structure for table `att_request` */
-
-DROP TABLE IF EXISTS `att_request`;
 
 CREATE TABLE `att_request` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '申請ID',
@@ -138,8 +154,6 @@ CREATE TABLE `att_request` (
 
 /*Table structure for table `emp_account` */
 
-DROP TABLE IF EXISTS `emp_account`;
-
 CREATE TABLE `emp_account` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT 'アカウントID',
   `employee_id` bigint NOT NULL COMMENT '社員ID',
@@ -152,16 +166,14 @@ CREATE TABLE `emp_account` (
   `updated_by` bigint DEFAULT NULL COMMENT '更新者ID',
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新日時',
   `is_deleted` tinyint NOT NULL DEFAULT '0' COMMENT '論理削除（0=有効 1=削除）',
-  `active_flag` tinyint(1) AS (CASE WHEN `is_deleted` = 0 THEN 0 ELSE NULL END) VIRTUAL COMMENT '論理削除対応ユニークキー用',
+  `active_deleted` tinyint GENERATED ALWAYS AS (case when `is_deleted` = 0 then `is_deleted` else NULL end) VIRTUAL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uk_username` (`username`,`active_flag`),
-  UNIQUE KEY `uk_employee_id` (`employee_id`,`active_flag`),
+  UNIQUE KEY `uk_username` (`username`,`active_deleted`),
+  UNIQUE KEY `uk_employee_id` (`employee_id`,`active_deleted`),
   KEY `idx_employee_id` (`employee_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='社員アカウント';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='社員アカウント';
 
 /*Table structure for table `emp_employee` */
-
-DROP TABLE IF EXISTS `emp_employee`;
 
 CREATE TABLE `emp_employee` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '社員ID',
@@ -183,17 +195,15 @@ CREATE TABLE `emp_employee` (
   `updated_by` bigint DEFAULT NULL COMMENT '更新者ID',
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新日時',
   `is_deleted` tinyint NOT NULL DEFAULT '0' COMMENT '論理削除（0=有効 1=削除）',
-  `active_flag` tinyint(1) AS (CASE WHEN `is_deleted` = 0 THEN 0 ELSE NULL END) VIRTUAL COMMENT '論理削除対応ユニークキー用',
+  `active_deleted` tinyint GENERATED ALWAYS AS (case when `is_deleted` = 0 then `is_deleted` else NULL end) VIRTUAL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uk_employee_code` (`company_id`,`employee_code`,`active_flag`),
-  UNIQUE KEY `uk_email` (`email`,`active_flag`),
+  UNIQUE KEY `uk_employee_code` (`company_id`,`employee_code`,`active_deleted`),
+  UNIQUE KEY `uk_email` (`email`,`active_deleted`),
   KEY `idx_company_id` (`company_id`),
   KEY `idx_status` (`status`)
-) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='社員マスタ';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='社員マスタ';
 
 /*Table structure for table `emp_employee_position` */
-
-DROP TABLE IF EXISTS `emp_employee_position`;
 
 CREATE TABLE `emp_employee_position` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '社員職位ID',
@@ -216,11 +226,9 @@ CREATE TABLE `emp_employee_position` (
   KEY `idx_node_id` (`node_id`),
   KEY `idx_grade_id` (`grade_id`),
   KEY `idx_is_primary` (`is_primary`)
-) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='社員職位関連（兼任対応）';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='社員職位関連（兼任対応）';
 
 /*Table structure for table `org_company` */
-
-DROP TABLE IF EXISTS `org_company`;
 
 CREATE TABLE `org_company` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '会社ID',
@@ -235,15 +243,13 @@ CREATE TABLE `org_company` (
   `updated_by` bigint DEFAULT NULL COMMENT '更新者ID',
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新日時',
   `is_deleted` tinyint NOT NULL DEFAULT '0' COMMENT '論理削除（0=有効 1=削除）',
-  `active_flag` tinyint(1) AS (CASE WHEN `is_deleted` = 0 THEN 0 ELSE NULL END) VIRTUAL COMMENT '論理削除対応ユニークキー用',
+  `active_deleted` tinyint GENERATED ALWAYS AS (case when `is_deleted` = 0 then `is_deleted` else NULL end) VIRTUAL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uk_company_code` (`company_code`,`active_flag`),
+  UNIQUE KEY `uk_company_code` (`company_code`,`active_deleted`),
   KEY `idx_parent_id` (`parent_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='会社マスタ';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='会社マスタ';
 
 /*Table structure for table `org_grade` */
-
-DROP TABLE IF EXISTS `org_grade`;
 
 CREATE TABLE `org_grade` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '職級ID',
@@ -258,16 +264,14 @@ CREATE TABLE `org_grade` (
   `updated_by` bigint DEFAULT NULL COMMENT '更新者ID',
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新日時',
   `is_deleted` tinyint NOT NULL DEFAULT '0' COMMENT '論理削除（0=有効 1=削除）',
-  `active_flag` tinyint(1) AS (CASE WHEN `is_deleted` = 0 THEN 0 ELSE NULL END) VIRTUAL COMMENT '論理削除対応ユニークキー用',
+  `active_deleted` tinyint GENERATED ALWAYS AS (case when `is_deleted` = 0 then `is_deleted` else NULL end) VIRTUAL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uk_grade_code` (`company_id`,`code`,`active_flag`),
+  UNIQUE KEY `uk_grade_code` (`company_id`,`code`,`active_deleted`),
   KEY `idx_company_id` (`company_id`),
   KEY `idx_grade_level` (`grade_level`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='職級マスタ';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='職級マスタ';
 
 /*Table structure for table `org_node` */
-
-DROP TABLE IF EXISTS `org_node`;
 
 CREATE TABLE `org_node` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '組織ノードID',
@@ -286,17 +290,15 @@ CREATE TABLE `org_node` (
   `updated_by` bigint DEFAULT NULL COMMENT '更新者ID',
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新日時',
   `is_deleted` tinyint NOT NULL DEFAULT '0' COMMENT '論理削除（0=有効 1=削除）',
-  `active_flag` tinyint(1) AS (CASE WHEN `is_deleted` = 0 THEN 0 ELSE NULL END) VIRTUAL COMMENT '論理削除対応ユニークキー用',
+  `active_deleted` tinyint GENERATED ALWAYS AS (case when `is_deleted` = 0 then `is_deleted` else NULL end) VIRTUAL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uk_node_code` (`company_id`,`code`,`active_flag`),
+  UNIQUE KEY `uk_node_code` (`company_id`,`code`,`active_deleted`),
   KEY `idx_company_id` (`company_id`),
   KEY `idx_parent_id` (`parent_id`),
   KEY `idx_manager_id` (`manager_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='組織ノード（無限階層）';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='組織ノード（無限階層）';
 
 /*Table structure for table `org_node_closure` */
-
-DROP TABLE IF EXISTS `org_node_closure`;
 
 CREATE TABLE `org_node_closure` (
   `ancestor_id` bigint NOT NULL COMMENT '祖先ノードID',
@@ -308,8 +310,6 @@ CREATE TABLE `org_node_closure` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='組織閉包テーブル';
 
 /*Table structure for table `sys_employee_role` */
-
-DROP TABLE IF EXISTS `sys_employee_role`;
 
 CREATE TABLE `sys_employee_role` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '社員ロールID',
@@ -323,16 +323,14 @@ CREATE TABLE `sys_employee_role` (
   `updated_by` bigint DEFAULT NULL COMMENT '更新者ID',
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新日時',
   `is_deleted` tinyint NOT NULL DEFAULT '0' COMMENT '論理削除（0=有効 1=削除）',
-  `active_flag` tinyint(1) AS (CASE WHEN `is_deleted` = 0 THEN 0 ELSE NULL END) VIRTUAL COMMENT '論理削除対応ユニークキー用',
+  `active_deleted` tinyint GENERATED ALWAYS AS (case when `is_deleted` = 0 then `is_deleted` else NULL end) VIRTUAL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uk_employee_role` (`employee_id`,`role_id`,`company_id`,`active_flag`),
+  UNIQUE KEY `uk_employee_role` (`employee_id`,`role_id`,`company_id`,`active_deleted`),
   KEY `idx_employee_id` (`employee_id`),
   KEY `idx_role_id` (`role_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='社員個人追加ロール関連';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='社員個人追加ロール関連';
 
 /*Table structure for table `sys_enum_type` */
-
-DROP TABLE IF EXISTS `sys_enum_type`;
 
 CREATE TABLE `sys_enum_type` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '列挙タイプID',
@@ -346,14 +344,12 @@ CREATE TABLE `sys_enum_type` (
   `updated_by` bigint DEFAULT NULL COMMENT '更新者ID',
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新日時',
   `is_deleted` tinyint NOT NULL DEFAULT '0' COMMENT '論理削除（0=有効 1=削除）',
-  `active_flag` tinyint(1) AS (CASE WHEN `is_deleted` = 0 THEN 0 ELSE NULL END) VIRTUAL COMMENT '論理削除対応ユニークキー用',
+  `active_deleted` tinyint GENERATED ALWAYS AS (case when `is_deleted` = 0 then `is_deleted` else NULL end) VIRTUAL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uk_enum_type_code` (`code`,`active_flag`)
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='列挙タイプ定義';
+  UNIQUE KEY `uk_enum_type_code` (`code`,`active_deleted`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='列挙タイプ定義';
 
 /*Table structure for table `sys_enum_value` */
-
-DROP TABLE IF EXISTS `sys_enum_value`;
 
 CREATE TABLE `sys_enum_value` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '列挙値ID',
@@ -366,15 +362,13 @@ CREATE TABLE `sys_enum_value` (
   `updated_by` bigint DEFAULT NULL COMMENT '更新者ID',
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新日時',
   `is_deleted` tinyint NOT NULL DEFAULT '0' COMMENT '論理削除（0=有効 1=削除）',
-  `active_flag` tinyint(1) AS (CASE WHEN `is_deleted` = 0 THEN 0 ELSE NULL END) VIRTUAL COMMENT '論理削除対応ユニークキー用',
+  `active_deleted` tinyint GENERATED ALWAYS AS (case when `is_deleted` = 0 then `is_deleted` else NULL end) VIRTUAL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uk_enum_value_code` (`enum_type_code`,`code`,`active_flag`),
+  UNIQUE KEY `uk_enum_value_code` (`enum_type_code`,`code`,`active_deleted`),
   KEY `idx_enum_type_code` (`enum_type_code`)
-) ENGINE=InnoDB AUTO_INCREMENT=30 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='列挙値定義';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='列挙値定義';
 
 /*Table structure for table `sys_grade_role` */
-
-DROP TABLE IF EXISTS `sys_grade_role`;
 
 CREATE TABLE `sys_grade_role` (
   `grade_id` bigint NOT NULL COMMENT '職級ID',
@@ -387,8 +381,6 @@ CREATE TABLE `sys_grade_role` (
 
 /*Table structure for table `sys_i18n` */
 
-DROP TABLE IF EXISTS `sys_i18n`;
-
 CREATE TABLE `sys_i18n` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '国際化ID',
   `ref_type` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '参照タイプ（ENUM/GRADE/NODE等）',
@@ -400,15 +392,13 @@ CREATE TABLE `sys_i18n` (
   `updated_by` bigint DEFAULT NULL COMMENT '更新者ID',
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新日時',
   `is_deleted` tinyint NOT NULL DEFAULT '0' COMMENT '論理削除（0=有効 1=削除）',
-  `active_flag` tinyint(1) AS (CASE WHEN `is_deleted` = 0 THEN 0 ELSE NULL END) VIRTUAL COMMENT '論理削除対応ユニークキー用',
+  `active_deleted` tinyint GENERATED ALWAYS AS (case when `is_deleted` = 0 then `is_deleted` else NULL end) VIRTUAL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uk_i18n` (`ref_type`,`ref_id`,`language`,`active_flag`),
+  UNIQUE KEY `uk_i18n` (`ref_type`,`ref_id`,`language`,`active_deleted`),
   KEY `idx_ref` (`ref_type`,`ref_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=49 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='国際化翻訳テーブル';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='国際化翻訳テーブル';
 
 /*Table structure for table `sys_menu` */
-
-DROP TABLE IF EXISTS `sys_menu`;
 
 CREATE TABLE `sys_menu` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT 'メニューID',
@@ -427,15 +417,13 @@ CREATE TABLE `sys_menu` (
   `updated_by` bigint DEFAULT NULL COMMENT '更新者ID',
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新日時',
   `is_deleted` tinyint NOT NULL DEFAULT '0' COMMENT '論理削除（0=有効 1=削除）',
-  `active_flag` tinyint(1) AS (CASE WHEN `is_deleted` = 0 THEN 0 ELSE NULL END) VIRTUAL COMMENT '論理削除対応ユニークキー用',
+  `active_deleted` tinyint GENERATED ALWAYS AS (case when `is_deleted` = 0 then `is_deleted` else NULL end) VIRTUAL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uk_menu_code` (`code`,`active_flag`),
+  UNIQUE KEY `uk_menu_code` (`code`,`active_deleted`),
   KEY `idx_parent_id` (`parent_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='メニューマスタ';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='メニューマスタ';
 
 /*Table structure for table `sys_permission` */
-
-DROP TABLE IF EXISTS `sys_permission`;
 
 CREATE TABLE `sys_permission` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '権限ID',
@@ -452,16 +440,14 @@ CREATE TABLE `sys_permission` (
   `updated_by` bigint DEFAULT NULL COMMENT '更新者ID',
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新日時',
   `is_deleted` tinyint NOT NULL DEFAULT '0' COMMENT '論理削除（0=有効 1=削除）',
-  `active_flag` tinyint(1) AS (CASE WHEN `is_deleted` = 0 THEN 0 ELSE NULL END) VIRTUAL COMMENT '論理削除対応ユニークキー用',
+  `active_deleted` tinyint GENERATED ALWAYS AS (case when `is_deleted` = 0 then `is_deleted` else NULL end) VIRTUAL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uk_permission_code` (`code`,`active_flag`),
-  UNIQUE KEY `uk_method_path` (`method`,`path`,`active_flag`),
+  UNIQUE KEY `uk_permission_code` (`code`,`active_deleted`),
+  UNIQUE KEY `uk_method_path` (`method`,`path`,`active_deleted`),
   KEY `idx_menu_id` (`menu_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=35 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='権限マスタ';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='権限マスタ';
 
 /*Table structure for table `sys_role` */
-
-DROP TABLE IF EXISTS `sys_role`;
 
 CREATE TABLE `sys_role` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT 'ロールID',
@@ -476,15 +462,13 @@ CREATE TABLE `sys_role` (
   `updated_by` bigint DEFAULT NULL COMMENT '更新者ID',
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新日時',
   `is_deleted` tinyint NOT NULL DEFAULT '0' COMMENT '論理削除（0=有効 1=削除）',
-  `active_flag` tinyint(1) AS (CASE WHEN `is_deleted` = 0 THEN 0 ELSE NULL END) VIRTUAL COMMENT '論理削除対応ユニークキー用',
+  `active_deleted` tinyint GENERATED ALWAYS AS (case when `is_deleted` = 0 then `is_deleted` else NULL end) VIRTUAL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uk_role_code` (`company_id`,`code`,`active_flag`),
+  UNIQUE KEY `uk_role_code` (`company_id`,`code`,`active_deleted`),
   KEY `idx_company_id` (`company_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='ロールマスタ';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='ロールマスタ';
 
 /*Table structure for table `sys_role_menu` */
-
-DROP TABLE IF EXISTS `sys_role_menu`;
 
 CREATE TABLE `sys_role_menu` (
   `role_id` bigint NOT NULL COMMENT 'ロールID',
@@ -497,8 +481,6 @@ CREATE TABLE `sys_role_menu` (
 
 /*Table structure for table `sys_role_permission` */
 
-DROP TABLE IF EXISTS `sys_role_permission`;
-
 CREATE TABLE `sys_role_permission` (
   `role_id` bigint NOT NULL COMMENT 'ロールID',
   `permission_id` bigint NOT NULL COMMENT '権限ID',
@@ -509,8 +491,6 @@ CREATE TABLE `sys_role_permission` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='ロール権限関連';
 
 /*Table structure for table `wf_approval` */
-
-DROP TABLE IF EXISTS `wf_approval`;
 
 CREATE TABLE `wf_approval` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '承認フローID',
@@ -530,9 +510,9 @@ CREATE TABLE `wf_approval` (
   `updated_by` bigint DEFAULT NULL COMMENT '更新者ID',
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新日時',
   `is_deleted` tinyint NOT NULL DEFAULT '0' COMMENT '論理削除（0=有効 1=削除）',
-  `active_flag` tinyint(1) AS (CASE WHEN `is_deleted` = 0 THEN 0 ELSE NULL END) VIRTUAL COMMENT '論理削除対応ユニークキー用',
+  `active_deleted` tinyint GENERATED ALWAYS AS (case when `is_deleted` = 0 then `is_deleted` else NULL end) VIRTUAL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uk_request_id` (`request_id`,`active_flag`),
+  UNIQUE KEY `uk_request_id` (`request_id`,`active_deleted`),
   KEY `idx_applicant_id` (`applicant_id`),
   KEY `idx_company_id` (`company_id`),
   KEY `idx_status` (`status`),
@@ -540,8 +520,6 @@ CREATE TABLE `wf_approval` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='承認フロー';
 
 /*Table structure for table `wf_approval_rule` */
-
-DROP TABLE IF EXISTS `wf_approval_rule`;
 
 CREATE TABLE `wf_approval_rule` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '承認ルールID',
@@ -558,16 +536,14 @@ CREATE TABLE `wf_approval_rule` (
   `updated_by` bigint DEFAULT NULL COMMENT '更新者ID',
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新日時',
   `is_deleted` tinyint NOT NULL DEFAULT '0' COMMENT '論理削除（0=有効 1=削除）',
-  `active_flag` tinyint(1) AS (CASE WHEN `is_deleted` = 0 THEN 0 ELSE NULL END) VIRTUAL COMMENT '論理削除対応ユニークキー用',
+  `active_deleted` tinyint GENERATED ALWAYS AS (case when `is_deleted` = 0 then `is_deleted` else NULL end) VIRTUAL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uk_rule` (`company_id`,`request_type`,`amount_threshold`,`active_flag`),
+  UNIQUE KEY `uk_rule` (`company_id`,`request_type`,`amount_threshold`,`active_deleted`),
   KEY `idx_company_id` (`company_id`),
   KEY `idx_request_type` (`request_type`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='承認ルール定義';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='承認ルール定義';
 
 /*Table structure for table `wf_approval_step` */
-
-DROP TABLE IF EXISTS `wf_approval_step`;
 
 CREATE TABLE `wf_approval_step` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '承認ステップID',
@@ -582,9 +558,9 @@ CREATE TABLE `wf_approval_step` (
   `updated_by` bigint DEFAULT NULL COMMENT '更新者ID',
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新日時',
   `is_deleted` tinyint NOT NULL DEFAULT '0' COMMENT '論理削除（0=有効 1=削除）',
-  `active_flag` tinyint(1) AS (CASE WHEN `is_deleted` = 0 THEN 0 ELSE NULL END) VIRTUAL COMMENT '論理削除対応ユニークキー用',
+  `active_deleted` tinyint GENERATED ALWAYS AS (case when `is_deleted` = 0 then `is_deleted` else NULL end) VIRTUAL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uk_approval_step` (`approval_id`,`step`,`active_flag`),
+  UNIQUE KEY `uk_approval_step` (`approval_id`,`step`,`active_deleted`),
   KEY `idx_approval_id` (`approval_id`),
   KEY `idx_approver_id` (`approver_id`),
   KEY `idx_status` (`status`)
@@ -594,5 +570,3 @@ CREATE TABLE `wf_approval_step` (
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
 /*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
-
-

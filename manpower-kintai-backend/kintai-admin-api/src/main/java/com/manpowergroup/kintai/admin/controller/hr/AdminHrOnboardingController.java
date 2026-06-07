@@ -4,7 +4,7 @@ import com.manpowergroup.kintai.common.result.Result;
 import com.manpowergroup.kintai.common.security.SecurityPermissions;
 import com.manpowergroup.kintai.framework.security.jwt.LoginPrincipal;
 import com.manpowergroup.kintai.system.application.dto.hr.response.EmployeeOnboardingOptionsResponse;
-import com.manpowergroup.kintai.system.application.dto.hr.EmployeeOnboardingRequest;
+import com.manpowergroup.kintai.system.application.dto.hr.request.EmployeeOnboardingRequest;
 import com.manpowergroup.kintai.system.application.dto.hr.response.EmployeeOnboardingResponse;
 import com.manpowergroup.kintai.system.application.service.hr.EmployeeOnboardingService;
 import jakarta.validation.Valid;

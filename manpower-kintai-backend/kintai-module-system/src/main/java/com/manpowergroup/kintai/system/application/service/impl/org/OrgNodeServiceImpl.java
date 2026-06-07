@@ -111,13 +111,20 @@ public class OrgNodeServiceImpl implements OrgNodeService {
     @Transactional
     public void remove(Long id) {
         getById(id);
+        boolean hasDescendants = closureRepository.findDescendants(id)
+                .stream()
+                .anyMatch(closure -> closure.getDepth() != null && closure.getDepth() > 0);
+        if (hasDescendants) {
+            throw new BizException(SystemErrorCode.NODE_HAS_CHILDREN);
+        }
         closureRepository.deleteByDescendantId(id);
         nodeRepository.deleteById(id);
     }
 
     enum SystemErrorCode implements BaseErrorCode {
         NODE_NOT_FOUND(404, "error.node.not_found"),
-        NODE_CODE_DUPLICATE(409, "error.node.code_duplicate");
+        NODE_CODE_DUPLICATE(409, "error.node.code_duplicate"),
+        NODE_HAS_CHILDREN(409, "error.node.has_children");
 
         private final int code;
         private final String messageKey;

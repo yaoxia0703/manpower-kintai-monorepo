@@ -1,4 +1,4 @@
-package com.manpowergroup.kintai.system.application.dto.hr;
+package com.manpowergroup.kintai.system.application.dto.hr.request;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
