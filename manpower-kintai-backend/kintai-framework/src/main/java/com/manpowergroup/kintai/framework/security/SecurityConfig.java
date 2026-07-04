@@ -1,5 +1,6 @@
 package com.manpowergroup.kintai.framework.security;
 
+import com.manpowergroup.kintai.framework.security.authority.DynamicAuthorizationManager;
 import com.manpowergroup.kintai.framework.security.jwt.JwtAuthenticationFilter;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
@@ -18,40 +19,29 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.List;
 
-/**
- * セキュリティ設定クラス
- */
 @Configuration
 @EnableMethodSecurity
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final DynamicAuthorizationManager dynamicAuthorizationManager;
 
-    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
+    public SecurityConfig(
+            JwtAuthenticationFilter jwtAuthenticationFilter,
+            DynamicAuthorizationManager dynamicAuthorizationManager
+    ) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        this.dynamicAuthorizationManager = dynamicAuthorizationManager;
     }
 
-    /**
-     * SecurityFilterChain 設定
-     */
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-
         http
-                // CSRF無効化
                 .csrf(AbstractHttpConfigurer::disable)
-
-                // CORS設定適用
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-
-                // Spring Security標準ログイン画面を無効化（SPA + JWT）
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
-
-                // セッションを使用しない（JWT前提）
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-
-                // 認証・認可エラーハンドリング
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint((request, response, authException) -> {
                             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
@@ -64,58 +54,34 @@ public class SecurityConfig {
                             response.getWriter().write("{\"code\":403,\"message\":\"権限がありません\"}");
                         })
                 )
-
-                // アクセス制御
                 .authorizeHttpRequests(auth -> auth
-                        // 認証不要（ログイン系）
                         .requestMatchers("/api/system/auth/login").permitAll()
-
-                        // 基本リソース
                         .requestMatchers("/error/**", "/favicon.ico", "/actuator/health").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
-
-                        // 認証必須API
-                        .requestMatchers("/api/system/**").authenticated()
-                        .requestMatchers("/admin/**", "/employee/**").authenticated()
-
-                        // その他は認証必須
-                        .anyRequest().authenticated()
+                        .requestMatchers("/admin/**").access(dynamicAuthorizationManager)
+                        .requestMatchers("/manager/**").access(dynamicAuthorizationManager)
+                        .requestMatchers("/api/system/**").access(dynamicAuthorizationManager)
+                        .requestMatchers("/employee/**").access(dynamicAuthorizationManager)
+                        .anyRequest().access(dynamicAuthorizationManager)
                 )
-
-                // JWTフィルタ適用
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 
-    /**
-     * CORS設定
-     */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-
-        // フロントエンド許可オリジン
         configuration.setAllowedOrigins(List.of("http://localhost:5173"));
-
-        // 許可HTTPメソッド
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
-
-        // 許可ヘッダー
         configuration.setAllowedHeaders(List.of("*"));
-
-        // Cookie / Authorization許可
         configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
-
         return source;
     }
 
-    /**
-     * パスワードエンコーダー
-     */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
