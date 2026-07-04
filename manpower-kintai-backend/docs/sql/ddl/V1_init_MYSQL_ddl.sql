@@ -256,7 +256,7 @@ CREATE TABLE `org_grade` (
   UNIQUE KEY `uk_grade_code` (`company_id`,`code`,((case when (`is_deleted` = 0) then `is_deleted` else NULL end))),
   KEY `idx_company_id` (`company_id`),
   KEY `idx_grade_level` (`grade_level`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='職級マスタ';
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='職級マスタ';
 
 /*Table structure for table `org_node` */
 
@@ -443,7 +443,7 @@ CREATE TABLE `sys_permission` (
   UNIQUE KEY `uk_permission_code` (`code`,((case when (`is_deleted` = 0) then `is_deleted` else NULL end))),
   UNIQUE KEY `uk_method_path` (`method`,`path`,((case when (`is_deleted` = 0) then `is_deleted` else NULL end))),
   KEY `idx_menu_id` (`menu_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=25 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='権限マスタ';
+) ENGINE=InnoDB AUTO_INCREMENT=97 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='権限マスタ';
 
 /*Table structure for table `sys_role` */
 
