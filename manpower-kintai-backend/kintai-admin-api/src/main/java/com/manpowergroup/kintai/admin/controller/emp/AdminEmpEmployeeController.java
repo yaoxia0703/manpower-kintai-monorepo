@@ -3,7 +3,6 @@ package com.manpowergroup.kintai.admin.controller.emp;
 import com.manpowergroup.kintai.common.dto.PageRequest;
 import com.manpowergroup.kintai.common.dto.PageResult;
 import com.manpowergroup.kintai.common.result.Result;
-import com.manpowergroup.kintai.common.security.SecurityPermissions;
 import com.manpowergroup.kintai.system.application.assembler.emp.EmployeeAssembler;
 import com.manpowergroup.kintai.system.application.dto.emp.response.EmployeeResponse;
 import com.manpowergroup.kintai.system.application.dto.emp.request.EmployeeCreateRequest;
@@ -11,7 +10,6 @@ import com.manpowergroup.kintai.system.application.dto.emp.request.EmployeeUpdat
 import com.manpowergroup.kintai.system.application.service.emp.EmpEmployeeService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 // 社員マスタ管理Controller（管理者用）
@@ -24,7 +22,6 @@ public class AdminEmpEmployeeController {
 
     // 会社IDで社員一覧をページング取得
     @GetMapping
-    @PreAuthorize(SecurityPermissions.HAS_ADMIN_EMPLOYEE_READ)
     public Result<PageResult<EmployeeResponse>> page(
             @RequestParam Long companyId,
             @RequestParam(defaultValue = "1") int page,
@@ -34,7 +31,6 @@ public class AdminEmpEmployeeController {
 
     // 氏名キーワードで社員を検索
     @GetMapping("/search")
-    @PreAuthorize(SecurityPermissions.HAS_ADMIN_EMPLOYEE_READ)
     public Result<PageResult<EmployeeResponse>> search(
             @RequestParam Long companyId,
             @RequestParam(required = false) String keyword,
@@ -45,28 +41,24 @@ public class AdminEmpEmployeeController {
 
     // IDで社員を取得
     @GetMapping("/{id}")
-    @PreAuthorize(SecurityPermissions.HAS_ADMIN_EMPLOYEE_READ)
     public Result<EmployeeResponse> getById(@PathVariable Long id) {
         return Result.ok(EmployeeAssembler.toResponse(service.getById(id)));
     }
 
     // 社員を新規作成
     @PostMapping
-    @PreAuthorize(SecurityPermissions.HAS_ADMIN_EMPLOYEE_WRITE)
     public Result<EmployeeResponse> create(@RequestBody @Valid EmployeeCreateRequest request) {
         return Result.ok(EmployeeAssembler.toResponse(service.create(EmployeeAssembler.toCommand(request))));
     }
 
     // 社員情報を更新
     @PutMapping("/{id}")
-    @PreAuthorize(SecurityPermissions.HAS_ADMIN_EMPLOYEE_WRITE)
     public Result<EmployeeResponse> update(@PathVariable Long id, @RequestBody @Valid EmployeeUpdateRequest request) {
         return Result.ok(EmployeeAssembler.toResponse(service.update(id, EmployeeAssembler.toCommand(request))));
     }
 
     // 社員を在職状態に変更
     @PutMapping("/{id}/enable")
-    @PreAuthorize(SecurityPermissions.HAS_ADMIN_EMPLOYEE_WRITE)
     public Result<Void> enable(@PathVariable Long id) {
         service.enable(id);
         return Result.ok();
@@ -74,7 +66,6 @@ public class AdminEmpEmployeeController {
 
     // 社員を退職状態に変更
     @PutMapping("/{id}/disable")
-    @PreAuthorize(SecurityPermissions.HAS_ADMIN_EMPLOYEE_WRITE)
     public Result<Void> disable(@PathVariable Long id) {
         service.disable(id);
         return Result.ok();
@@ -82,7 +73,6 @@ public class AdminEmpEmployeeController {
 
     // 社員を削除（論理削除）
     @DeleteMapping("/{id}")
-    @PreAuthorize(SecurityPermissions.HAS_ADMIN_EMPLOYEE_WRITE)
     public Result<Void> remove(@PathVariable Long id) {
         service.remove(id);
         return Result.ok();

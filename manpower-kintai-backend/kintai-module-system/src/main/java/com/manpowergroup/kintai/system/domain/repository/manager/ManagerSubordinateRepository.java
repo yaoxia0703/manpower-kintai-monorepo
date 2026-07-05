@@ -2,6 +2,7 @@ package com.manpowergroup.kintai.system.domain.repository.manager;
 
 import com.manpowergroup.kintai.common.dto.JoinPageResult;
 import com.manpowergroup.kintai.system.application.dto.manager.response.SubordinateEmployeeResponse;
+import com.manpowergroup.kintai.system.application.dto.manager.response.SubordinateFilterOptionsResponse;
 import com.manpowergroup.kintai.system.application.query.manager.SubordinateQuery;
 
 
@@ -10,4 +11,5 @@ public interface ManagerSubordinateRepository {
     JoinPageResult<SubordinateEmployeeResponse> pageSubordinates(
             SubordinateQuery query, int pageNum, int pageSize);
 
+    SubordinateFilterOptionsResponse filterOptions(Long managerId);
 }

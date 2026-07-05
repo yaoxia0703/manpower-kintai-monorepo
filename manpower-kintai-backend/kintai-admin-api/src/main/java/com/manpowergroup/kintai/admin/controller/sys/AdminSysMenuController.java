@@ -1,7 +1,6 @@
 package com.manpowergroup.kintai.admin.controller.sys;
 
 import com.manpowergroup.kintai.common.result.Result;
-import com.manpowergroup.kintai.common.security.SecurityPermissions;
 import com.manpowergroup.kintai.system.application.assembler.sys.MenuAssembler;
 import com.manpowergroup.kintai.system.application.dto.sys.response.MenuResponse;
 import com.manpowergroup.kintai.system.application.dto.sys.request.MenuCreateRequest;
@@ -9,7 +8,6 @@ import com.manpowergroup.kintai.system.application.dto.sys.request.MenuUpdateReq
 import com.manpowergroup.kintai.system.application.service.sys.SysMenuService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,59 +27,50 @@ public class AdminSysMenuController {
     private final SysMenuService service;
 
     @GetMapping
-    @PreAuthorize(SecurityPermissions.HAS_ADMIN_MENU_READ)
     public Result<List<MenuResponse>> listAll() {
         return Result.ok(service.listAll().stream().map(MenuAssembler::toResponse).toList());
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize(SecurityPermissions.HAS_ADMIN_MENU_READ)
     public Result<MenuResponse> getById(@PathVariable Long id) {
         return Result.ok(MenuAssembler.toResponse(service.getById(id)));
     }
 
     @PostMapping
-    @PreAuthorize(SecurityPermissions.HAS_ADMIN_MENU_WRITE)
     public Result<MenuResponse> create(@RequestBody @Valid MenuCreateRequest request) {
         return Result.ok(MenuAssembler.toResponse(service.create(MenuAssembler.toCommand(request))));
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize(SecurityPermissions.HAS_ADMIN_MENU_WRITE)
     public Result<MenuResponse> update(@PathVariable Long id, @RequestBody @Valid MenuUpdateRequest request) {
         return Result.ok(MenuAssembler.toResponse(service.update(id, MenuAssembler.toCommand(request))));
     }
 
     @PutMapping("/{id}/show")
-    @PreAuthorize(SecurityPermissions.HAS_ADMIN_MENU_WRITE)
     public Result<Void> show(@PathVariable Long id) {
         service.show(id);
         return Result.ok();
     }
 
     @PutMapping("/{id}/hide")
-    @PreAuthorize(SecurityPermissions.HAS_ADMIN_MENU_WRITE)
     public Result<Void> hide(@PathVariable Long id) {
         service.hide(id);
         return Result.ok();
     }
 
     @PutMapping("/{id}/enable")
-    @PreAuthorize(SecurityPermissions.HAS_ADMIN_MENU_WRITE)
     public Result<Void> enable(@PathVariable Long id) {
         service.enable(id);
         return Result.ok();
     }
 
     @PutMapping("/{id}/disable")
-    @PreAuthorize(SecurityPermissions.HAS_ADMIN_MENU_WRITE)
     public Result<Void> disable(@PathVariable Long id) {
         service.disable(id);
         return Result.ok();
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize(SecurityPermissions.HAS_ADMIN_MENU_WRITE)
     public Result<Void> remove(@PathVariable Long id) {
         service.remove(id);
         return Result.ok();

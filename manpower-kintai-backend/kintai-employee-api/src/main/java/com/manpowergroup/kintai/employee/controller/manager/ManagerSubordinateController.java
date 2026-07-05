@@ -2,16 +2,15 @@ package com.manpowergroup.kintai.employee.controller.manager;
 
 import com.manpowergroup.kintai.common.dto.JoinPageResult;
 import com.manpowergroup.kintai.common.result.Result;
-import com.manpowergroup.kintai.common.security.SecurityPermissions;
 import com.manpowergroup.kintai.framework.security.jwt.LoginPrincipal;
 import com.manpowergroup.kintai.system.application.assembler.manager.SubordinateAssembler;
 import com.manpowergroup.kintai.system.application.dto.manager.request.SubordinateQueryRequest;
 import com.manpowergroup.kintai.system.application.dto.manager.response.SubordinateEmployeeResponse;
+import com.manpowergroup.kintai.system.application.dto.manager.response.SubordinateFilterOptionsResponse;
 import com.manpowergroup.kintai.system.application.query.manager.SubordinateQuery;
 import com.manpowergroup.kintai.system.application.service.manager.ManagerSubordinateService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,8 +24,13 @@ public class ManagerSubordinateController {
 
     private final ManagerSubordinateService subordinateService;
 
+    @GetMapping("/options")
+    public Result<SubordinateFilterOptionsResponse> options(
+            @AuthenticationPrincipal LoginPrincipal principal) {
+        return Result.ok(subordinateService.options(principal.employeeId()));
+    }
+
     @GetMapping
-    @PreAuthorize(SecurityPermissions.HAS_MANAGER_SUBORDINATE_READ)
     public Result<JoinPageResult<SubordinateEmployeeResponse>> pageSubordinates(
             @AuthenticationPrincipal LoginPrincipal principal,
             @Valid SubordinateQueryRequest request) {

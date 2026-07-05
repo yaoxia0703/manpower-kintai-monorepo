@@ -3,7 +3,6 @@ package com.manpowergroup.kintai.admin.controller.sys;
 import com.manpowergroup.kintai.common.dto.PageRequest;
 import com.manpowergroup.kintai.common.dto.PageResult;
 import com.manpowergroup.kintai.common.result.Result;
-import com.manpowergroup.kintai.common.security.SecurityPermissions;
 import com.manpowergroup.kintai.system.application.assembler.sys.PermissionAssembler;
 import com.manpowergroup.kintai.system.application.dto.sys.response.PermissionResponse;
 import com.manpowergroup.kintai.system.application.dto.sys.request.PermissionCreateRequest;
@@ -11,7 +10,6 @@ import com.manpowergroup.kintai.system.application.dto.sys.request.PermissionUpd
 import com.manpowergroup.kintai.system.application.service.sys.SysPermissionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -32,7 +30,6 @@ public class AdminSysPermissionController {
     private final SysPermissionService service;
 
     @GetMapping
-    @PreAuthorize(SecurityPermissions.HAS_ADMIN_PERMISSION_READ)
     public Result<PageResult<PermissionResponse>> page(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size) {
@@ -40,45 +37,38 @@ public class AdminSysPermissionController {
     }
 
     @GetMapping("/by-menu/{menuId}")
-    @PreAuthorize(SecurityPermissions.HAS_ADMIN_PERMISSION_READ)
     public Result<List<PermissionResponse>> listByMenu(@PathVariable Long menuId) {
         return Result.ok(service.listByMenu(menuId).stream().map(PermissionAssembler::toResponse).toList());
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize(SecurityPermissions.HAS_ADMIN_PERMISSION_READ)
     public Result<PermissionResponse> getById(@PathVariable Long id) {
         return Result.ok(PermissionAssembler.toResponse(service.getById(id)));
     }
 
     @PostMapping
-    @PreAuthorize(SecurityPermissions.HAS_ADMIN_PERMISSION_WRITE)
     public Result<PermissionResponse> create(@RequestBody @Valid PermissionCreateRequest request) {
         return Result.ok(PermissionAssembler.toResponse(service.create(PermissionAssembler.toCommand(request))));
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize(SecurityPermissions.HAS_ADMIN_PERMISSION_WRITE)
     public Result<PermissionResponse> update(@PathVariable Long id, @RequestBody @Valid PermissionUpdateRequest request) {
         return Result.ok(PermissionAssembler.toResponse(service.update(id, PermissionAssembler.toCommand(request))));
     }
 
     @PutMapping("/{id}/enable")
-    @PreAuthorize(SecurityPermissions.HAS_ADMIN_PERMISSION_WRITE)
     public Result<Void> enable(@PathVariable Long id) {
         service.enable(id);
         return Result.ok();
     }
 
     @PutMapping("/{id}/disable")
-    @PreAuthorize(SecurityPermissions.HAS_ADMIN_PERMISSION_WRITE)
     public Result<Void> disable(@PathVariable Long id) {
         service.disable(id);
         return Result.ok();
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize(SecurityPermissions.HAS_ADMIN_PERMISSION_WRITE)
     public Result<Void> remove(@PathVariable Long id) {
         service.remove(id);
         return Result.ok();

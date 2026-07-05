@@ -3,7 +3,6 @@ package com.manpowergroup.kintai.admin.controller.sys;
 import com.manpowergroup.kintai.common.dto.PageRequest;
 import com.manpowergroup.kintai.common.dto.PageResult;
 import com.manpowergroup.kintai.common.result.Result;
-import com.manpowergroup.kintai.common.security.SecurityPermissions;
 import com.manpowergroup.kintai.system.application.assembler.sys.RoleAssembler;
 import com.manpowergroup.kintai.system.application.dto.sys.response.RoleAuthorizationResponse;
 import com.manpowergroup.kintai.system.application.dto.sys.response.RoleResponse;
@@ -14,7 +13,6 @@ import com.manpowergroup.kintai.system.application.dto.sys.request.RoleUpdateReq
 import com.manpowergroup.kintai.system.application.service.sys.SysRoleService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -35,7 +33,6 @@ public class AdminSysRoleController {
     private final SysRoleService service;
 
     @GetMapping
-    @PreAuthorize(SecurityPermissions.HAS_ADMIN_ROLE_READ)
     public Result<PageResult<RoleResponse>> page(
             @RequestParam(required = false) Long companyId,
             @RequestParam(defaultValue = "1") int page,
@@ -44,37 +41,31 @@ public class AdminSysRoleController {
     }
 
     @GetMapping("/list")
-    @PreAuthorize(SecurityPermissions.HAS_ADMIN_ROLE_READ)
     public Result<List<RoleResponse>> list(@RequestParam(required = false) Long companyId) {
         return Result.ok(service.listByCompany(companyId).stream().map(RoleAssembler::toResponse).toList());
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize(SecurityPermissions.HAS_ADMIN_ROLE_READ)
     public Result<RoleResponse> getById(@PathVariable Long id) {
         return Result.ok(RoleAssembler.toResponse(service.getById(id)));
     }
 
     @GetMapping("/{id}/authorization")
-    @PreAuthorize(SecurityPermissions.HAS_ADMIN_ROLE_READ)
     public Result<RoleAuthorizationResponse> getAuthorization(@PathVariable Long id) {
         return Result.ok(service.getAuthorization(id));
     }
 
     @PostMapping
-    @PreAuthorize(SecurityPermissions.HAS_ADMIN_ROLE_WRITE)
     public Result<RoleResponse> create(@RequestBody @Valid RoleCreateRequest request) {
         return Result.ok(RoleAssembler.toResponse(service.create(RoleAssembler.toCommand(request))));
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize(SecurityPermissions.HAS_ADMIN_ROLE_WRITE)
     public Result<RoleResponse> update(@PathVariable Long id, @RequestBody @Valid RoleUpdateRequest request) {
         return Result.ok(RoleAssembler.toResponse(service.update(id, RoleAssembler.toCommand(request))));
     }
 
     @PutMapping("/{id}/menus")
-    @PreAuthorize(SecurityPermissions.HAS_ADMIN_ROLE_WRITE)
     @Deprecated(since = "0.0.1", forRemoval = false)
     public Result<Void> assignMenus(@PathVariable Long id, @RequestBody @Valid RoleAssignRequest request) {
         service.assignMenus(id, request.getIds());
@@ -82,7 +73,6 @@ public class AdminSysRoleController {
     }
 
     @PutMapping("/{id}/permissions")
-    @PreAuthorize(SecurityPermissions.HAS_ADMIN_ROLE_WRITE)
     @Deprecated(since = "0.0.1", forRemoval = false)
     public Result<Void> assignPermissions(@PathVariable Long id, @RequestBody @Valid RoleAssignRequest request) {
         service.assignPermissions(id, request.getIds());
@@ -90,28 +80,24 @@ public class AdminSysRoleController {
     }
 
     @PutMapping("/{id}/authorization")
-    @PreAuthorize(SecurityPermissions.HAS_ADMIN_ROLE_WRITE)
     public Result<Void> saveAuthorization(@PathVariable Long id, @RequestBody @Valid RoleAuthorizationSaveRequest request) {
         service.saveAuthorization(id, request);
         return Result.ok();
     }
 
     @PutMapping("/{id}/enable")
-    @PreAuthorize(SecurityPermissions.HAS_ADMIN_ROLE_WRITE)
     public Result<Void> enable(@PathVariable Long id) {
         service.enable(id);
         return Result.ok();
     }
 
     @PutMapping("/{id}/disable")
-    @PreAuthorize(SecurityPermissions.HAS_ADMIN_ROLE_WRITE)
     public Result<Void> disable(@PathVariable Long id) {
         service.disable(id);
         return Result.ok();
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize(SecurityPermissions.HAS_ADMIN_ROLE_WRITE)
     public Result<Void> remove(@PathVariable Long id) {
         service.remove(id);
         return Result.ok();

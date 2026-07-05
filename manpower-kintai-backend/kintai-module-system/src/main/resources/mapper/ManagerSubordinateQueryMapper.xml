@@ -3,6 +3,23 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.manpowergroup.kintai.system.infrastructure.mapper.manager.ManagerSubordinateQueryMapper">
 
+    <sql id="optionFilter">
+        FROM org_node mn
+        INNER JOIN org_node_closure c ON c.ancestor_id = mn.id
+        INNER JOIN emp_employee_position p
+        ON p.node_id = c.descendant_id
+        AND p.status = 1
+        AND p.start_date &lt;= CURDATE()
+        AND (p.end_date IS NULL OR p.end_date &gt;= CURDATE())
+        INNER JOIN emp_employee ee ON ee.id = p.employee_id
+        INNER JOIN org_node n      ON n.id = p.node_id
+        LEFT  JOIN org_grade g     ON g.id = p.grade_id
+        WHERE mn.manager_id = #{q.managerId}
+        AND mn.status = 1
+        AND ee.status = 1
+        AND p.employee_id != #{q.managerId}
+    </sql>
+
     <!-- 共通の絞り込み条件（一覧・件数で完全に同一のロジックを共有） -->
     <sql id="baseFilter">
         FROM org_node mn
@@ -73,6 +90,31 @@
     <select id="countSubordinatePage" resultType="java.lang.Long">
         SELECT COUNT(DISTINCT ee.id)
         <include refid="baseFilter"/>
+    </select>
+
+    <select id="selectSubordinateNodeOptions"
+            resultType="com.manpowergroup.kintai.system.application.dto.manager.response.SubordinateFilterOptionsResponse$NodeOption">
+        SELECT DISTINCT
+        n.id        AS id,
+        n.parent_id AS parentId,
+        n.name      AS name,
+        n.code      AS code,
+        n.type_code AS typeCode,
+        n.level     AS level
+        <include refid="optionFilter"/>
+        ORDER BY n.level, n.name
+    </select>
+
+    <select id="selectSubordinateGradeOptions"
+            resultType="com.manpowergroup.kintai.system.application.dto.manager.response.SubordinateFilterOptionsResponse$GradeOption">
+        SELECT DISTINCT
+        g.id          AS id,
+        g.name        AS name,
+        g.code        AS code,
+        g.grade_level AS gradeLevel
+        <include refid="optionFilter"/>
+        AND p.grade_id IS NOT NULL
+        ORDER BY g.grade_level, g.name
     </select>
 
 </mapper>

@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.manpowergroup.kintai.common.dto.JoinPageResult;
 import com.manpowergroup.kintai.common.enums.Status;
 import com.manpowergroup.kintai.system.application.dto.manager.response.SubordinateEmployeeResponse;
+import com.manpowergroup.kintai.system.application.dto.manager.response.SubordinateFilterOptionsResponse;
 import com.manpowergroup.kintai.system.application.query.manager.SubordinateQuery;
 import com.manpowergroup.kintai.system.application.service.manager.ManagerSubordinateService;
 import com.manpowergroup.kintai.system.domain.entity.emp.EmpEmployee;
@@ -36,5 +37,10 @@ public class ManagerSubordinateServiceImpl implements ManagerSubordinateService 
     @Override
     public JoinPageResult<SubordinateEmployeeResponse> pageSubordinates(SubordinateQuery query, int pageNum, int pageSize) {
         return managerSubordinateRepository.pageSubordinates(query, pageNum, pageSize);
+    }
+
+    @Override
+    public SubordinateFilterOptionsResponse options(Long managerId) {
+        return managerSubordinateRepository.filterOptions(managerId);
     }
 }

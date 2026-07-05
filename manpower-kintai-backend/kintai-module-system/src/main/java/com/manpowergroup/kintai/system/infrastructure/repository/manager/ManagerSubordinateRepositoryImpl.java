@@ -2,6 +2,7 @@ package com.manpowergroup.kintai.system.infrastructure.repository.manager;
 
 import com.manpowergroup.kintai.common.dto.JoinPageResult;
 import com.manpowergroup.kintai.system.application.dto.manager.response.SubordinateEmployeeResponse;
+import com.manpowergroup.kintai.system.application.dto.manager.response.SubordinateFilterOptionsResponse;
 import com.manpowergroup.kintai.system.application.query.manager.SubordinateQuery;
 import com.manpowergroup.kintai.system.domain.repository.manager.ManagerSubordinateRepository;
 import com.manpowergroup.kintai.system.infrastructure.mapper.manager.ManagerSubordinateQueryMapper;
@@ -37,5 +38,14 @@ public class ManagerSubordinateRepositoryImpl implements ManagerSubordinateRepos
                 managerSubordinateQueryMapper.selectSubordinatePage(query, offset, pageSize);
 
         return JoinPageResult.of(records, total, pageNum, pageSize);
+    }
+
+    @Override
+    public SubordinateFilterOptionsResponse filterOptions(Long managerId) {
+        SubordinateQuery query = new SubordinateQuery(managerId, null, null, null, null);
+        return SubordinateFilterOptionsResponse.builder()
+                .nodes(managerSubordinateQueryMapper.selectSubordinateNodeOptions(query))
+                .grades(managerSubordinateQueryMapper.selectSubordinateGradeOptions(query))
+                .build();
     }
 }

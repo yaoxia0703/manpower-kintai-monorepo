@@ -6,3 +6,11 @@ export interface ApiResponse<T> {
   timestamp?: number
   detail?: string
 }
+
+export interface JoinPageResult<T> {
+  records: T[]
+  total: number
+  pageNum: number
+  pageSize: number
+  pages: number
+}
