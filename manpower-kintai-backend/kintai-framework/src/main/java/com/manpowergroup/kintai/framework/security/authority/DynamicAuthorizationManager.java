@@ -19,6 +19,10 @@ import java.util.function.Supplier;
 public class DynamicAuthorizationManager implements AuthorizationManager<RequestAuthorizationContext> {
 
     private static final String SUPER_ADMIN = "ROLE_SUPER_ADMIN";
+    // 個人自助系エンドポイント：ログインさえしていれば sys_permission を経由せず許可
+    private static final List<String> AUTHENTICATED_ONLY_PATHS = List.of(
+            "/admin/sys/notification/**"
+    );
 
     private final PermissionRuleProvider permissionRuleProvider;
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
@@ -26,6 +30,7 @@ public class DynamicAuthorizationManager implements AuthorizationManager<Request
     public DynamicAuthorizationManager(PermissionRuleProvider permissionRuleProvider) {
         this.permissionRuleProvider = permissionRuleProvider;
     }
+
 
     @Override
     @SuppressWarnings("deprecation")
@@ -42,6 +47,11 @@ public class DynamicAuthorizationManager implements AuthorizationManager<Request
         String method = normalizeMethod(request.getMethod());
         String path = requestPath(request);
 
+        // ログイン済みなら sys_permission を経由せず許可するパス
+        if (isAuthenticatedOnlyPath(path)) {
+            return new AuthorizationDecision(true);
+        }
+
         List<String> matchedCodes = permissionRuleProvider.loadEnabledRules().stream()
                 .filter(rule -> methodMatches(rule, method))
                 .filter(rule -> pathMatches(rule, path))
@@ -54,6 +64,10 @@ public class DynamicAuthorizationManager implements AuthorizationManager<Request
         boolean granted = !matchedCodes.isEmpty()
                 && matchedCodes.stream().anyMatch(code -> hasAuthority(current, code));
         return new AuthorizationDecision(granted);
+    }
+
+    private boolean isAuthenticatedOnlyPath(String path) {
+        return AUTHENTICATED_ONLY_PATHS.stream().anyMatch(pattern -> pathMatcher.match(pattern, path));
     }
 
     private boolean methodMatches(PermissionRule rule, String method) {
