@@ -1,6 +1,7 @@
 import axios from 'axios'
 import router from '@/router'
 import { API_BASE_URL } from '@/config/env'
+import type { ApiResponse } from '@/types/common'
 
 const request = axios.create({
   baseURL: API_BASE_URL,
@@ -17,7 +18,7 @@ request.interceptors.request.use((config) => {
 
 request.interceptors.response.use(
   (response) => {
-    const data = response.data
+    const data = response.data as ApiErrorResponse
     if (data?.code && data.code !== 200) {
       return Promise.reject(new Error(resolveErrorMessage(data)))
     }
@@ -38,16 +39,26 @@ request.interceptors.response.use(
   },
 )
 
-function resolveErrorMessage(data: any) {
-  const errors = data?.data?.errors
+// バリデーションエラー1件分の形
+interface ValidationErrorItem {
+  key?: string
+  message?: string
+}
+
+// resolveErrorMessage / interceptor 共通で使うエラーレスポンスの型
+type ApiErrorResponse = ApiResponse<{ errors?: ValidationErrorItem[] }>
+
+// バックエンドのエラーレスポンスからユーザー向けメッセージを組み立てる
+function resolveErrorMessage(response: ApiErrorResponse): string {
+  const errors = response?.data?.errors
   if (Array.isArray(errors) && errors.length > 0) {
     return errors
       .map((item) => item?.message || item?.key)
-      .filter(Boolean)
+      .filter((msg): msg is string => Boolean(msg))
       .slice(0, 3)
       .join('\n')
   }
-  return data?.message || 'Request failed'
+  return response?.message || 'Request failed'
 }
 
 export default request

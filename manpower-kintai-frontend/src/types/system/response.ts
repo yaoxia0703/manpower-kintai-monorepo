@@ -50,3 +50,21 @@ export interface RoleAuthorization {
   selectedMenuIds: number[]
   selectedPermissionIds: number[]
 }
+
+export type NotificationType =
+  | 'REQUEST_SUBMITTED'
+  | 'REQUEST_APPROVED'
+  | 'REQUEST_REJECTED'
+  | 'REQUEST_CANCELLED'
+
+export interface SysNotification {
+  id: number
+  type: NotificationType
+  title: string
+  content: string
+  refType?: string | null
+  refId?: number | null
+  isRead: boolean
+  readAt?: string | null
+  createdAt?: string | null
+}

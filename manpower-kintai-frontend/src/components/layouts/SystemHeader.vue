@@ -13,7 +13,64 @@
       <el-input class="global-search" placeholder="検索..." size="default" disabled />
 
       <div class="header-actions">
-        <el-button circle aria-label="通知">!</el-button>
+        <el-popover
+          placement="bottom-end"
+          trigger="click"
+          width="min(360px, calc(100vw - 24px))"
+          :teleported="false"
+          popper-class="notification-popper"
+          @show="handleNotificationOpen"
+        >
+          <template #reference>
+            <el-badge
+              :value="unreadCount"
+              :max="99"
+              :hidden="unreadCount <= 0"
+              class="notification-badge"
+            >
+              <el-button circle aria-label="通知" :icon="Bell" />
+            </el-badge>
+          </template>
+
+          <div class="notification-panel">
+            <div class="notification-header">
+              <span class="notification-title">通知</span>
+              <el-button
+                text
+                size="small"
+                :icon="Refresh"
+                :loading="notificationsLoading"
+                @click="loadNotifications()"
+              >
+                更新
+              </el-button>
+            </div>
+
+            <div v-if="notificationError" class="notification-state notification-error">
+              {{ notificationError }}
+            </div>
+            <div v-else-if="notificationsLoading" class="notification-state">読み込み中...</div>
+            <el-empty
+              v-else-if="notifications.length === 0"
+              description="未読通知はありません"
+              :image-size="72"
+            />
+            <div v-else class="notification-list">
+              <button
+                v-for="notification in notifications"
+                :key="notification.id"
+                class="notification-item"
+                type="button"
+              >
+                <span class="notification-item-title">{{ notification.title }}</span>
+                <span class="notification-item-content">{{ notification.content }}</span>
+                <span class="notification-item-time">
+                  {{ formatNotificationTime(notification.createdAt) }}
+                </span>
+              </button>
+            </div>
+          </div>
+        </el-popover>
 
         <el-dropdown
           trigger="click"
@@ -44,11 +101,17 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { Bell, Refresh } from '@element-plus/icons-vue'
+import { computed, onMounted, ref } from 'vue'
+import {
+  fetchUnreadNotificationCount,
+  fetchUnreadNotifications,
+} from '@/api/system/notification'
 import MenuItem from '@/components/layouts/MenuItem.vue'
 import { useAuthStore } from '@/stores/auth'
 import { usePermissionStore } from '@/stores/permissionStore'
 import { useUserStore } from '@/stores/userStore'
+import type { SysNotification } from '@/types/system'
 
 interface HeaderMenu {
   name: string
@@ -60,6 +123,12 @@ interface HeaderMenu {
 const authStore = useAuthStore()
 const userStore = useUserStore()
 const permissionStore = usePermissionStore()
+const unreadCount = ref(0)
+const notifications = ref<SysNotification[]>([])
+const notificationsLoading = ref(false)
+const notificationError = ref('')
+
+const NOTIFICATION_PAGE_SIZE = 10
 
 const userInitial = computed(() => {
   const name = userStore.displayName || userStore.email || 'U'
@@ -85,6 +154,45 @@ async function handleUserCommand(command: string) {
     await authStore.logout()
   }
 }
+
+async function loadUnreadCount() {
+  try {
+    const response = await fetchUnreadNotificationCount()
+    unreadCount.value = response.data.data ?? 0
+  } catch {
+    unreadCount.value = 0
+  }
+}
+
+async function loadNotifications() {
+  notificationsLoading.value = true
+  notificationError.value = ''
+
+  try {
+    const response = await fetchUnreadNotifications({ page: 1, size: NOTIFICATION_PAGE_SIZE })
+    notifications.value = response.data.data.records
+    await loadUnreadCount()
+  } catch {
+    notificationError.value = '通知を取得できませんでした'
+  } finally {
+    notificationsLoading.value = false
+  }
+}
+
+function handleNotificationOpen() {
+  void loadNotifications()
+}
+
+function formatNotificationTime(value?: string | null) {
+  if (!value) {
+    return ''
+  }
+  return value.replace('T', ' ').slice(0, 16)
+}
+
+onMounted(() => {
+  void loadUnreadCount()
+})
 </script>
 
 <style scoped>
@@ -145,6 +253,92 @@ async function handleUserCommand(command: string) {
   justify-self: end;
   align-items: center;
   gap: 8px;
+}
+
+.notification-badge {
+  display: inline-flex;
+}
+
+.notification-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.notification-header {
+  display: flex;
+  min-height: 32px;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--el-border-color-lighter);
+  padding-bottom: 8px;
+}
+
+.notification-title {
+  color: var(--el-text-color-primary);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.notification-state {
+  padding: 18px 4px;
+  color: var(--el-text-color-secondary);
+  font-size: 13px;
+  text-align: center;
+}
+
+.notification-error {
+  color: var(--el-color-danger);
+}
+
+.notification-list {
+  display: flex;
+  max-height: 320px;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.notification-item {
+  display: grid;
+  width: 100%;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 4px;
+  border: 0;
+  border-bottom: 1px solid var(--el-border-color-lighter);
+  background: transparent;
+  padding: 10px 2px;
+  color: inherit;
+  cursor: default;
+  font: inherit;
+  text-align: left;
+}
+
+.notification-item:last-child {
+  border-bottom: 0;
+}
+
+.notification-item-title {
+  overflow: hidden;
+  color: var(--el-text-color-primary);
+  font-size: 13px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.notification-item-content {
+  display: -webkit-box;
+  overflow: hidden;
+  color: var(--el-text-color-regular);
+  font-size: 13px;
+  line-height: 1.4;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.notification-item-time {
+  color: var(--el-text-color-secondary);
+  font-size: 12px;
 }
 
 .user-avatar {
