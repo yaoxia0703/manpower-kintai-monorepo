@@ -19,6 +19,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
+// 各種申請
 @Getter
 @Setter(AccessLevel.PRIVATE)
 @Accessors(chain = true)
@@ -26,40 +27,57 @@ import java.time.LocalTime;
 public class AttRequest {
 
     @TableId(type = IdType.AUTO)
+    // 申請ID
     private Long id;
 
+    // 申請者社員ID
     private Long employeeId;
 
+    // 会社ID
     private Long companyId;
 
+    // 申請タイプ（REQUEST_TYPE参照）
     private String requestType;
 
+    // 開始日
     private LocalDate startDate;
 
+    // 終了日
     private LocalDate endDate;
 
+    // 開始時刻（残業申請等）
     private LocalTime startTime;
 
+    // 終了時刻（残業申請等）
     private LocalTime endTime;
 
+    // 申請日数
     private BigDecimal days;
 
+    // 申請時間（分）
     private Integer minutes;
 
+    // 申請理由
     private String reason;
 
+    // 承認ステータス（APPROVAL_STATUS参照）
     private ApprovalStatus status;
 
+    // 作成者ID
     private Long createdBy;
 
+    // 作成日時
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createdAt;
 
+    // 更新者ID
     private Long updatedBy;
 
+    // 更新日時
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private LocalDateTime updatedAt;
 
+    // 論理削除（0=有効 1=削除）
     @TableLogic
     private Integer isDeleted;
 

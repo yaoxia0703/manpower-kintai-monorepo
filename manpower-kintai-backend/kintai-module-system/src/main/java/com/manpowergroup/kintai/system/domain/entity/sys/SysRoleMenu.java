@@ -24,8 +24,10 @@ public class SysRoleMenu {
     // メニューID
     private Long menuId;
 
+    // 作成者ID
     private Long createdBy;
 
+    // 作成日時
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createdAt;
 }

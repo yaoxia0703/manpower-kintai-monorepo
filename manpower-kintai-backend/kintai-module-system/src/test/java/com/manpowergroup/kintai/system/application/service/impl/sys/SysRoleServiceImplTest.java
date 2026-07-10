@@ -1,17 +1,15 @@
 package com.manpowergroup.kintai.system.application.service.impl.sys;
 
-import com.manpowergroup.kintai.system.application.dto.sys.request.RoleAuthorizationSaveRequest;
+import com.manpowergroup.kintai.system.application.command.sys.RoleAuthorizationSaveCommand;
+import com.manpowergroup.kintai.system.application.service.sys.SysRoleService;
 import com.manpowergroup.kintai.system.domain.entity.sys.SysRole;
-import com.manpowergroup.kintai.system.infrastructure.mapper.sys.SysEmployeeRoleMapper;
 import com.manpowergroup.kintai.system.infrastructure.mapper.sys.SysMenuMapper;
 import com.manpowergroup.kintai.system.infrastructure.mapper.sys.SysPermissionMapper;
-import com.manpowergroup.kintai.system.infrastructure.mapper.sys.SysRoleMapper;
 import com.manpowergroup.kintai.system.infrastructure.mapper.sys.SysRoleMenuMapper;
 import com.manpowergroup.kintai.system.infrastructure.mapper.sys.SysRolePermissionMapper;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.List;
 
@@ -27,21 +25,18 @@ class SysRoleServiceImplTest {
     void saveAuthorizationReplacesMenusAndPermissionsTogether() {
         SysRoleMenuMapper roleMenuMapper = Mockito.mock(SysRoleMenuMapper.class);
         SysRolePermissionMapper rolePermissionMapper = Mockito.mock(SysRolePermissionMapper.class);
-        SysRoleMapper roleMapper = Mockito.mock(SysRoleMapper.class);
-        SysRoleServiceImpl service = new SysRoleServiceImpl(
+        SysRoleService roleService = Mockito.mock(SysRoleService.class);
+        RoleAuthorizationServiceImpl service = new RoleAuthorizationServiceImpl(
+                roleService,
                 roleMenuMapper,
                 rolePermissionMapper,
-                Mockito.mock(SysEmployeeRoleMapper.class),
                 Mockito.mock(SysMenuMapper.class),
                 Mockito.mock(SysPermissionMapper.class));
-        ReflectionTestUtils.setField(service, "baseMapper", roleMapper);
 
-        when(roleMapper.selectById(7L)).thenReturn(new SysRole().setId(7L));
-        RoleAuthorizationSaveRequest request = new RoleAuthorizationSaveRequest();
-        request.setMenuIds(List.of(1L, 2L));
-        request.setPermissionIds(List.of(10L, 11L));
+        when(roleService.getById(7L)).thenReturn(new SysRole().setId(7L));
+        RoleAuthorizationSaveCommand command = new RoleAuthorizationSaveCommand(7L, List.of(1L, 2L), List.of(10L, 11L));
 
-        service.saveAuthorization(7L, request);
+        service.saveAuthorization(command);
 
         verify(roleMenuMapper).delete(any());
         verify(rolePermissionMapper).delete(any());

@@ -3,13 +3,10 @@ package com.manpowergroup.kintai.system.application.service.impl.sys;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.manpowergroup.kintai.common.exception.BaseErrorCode;
 import com.manpowergroup.kintai.common.exception.BizException;
-import com.manpowergroup.kintai.system.application.command.sys.EmployeeRoleAssignCommand;
-import com.manpowergroup.kintai.system.application.command.sys.EmployeeRoleUpdateCommand;
 import com.manpowergroup.kintai.system.application.service.sys.SysEmployeeRoleService;
 import com.manpowergroup.kintai.system.domain.entity.sys.SysEmployeeRole;
 import com.manpowergroup.kintai.system.infrastructure.mapper.sys.SysEmployeeRoleMapper;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -36,45 +33,8 @@ public class SysEmployeeRoleServiceImpl extends ServiceImpl<SysEmployeeRoleMappe
                 .list();
     }
 
-    @Override
-    @Transactional
-    public SysEmployeeRole assign(EmployeeRoleAssignCommand command) {
-        boolean exists = lambdaQuery()
-                .eq(SysEmployeeRole::getEmployeeId, command.employeeId())
-                .eq(SysEmployeeRole::getRoleId, command.roleId())
-                .eq(SysEmployeeRole::getCompanyId, command.companyId())
-                .count() > 0;
-        if (exists) throw new BizException(SystemErrorCode.EMPLOYEE_ROLE_ALREADY_EXISTS);
-        SysEmployeeRole employeeRole = new SysEmployeeRole()
-                .setEmployeeId(command.employeeId())
-                .setRoleId(command.roleId())
-                .setCompanyId(command.companyId())
-                .setStartDate(command.startDate())
-                .setEndDate(command.endDate());
-        save(employeeRole);
-        return employeeRole;
-    }
-
-    @Override
-    @Transactional
-    public SysEmployeeRole update(Long id, EmployeeRoleUpdateCommand command) {
-        SysEmployeeRole existing = getById(id);
-        existing.setStartDate(command.startDate())
-                .setEndDate(command.endDate());
-        updateById(existing);
-        return existing;
-    }
-
-    @Override
-    @Transactional
-    public void revoke(Long id) {
-        getById(id);
-        removeById(id);
-    }
-
     enum SystemErrorCode implements BaseErrorCode {
-        EMPLOYEE_ROLE_NOT_FOUND(404, "error.employee_role.not_found"),
-        EMPLOYEE_ROLE_ALREADY_EXISTS(409, "error.employee_role.already_exists");
+        EMPLOYEE_ROLE_NOT_FOUND(404, "error.employee_role.not_found");
 
         private final int code;
         private final String messageKey;

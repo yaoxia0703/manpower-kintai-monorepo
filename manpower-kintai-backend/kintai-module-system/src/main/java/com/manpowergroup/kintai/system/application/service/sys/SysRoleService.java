@@ -5,8 +5,6 @@ import com.manpowergroup.kintai.common.dto.PageRequest;
 import com.manpowergroup.kintai.common.dto.PageResult;
 import com.manpowergroup.kintai.system.application.command.sys.RoleCreateCommand;
 import com.manpowergroup.kintai.system.application.command.sys.RoleUpdateCommand;
-import com.manpowergroup.kintai.system.application.dto.sys.response.RoleAuthorizationResponse;
-import com.manpowergroup.kintai.system.application.dto.sys.request.RoleAuthorizationSaveRequest;
 import com.manpowergroup.kintai.system.domain.entity.sys.SysRole;
 
 import java.util.List;
@@ -22,16 +20,6 @@ public interface SysRoleService extends IService<SysRole> {
     SysRole create(RoleCreateCommand command);
 
     SysRole update(Long id, RoleUpdateCommand command);
-
-    @Deprecated(since = "0.0.1", forRemoval = false)
-    void assignMenus(Long roleId, List<Long> menuIds);
-
-    @Deprecated(since = "0.0.1", forRemoval = false)
-    void assignPermissions(Long roleId, List<Long> permissionIds);
-
-    RoleAuthorizationResponse getAuthorization(Long roleId);
-
-    void saveAuthorization(Long roleId, RoleAuthorizationSaveRequest request);
 
     void enable(Long id);
 

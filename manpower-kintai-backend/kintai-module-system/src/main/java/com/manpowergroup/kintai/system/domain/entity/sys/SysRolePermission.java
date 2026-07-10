@@ -24,8 +24,10 @@ public class SysRolePermission {
     // 権限ID
     private Long permissionId;
 
+    // 作成者ID
     private Long createdBy;
 
+    // 作成日時
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createdAt;
 }

@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 public class SysEnumValue {
 
     @TableId(type = IdType.AUTO)
+    // 列挙値ID
     private Long id;
 
     // 列挙型コード（sys_enum_type.codeを参照）
@@ -28,16 +29,21 @@ public class SysEnumValue {
     // ステータス
     private Status status;
 
+    // 作成者ID
     private Long createdBy;
 
+    // 作成日時
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createdAt;
 
+    // 更新者ID
     private Long updatedBy;
 
+    // 更新日時
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private LocalDateTime updatedAt;
 
+    // 論理削除（0=有効 1=削除）
     @TableLogic
     private Integer isDeleted;
 

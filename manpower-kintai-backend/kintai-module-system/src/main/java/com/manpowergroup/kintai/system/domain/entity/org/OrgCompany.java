@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 public class OrgCompany {
 
     @TableId(type = IdType.AUTO)
+    // 会社ID
     private Long id;
 
     // 親会社ID（NULLが最上位）
@@ -34,13 +35,17 @@ public class OrgCompany {
     // ステータス
     private Status status;
 
+    // 作成者ID
     private Long createdBy;
 
+    // 作成日時
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createdAt;
 
+    // 更新者ID
     private Long updatedBy;
 
+    // 更新日時
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private LocalDateTime updatedAt;
 

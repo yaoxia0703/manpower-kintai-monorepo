@@ -3,6 +3,7 @@ package com.manpowergroup.kintai.admin.controller.sys;
 import com.manpowergroup.kintai.common.dto.PageRequest;
 import com.manpowergroup.kintai.common.dto.PageResult;
 import com.manpowergroup.kintai.common.result.Result;
+import com.manpowergroup.kintai.system.application.assembler.sys.RoleAuthorizationAssembler;
 import com.manpowergroup.kintai.system.application.assembler.sys.RoleAssembler;
 import com.manpowergroup.kintai.system.application.dto.sys.response.RoleAuthorizationResponse;
 import com.manpowergroup.kintai.system.application.dto.sys.response.RoleResponse;
@@ -10,6 +11,7 @@ import com.manpowergroup.kintai.system.application.dto.sys.request.RoleAssignReq
 import com.manpowergroup.kintai.system.application.dto.sys.request.RoleAuthorizationSaveRequest;
 import com.manpowergroup.kintai.system.application.dto.sys.request.RoleCreateRequest;
 import com.manpowergroup.kintai.system.application.dto.sys.request.RoleUpdateRequest;
+import com.manpowergroup.kintai.system.application.service.sys.RoleAuthorizationService;
 import com.manpowergroup.kintai.system.application.service.sys.SysRoleService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +33,7 @@ import java.util.List;
 public class AdminSysRoleController {
 
     private final SysRoleService service;
+    private final RoleAuthorizationService authorizationService;
 
     @GetMapping
     public Result<PageResult<RoleResponse>> page(
@@ -52,7 +55,7 @@ public class AdminSysRoleController {
 
     @GetMapping("/{id}/authorization")
     public Result<RoleAuthorizationResponse> getAuthorization(@PathVariable Long id) {
-        return Result.ok(service.getAuthorization(id));
+        return Result.ok(authorizationService.getAuthorization(id));
     }
 
     @PostMapping
@@ -68,20 +71,20 @@ public class AdminSysRoleController {
     @PutMapping("/{id}/menus")
     @Deprecated(since = "0.0.1", forRemoval = false)
     public Result<Void> assignMenus(@PathVariable Long id, @RequestBody @Valid RoleAssignRequest request) {
-        service.assignMenus(id, request.getIds());
+        authorizationService.assignMenus(RoleAuthorizationAssembler.toMenuAssignCommand(id, request));
         return Result.ok();
     }
 
     @PutMapping("/{id}/permissions")
     @Deprecated(since = "0.0.1", forRemoval = false)
     public Result<Void> assignPermissions(@PathVariable Long id, @RequestBody @Valid RoleAssignRequest request) {
-        service.assignPermissions(id, request.getIds());
+        authorizationService.assignPermissions(RoleAuthorizationAssembler.toPermissionAssignCommand(id, request));
         return Result.ok();
     }
 
     @PutMapping("/{id}/authorization")
     public Result<Void> saveAuthorization(@PathVariable Long id, @RequestBody @Valid RoleAuthorizationSaveRequest request) {
-        service.saveAuthorization(id, request);
+        authorizationService.saveAuthorization(RoleAuthorizationAssembler.toSaveCommand(id, request));
         return Result.ok();
     }
 

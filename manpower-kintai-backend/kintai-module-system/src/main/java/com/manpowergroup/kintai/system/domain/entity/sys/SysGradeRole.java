@@ -21,8 +21,10 @@ public class SysGradeRole {
     // ロールID
     private Long roleId;
 
+    // 作成者ID
     private Long createdBy;
 
+    // 作成日時
     @TableField(fill = com.baomidou.mybatisplus.annotation.FieldFill.INSERT)
     private LocalDateTime createdAt;
 }

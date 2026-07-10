@@ -18,6 +18,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
+// 打刻記録
 @Data
 @Accessors(chain = true)
 @TableName("att_record")
@@ -26,38 +27,54 @@ public class AttRecord {
     public static final int STANDARD_WORK_MINUTES = 480;
 
     @TableId(type = IdType.AUTO)
+    // 打刻記録ID
     private Long id;
 
+    // 社員ID
     private Long employeeId;
 
+    // 会社ID
     private Long companyId;
 
+    // 勤務日
     private LocalDate workDate;
 
+    // 出勤時刻
     private LocalTime clockIn;
 
+    // 退勤時刻
     private LocalTime clockOut;
 
+    // 出勤区分（ATTENDANCE_TYPE参照）
     private AttendanceType attendanceType;
 
+    // 実労働時間（分）
     private Integer workMinutes;
 
+    // 残業時間（分）
     private Integer overtimeMinutes;
 
+    // 備考
     private String remark;
 
+    // ステータス（0=未承認 1=承認済 2=否認）
     private AttRecordStatus status;
 
+    // 作成者ID
     private Long createdBy;
 
+    // 作成日時
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createdAt;
 
+    // 更新者ID
     private Long updatedBy;
 
+    // 更新日時
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private LocalDateTime updatedAt;
 
+    // 論理削除（0=有効 1=削除）
     @TableLogic
     private Integer isDeleted;
 

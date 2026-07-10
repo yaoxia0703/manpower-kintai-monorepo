@@ -1,8 +1,10 @@
 package com.manpowergroup.kintai.employee.controller.att;
 
-import com.manpowergroup.kintai.attendance.application.dto.TimesheetMonthResponse;
-import com.manpowergroup.kintai.attendance.application.dto.TimesheetSaveRequest;
-import com.manpowergroup.kintai.attendance.application.service.att.AttTimesheetService;
+import com.manpowergroup.kintai.attendance.application.assembler.timesheet.TimesheetAssembler;
+import com.manpowergroup.kintai.attendance.application.dto.timesheet.request.TimesheetSaveRequest;
+import com.manpowergroup.kintai.attendance.application.dto.timesheet.response.TimesheetMonthResponse;
+import com.manpowergroup.kintai.attendance.application.service.att.AttTimesheetQueryService;
+import com.manpowergroup.kintai.attendance.application.service.att.AttTimesheetRecordService;
 import com.manpowergroup.kintai.common.result.Result;
 import com.manpowergroup.kintai.framework.security.jwt.LoginPrincipal;
 import com.manpowergroup.kintai.system.application.service.emp.EmpEmployeeService;
@@ -24,7 +26,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class EmpTimesheetController {
 
-    private final AttTimesheetService timesheetService;
+    private final AttTimesheetQueryService timesheetQueryService;
+    private final AttTimesheetRecordService timesheetRecordService;
     private final EmpEmployeeService employeeService;
 
     @GetMapping
@@ -33,7 +36,8 @@ public class EmpTimesheetController {
             @RequestParam int year,
             @RequestParam int month) {
         EmpEmployee employee = employeeService.getById(principal.employeeId());
-        return Result.ok(timesheetService.getMonthlyTimesheet(employee.getId(), employee.getCompanyId(), year, month));
+        return Result.ok(timesheetQueryService.getMonthlyTimesheet(
+                TimesheetAssembler.toMonthQuery(employee.getId(), employee.getCompanyId(), year, month)));
     }
 
     @PutMapping
@@ -41,7 +45,8 @@ public class EmpTimesheetController {
             @AuthenticationPrincipal LoginPrincipal principal,
             @RequestBody @Valid TimesheetSaveRequest request) {
         EmpEmployee employee = employeeService.getById(principal.employeeId());
-        timesheetService.saveRecord(employee.getId(), employee.getCompanyId(), request);
+        timesheetRecordService.saveRecord(
+                TimesheetAssembler.toSaveCommand(employee.getId(), employee.getCompanyId(), request));
         return Result.ok();
     }
 
@@ -49,7 +54,7 @@ public class EmpTimesheetController {
     public Result<Void> deleteRecord(
             @AuthenticationPrincipal LoginPrincipal principal,
             @PathVariable Long recordId) {
-        timesheetService.deleteRecord(principal.employeeId(), recordId);
+        timesheetRecordService.deleteRecord(TimesheetAssembler.toDeleteCommand(principal.employeeId(), recordId));
         return Result.ok();
     }
 }

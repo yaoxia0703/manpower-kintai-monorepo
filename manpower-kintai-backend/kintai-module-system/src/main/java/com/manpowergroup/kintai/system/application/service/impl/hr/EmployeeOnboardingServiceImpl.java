@@ -12,7 +12,7 @@ import com.manpowergroup.kintai.system.application.service.emp.EmpAccountService
 import com.manpowergroup.kintai.system.application.service.emp.EmpEmployeePositionService;
 import com.manpowergroup.kintai.system.application.service.emp.EmpEmployeeService;
 import com.manpowergroup.kintai.system.application.service.hr.EmployeeOnboardingService;
-import com.manpowergroup.kintai.system.application.service.sys.SysEmployeeRoleService;
+import com.manpowergroup.kintai.system.application.service.sys.EmployeeRoleAssignmentService;
 import com.manpowergroup.kintai.system.domain.entity.emp.EmpAccount;
 import com.manpowergroup.kintai.system.domain.entity.emp.EmpEmployee;
 import com.manpowergroup.kintai.system.domain.entity.emp.EmpEmployeePosition;
@@ -43,7 +43,7 @@ public class EmployeeOnboardingServiceImpl implements EmployeeOnboardingService 
     private final EmpEmployeeService employeeService;
     private final EmpAccountService accountService;
     private final EmpEmployeePositionService positionService;
-    private final SysEmployeeRoleService employeeRoleService;
+    private final EmployeeRoleAssignmentService employeeRoleAssignmentService;
     private final EmpEmployeeMapper employeeMapper;
     private final OrgCompanyMapper companyMapper;
     private final OrgNodeMapper nodeMapper;
@@ -116,7 +116,7 @@ public class EmployeeOnboardingServiceImpl implements EmployeeOnboardingService 
                 EmployeeOnboardingAssembler.toPosition(request, employee.getId(), operatorEmployeeId));
 
         EmployeeOnboardingAssembler.toEmployeeRoles(request, employee.getId(), operatorEmployeeId)
-                .forEach(employeeRoleService::assign);
+                .forEach(employeeRoleAssignmentService::assign);
 
         return EmployeeOnboardingResponse.builder()
                 .employeeId(employee.getId())

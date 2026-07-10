@@ -1,6 +1,7 @@
 package com.manpowergroup.kintai.common.dto;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 import java.util.List;
@@ -9,12 +10,22 @@ import java.util.stream.Collectors;
 
 // ページングレスポンス共通DTO
 @Data
+@Schema(description = "ページングレスポンス")
 public class PageResult<T> {
 
+    @Schema(description = "データリスト")
     private List<T> records;
+
+    @Schema(description = "総件数", example = "100")
     private long total;
+
+    @Schema(description = "現在のページ番号", example = "1")
     private long page;
+
+    @Schema(description = "1ページあたりの件数", example = "10")
     private long size;
+
+    @Schema(description = "総ページ数", example = "10")
     private long pages;
 
     public static <T> PageResult<T> of(Page<T> page) {

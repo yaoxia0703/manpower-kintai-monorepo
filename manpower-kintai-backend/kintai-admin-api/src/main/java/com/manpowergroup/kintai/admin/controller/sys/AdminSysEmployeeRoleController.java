@@ -5,6 +5,7 @@ import com.manpowergroup.kintai.system.application.assembler.sys.EmployeeRoleAss
 import com.manpowergroup.kintai.system.application.dto.sys.response.EmployeeRoleResponse;
 import com.manpowergroup.kintai.system.application.dto.sys.request.EmployeeRoleAssignRequest;
 import com.manpowergroup.kintai.system.application.dto.sys.request.EmployeeRoleUpdateRequest;
+import com.manpowergroup.kintai.system.application.service.sys.EmployeeRoleAssignmentService;
 import com.manpowergroup.kintai.system.application.service.sys.SysEmployeeRoleService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,7 @@ import java.util.List;
 public class AdminSysEmployeeRoleController {
 
     private final SysEmployeeRoleService service;
+    private final EmployeeRoleAssignmentService assignmentService;
 
     @GetMapping
     public Result<List<EmployeeRoleResponse>> listActive(@RequestParam Long employeeId) {
@@ -31,17 +33,17 @@ public class AdminSysEmployeeRoleController {
 
     @PostMapping
     public Result<EmployeeRoleResponse> assign(@RequestBody @Valid EmployeeRoleAssignRequest request) {
-        return Result.ok(EmployeeRoleAssembler.toResponse(service.assign(EmployeeRoleAssembler.toCommand(request))));
+        return Result.ok(EmployeeRoleAssembler.toResponse(assignmentService.assign(EmployeeRoleAssembler.toCommand(request))));
     }
 
     @PutMapping("/{id}")
     public Result<EmployeeRoleResponse> update(@PathVariable Long id, @RequestBody @Valid EmployeeRoleUpdateRequest request) {
-        return Result.ok(EmployeeRoleAssembler.toResponse(service.update(id, EmployeeRoleAssembler.toCommand(request))));
+        return Result.ok(EmployeeRoleAssembler.toResponse(assignmentService.update(id, EmployeeRoleAssembler.toCommand(request))));
     }
 
     @DeleteMapping("/{id}")
     public Result<Void> revoke(@PathVariable Long id) {
-        service.revoke(id);
+        assignmentService.revoke(id);
         return Result.ok();
     }
 }
