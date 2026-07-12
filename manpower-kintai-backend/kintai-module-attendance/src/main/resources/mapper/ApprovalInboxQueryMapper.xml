@@ -10,6 +10,8 @@
         <result property="requestId" column="request_id"/>
         <result property="requestType" column="request_type"/>
         <result property="applicantId" column="applicant_id"/>
+        <result property="applicantEmployeeCode" column="applicant_employee_code"/>
+        <result property="applicantName" column="applicant_name"/>
         <result property="currentStep" column="current_step"/>
         <result property="totalSteps" column="total_steps"/>
         <result property="startDate" column="start_date"/>
@@ -23,6 +25,8 @@
                a.request_id,
                a.request_type,
                a.applicant_id,
+               applicant.employee_code AS applicant_employee_code,
+               CONCAT(applicant.last_name, ' ', applicant.first_name) AS applicant_name,
                a.current_step,
                a.total_steps,
                r.start_date,
@@ -36,6 +40,9 @@
         INNER JOIN att_request r
                 ON r.id = a.request_id
                AND r.is_deleted = 0
+        INNER JOIN emp_employee applicant
+                ON applicant.id = a.applicant_id
+               AND applicant.is_deleted = 0
         WHERE s.is_deleted = 0
           AND s.status = 'PENDING'
           AND a.status = 'PENDING'

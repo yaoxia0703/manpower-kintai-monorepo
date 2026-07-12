@@ -10,6 +10,8 @@
         <result property="requestId" column="request_id"/>
         <result property="requestType" column="request_type"/>
         <result property="applicantId" column="applicant_id"/>
+        <result property="applicantEmployeeCode" column="applicant_employee_code"/>
+        <result property="applicantName" column="applicant_name"/>
         <result property="currentStep" column="current_step"/>
         <result property="totalSteps" column="total_steps"/>
         <result property="status" column="status"/>
@@ -24,6 +26,8 @@
                type="com.manpowergroup.kintai.attendance.application.dto.wf.response.ApprovalStepItem">
         <id property="step" column="step"/>
         <result property="approverId" column="approver_id"/>
+        <result property="approverEmployeeCode" column="approver_employee_code"/>
+        <result property="approverName" column="approver_name"/>
         <result property="status" column="status"/>
         <result property="comment" column="comment"/>
         <result property="decidedAt" column="decided_at"/>
@@ -35,6 +39,8 @@
         <result property="requestId" column="request_id"/>
         <result property="requestType" column="request_type"/>
         <result property="applicantId" column="applicant_id"/>
+        <result property="applicantEmployeeCode" column="applicant_employee_code"/>
+        <result property="applicantName" column="applicant_name"/>
         <result property="status" column="status"/>
         <result property="submittedAt" column="submitted_at"/>
         <result property="completedAt" column="completed_at"/>
@@ -45,6 +51,8 @@
                a.request_id,
                a.request_type,
                a.applicant_id,
+               applicant.employee_code AS applicant_employee_code,
+               CONCAT(applicant.last_name, ' ', applicant.first_name) AS applicant_name,
                a.current_step,
                a.total_steps,
                a.status,
@@ -57,6 +65,9 @@
         INNER JOIN att_request r
                 ON r.id = a.request_id
                AND r.is_deleted = 0
+        INNER JOIN emp_employee applicant
+                ON applicant.id = a.applicant_id
+               AND applicant.is_deleted = 0
         WHERE a.id = #{approvalId}
           AND a.is_deleted = 0
           AND (a.applicant_id = #{viewerId}
@@ -72,15 +83,20 @@
     </select>
 
     <select id="selectSteps" resultMap="stepItemMap">
-        SELECT step,
-               approver_id,
-               status,
-               comment,
-               approved_at AS decided_at
-        FROM wf_approval_step
-        WHERE approval_id = #{approvalId}
-          AND is_deleted = 0
-        ORDER BY step ASC
+        SELECT s.step,
+               s.approver_id,
+               approver.employee_code AS approver_employee_code,
+               CONCAT(approver.last_name, ' ', approver.first_name) AS approver_name,
+               s.status,
+               s.comment,
+               s.approved_at AS decided_at
+        FROM wf_approval_step s
+        INNER JOIN emp_employee approver
+                ON approver.id = s.approver_id
+               AND approver.is_deleted = 0
+        WHERE s.approval_id = #{approvalId}
+          AND s.is_deleted = 0
+        ORDER BY s.step ASC
     </select>
 
     <select id="selectHistory" resultMap="historyItemMap">
@@ -88,10 +104,15 @@
                a.request_id,
                a.request_type,
                a.applicant_id,
+               applicant.employee_code AS applicant_employee_code,
+               CONCAT(applicant.last_name, ' ', applicant.first_name) AS applicant_name,
                a.status,
                a.created_at AS submitted_at,
                a.completed_at
         FROM wf_approval a
+        INNER JOIN emp_employee applicant
+                ON applicant.id = a.applicant_id
+               AND applicant.is_deleted = 0
         WHERE a.is_deleted = 0
           AND a.status &lt;&gt; 'PENDING'
           AND (a.applicant_id = #{viewerId}

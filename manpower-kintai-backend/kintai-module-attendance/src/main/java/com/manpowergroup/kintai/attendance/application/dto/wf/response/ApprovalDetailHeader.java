@@ -17,6 +17,8 @@ public class ApprovalDetailHeader {
     private Long requestId;
     private String requestType;
     private Long applicantId;
+    private String applicantEmployeeCode;
+    private String applicantName;
     private Integer currentStep;
     private Integer totalSteps;
     private ApprovalStatus status;

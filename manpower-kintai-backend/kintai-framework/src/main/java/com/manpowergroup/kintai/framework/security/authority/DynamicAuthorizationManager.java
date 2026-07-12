@@ -21,10 +21,7 @@ public class DynamicAuthorizationManager implements AuthorizationManager<Request
     private static final String SUPER_ADMIN = "ROLE_SUPER_ADMIN";
     // 個人自助系エンドポイント：ログインさえしていれば sys_permission を経由せず許可
     private static final List<String> AUTHENTICATED_ONLY_PATHS = List.of(
-            "/admin/sys/notification/**",
-            "/employee/notifications/**",
-            "/employee/att/requests/**",
-            "/employee/approvals/**"
+            "/employee/notifications/**"
     );
 
     private final PermissionRuleProvider permissionRuleProvider;

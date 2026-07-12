@@ -60,6 +60,8 @@ public class EmpEmployeeServiceImpl extends ServiceImpl<EmpEmployeeMapper, EmpEm
                 .eq(EmpEmployee::getCompanyId, companyId);
         if (StringUtils.hasText(keyword)) {
             wrapper.and(q -> q
+                    .like(EmpEmployee::getEmployeeCode, keyword)
+                    .or()
                     .like(EmpEmployee::getLastName, keyword)
                     .or()
                     .like(EmpEmployee::getFirstName, keyword)

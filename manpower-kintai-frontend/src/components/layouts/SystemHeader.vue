@@ -140,8 +140,7 @@ const userInitial = computed(() => {
 })
 
 const displayMenus = computed<HeaderMenu[]>(() => {
-  const menus = permissionStore.menus
-  const dynamicMenus = menus
+  return permissionStore.menus
     .filter((menu) => menu.visible !== 0)
     .sort((a, b) => (a.sort ?? 0) - (b.sort ?? 0))
     .map((menu) => ({
@@ -150,20 +149,6 @@ const displayMenus = computed<HeaderMenu[]>(() => {
       path: menu.path,
       chevron: menu.type === 1,
     }))
-
-  const workflowMenus: HeaderMenu[] = [
-    { name: '勤怠申請', code: 'attendance-requests', path: '/admin/requests' },
-    { name: '承認', code: 'employee-approvals', path: '/admin/approvals' },
-  ]
-  const paths = new Set(
-    dynamicMenus
-      .map((menu) => menu.path)
-      .filter((path): path is string => typeof path === 'string' && path.length > 0),
-  )
-  return [
-    ...dynamicMenus,
-    ...workflowMenus.filter((menu) => !menu.path || !paths.has(menu.path)),
-  ]
 })
 
 async function handleUserCommand(command: string) {

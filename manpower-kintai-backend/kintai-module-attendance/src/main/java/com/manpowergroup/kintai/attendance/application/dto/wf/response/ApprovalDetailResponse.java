@@ -11,6 +11,8 @@ public record ApprovalDetailResponse(
         Long requestId,
         String requestType,
         Long applicantId,
+        String applicantEmployeeCode,
+        String applicantName,
         Integer currentStep,
         Integer totalSteps,
         ApprovalStatus status,
@@ -25,7 +27,8 @@ public record ApprovalDetailResponse(
             ApprovalDetailHeader header, List<ApprovalStepItem> steps) {
         return new ApprovalDetailResponse(
                 header.getApprovalId(), header.getRequestId(), header.getRequestType(),
-                header.getApplicantId(), header.getCurrentStep(), header.getTotalSteps(),
+                header.getApplicantId(), header.getApplicantEmployeeCode(), header.getApplicantName(),
+                header.getCurrentStep(), header.getTotalSteps(),
                 header.getStatus(), header.getStartDate(), header.getEndDate(),
                 header.getReason(), header.getSubmittedAt(), header.getCompletedAt(),
                 List.copyOf(steps));

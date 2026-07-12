@@ -16,6 +16,8 @@ public class ApprovalHistoryItem {
     private Long requestId;
     private String requestType;
     private Long applicantId;
+    private String applicantEmployeeCode;
+    private String applicantName;
     private ApprovalStatus status;
     private LocalDateTime submittedAt;
     private LocalDateTime completedAt;

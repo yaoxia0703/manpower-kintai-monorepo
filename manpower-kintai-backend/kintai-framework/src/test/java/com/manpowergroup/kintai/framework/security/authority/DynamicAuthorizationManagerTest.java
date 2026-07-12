@@ -96,17 +96,34 @@ class DynamicAuthorizationManagerTest {
     }
 
     @Test
-    void grantsAuthenticatedEmployeeSelfServiceAccessWithoutPermissionRule() {
+    void grantsOnlyNotificationSelfServiceAccessWithoutPermissionRule() {
         DynamicAuthorizationManager manager = new DynamicAuthorizationManager(List::of);
 
         assertTrue(manager.authorize(
                 authenticated("ROLE_EMPLOYEE"),
                 context("GET", "/employee/notifications/unread-count")).isGranted());
-        assertTrue(manager.authorize(
+        assertFalse(manager.authorize(
                 authenticated("ROLE_EMPLOYEE"),
                 context("POST", "/employee/att/requests")).isGranted());
-        assertTrue(manager.authorize(
+        assertFalse(manager.authorize(
                 authenticated("ROLE_EMPLOYEE"),
+                context("GET", "/employee/approvals/pending")).isGranted());
+    }
+
+    @Test
+    void grantsRequestAndApprovalEndpointsOnlyWithMatchingAuthority() {
+        DynamicAuthorizationManager manager = new DynamicAuthorizationManager(() -> List.of(
+                new PermissionRule("employee:request:create", "POST", "/employee/att/requests"),
+                new PermissionRule("manager:approval:read", "GET", "/employee/approvals/**")));
+
+        assertTrue(manager.authorize(
+                authenticated("employee:request:create"),
+                context("POST", "/employee/att/requests")).isGranted());
+        assertFalse(manager.authorize(
+                authenticated("employee:request:create"),
+                context("GET", "/employee/approvals/pending")).isGranted());
+        assertTrue(manager.authorize(
+                authenticated("manager:approval:read"),
                 context("GET", "/employee/approvals/pending")).isGranted());
     }
 

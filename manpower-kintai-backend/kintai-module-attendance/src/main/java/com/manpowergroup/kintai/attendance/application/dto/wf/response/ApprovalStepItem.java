@@ -14,6 +14,8 @@ public class ApprovalStepItem {
 
     private Integer step;
     private Long approverId;
+    private String approverEmployeeCode;
+    private String approverName;
     private ApprovalStatus status;
     private String comment;
     private LocalDateTime decidedAt;

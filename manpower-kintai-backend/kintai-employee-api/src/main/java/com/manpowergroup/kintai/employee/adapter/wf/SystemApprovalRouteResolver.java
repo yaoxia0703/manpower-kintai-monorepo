@@ -26,6 +26,7 @@ public class SystemApprovalRouteResolver implements ApprovalRouteResolver {
     private static final String DIRECT_ONLY = "DIRECT_ONLY";
     private static final String REACH_GRADE = "REACH_GRADE";
     private static final String REACH_DEPARTMENT = "REACH_DEPARTMENT";
+    private static final Set<String> APPROVAL_GRADE_LEVELS = Set.of("L1", "L2", "L3");
 
     private final EmpEmployeePositionService positionService;
     private final OrgNodeService nodeService;
@@ -50,6 +51,10 @@ public class SystemApprovalRouteResolver implements ApprovalRouteResolver {
             if (managerId == null || Objects.equals(managerId, employeeId)) {
                 continue;
             }
+            String managerGradeLevel = managerGradeLevel(managerId, companyId);
+            if (!APPROVAL_GRADE_LEVELS.contains(managerGradeLevel)) {
+                continue;
+            }
             approvers.add(managerId);
 
             if (DIRECT_ONLY.equals(stopCondition)) {
@@ -57,7 +62,7 @@ public class SystemApprovalRouteResolver implements ApprovalRouteResolver {
             } else if (REACH_DEPARTMENT.equals(stopCondition)) {
                 stopReached = Objects.equals(node.getDeptFunction(), rule.getStopDeptFunc());
             } else if (REACH_GRADE.equals(stopCondition)) {
-                stopReached = managerHasGrade(managerId, companyId, rule.getStopGradeLevel());
+                stopReached = Objects.equals(managerGradeLevel, rule.getStopGradeLevel());
             } else {
                 throw invalidRoute("unsupported approval stop condition: " + stopCondition);
             }
@@ -75,14 +80,14 @@ public class SystemApprovalRouteResolver implements ApprovalRouteResolver {
         return List.copyOf(approvers);
     }
 
-    private boolean managerHasGrade(Long managerId, Long companyId, String targetGradeLevel) {
+    private String managerGradeLevel(Long managerId, Long companyId) {
         EmpEmployeePosition managerPosition = positionService.getPrimaryByEmployee(managerId);
         requireCompany(managerPosition.getCompanyId(), companyId,
                 "approver primary position belongs to another company");
         OrgGrade grade = gradeService.getById(managerPosition.getGradeId());
         requireCompany(grade.getCompanyId(), companyId,
                 "approver grade belongs to another company");
-        return Objects.equals(grade.getGradeLevel(), targetGradeLevel);
+        return grade.getGradeLevel();
     }
 
     private void requireCompany(Long actualCompanyId, Long expectedCompanyId, String detail) {

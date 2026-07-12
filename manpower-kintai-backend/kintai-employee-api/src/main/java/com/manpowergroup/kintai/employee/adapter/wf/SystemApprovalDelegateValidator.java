@@ -16,6 +16,7 @@ import java.util.Objects;
 public class SystemApprovalDelegateValidator implements ApprovalDelegateValidator {
 
     private final EmpEmployeeService employeeService;
+    private final ApprovalManagerEligibility approvalManagerEligibility;
 
     @Override
     public void validateTarget(Long employeeId, Long companyId) {
@@ -25,6 +26,9 @@ public class SystemApprovalDelegateValidator implements ApprovalDelegateValidato
         }
         if (employee.getStatus() != Status.ENABLED) {
             throw invalidTarget("delegate approver is not enabled");
+        }
+        if (!approvalManagerEligibility.canApprove(employeeId)) {
+            throw invalidTarget("delegate employee does not have approval authority");
         }
     }
 

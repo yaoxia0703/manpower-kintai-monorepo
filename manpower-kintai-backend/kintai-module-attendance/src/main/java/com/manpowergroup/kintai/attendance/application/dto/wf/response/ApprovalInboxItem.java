@@ -16,6 +16,8 @@ public class ApprovalInboxItem {
     private Long requestId;
     private String requestType;
     private Long applicantId;
+    private String applicantEmployeeCode;
+    private String applicantName;
     private Integer currentStep;
     private Integer totalSteps;
     private LocalDate startDate;

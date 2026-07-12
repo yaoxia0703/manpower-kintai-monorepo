@@ -16,8 +16,10 @@ class SystemApprovalDelegateValidatorTest {
     @Test
     void acceptsEnabledEmployeeFromApprovalCompany() {
         EmpEmployeeService employeeService = Mockito.mock(EmpEmployeeService.class);
-        SystemApprovalDelegateValidator validator = new SystemApprovalDelegateValidator(employeeService);
+        ApprovalManagerEligibility eligibility = Mockito.mock(ApprovalManagerEligibility.class);
+        SystemApprovalDelegateValidator validator = new SystemApprovalDelegateValidator(employeeService, eligibility);
         when(employeeService.getById(30L)).thenReturn(employee(10L, Status.ENABLED));
+        when(eligibility.canApprove(30L)).thenReturn(true);
 
         assertDoesNotThrow(() -> validator.validateTarget(30L, 10L));
     }
@@ -25,11 +27,23 @@ class SystemApprovalDelegateValidatorTest {
     @Test
     void rejectsEmployeeFromAnotherCompanyOrDisabledEmployee() {
         EmpEmployeeService employeeService = Mockito.mock(EmpEmployeeService.class);
-        SystemApprovalDelegateValidator validator = new SystemApprovalDelegateValidator(employeeService);
+        ApprovalManagerEligibility eligibility = Mockito.mock(ApprovalManagerEligibility.class);
+        SystemApprovalDelegateValidator validator = new SystemApprovalDelegateValidator(employeeService, eligibility);
         when(employeeService.getById(30L)).thenReturn(employee(11L, Status.ENABLED));
         assertThrows(BizException.class, () -> validator.validateTarget(30L, 10L));
 
         when(employeeService.getById(30L)).thenReturn(employee(10L, Status.DISABLED));
+        assertThrows(BizException.class, () -> validator.validateTarget(30L, 10L));
+    }
+
+    @Test
+    void rejectsEmployeeWithoutApprovalAuthority() {
+        EmpEmployeeService employeeService = Mockito.mock(EmpEmployeeService.class);
+        ApprovalManagerEligibility eligibility = Mockito.mock(ApprovalManagerEligibility.class);
+        SystemApprovalDelegateValidator validator = new SystemApprovalDelegateValidator(employeeService, eligibility);
+        when(employeeService.getById(30L)).thenReturn(employee(10L, Status.ENABLED));
+        when(eligibility.canApprove(30L)).thenReturn(false);
+
         assertThrows(BizException.class, () -> validator.validateTarget(30L, 10L));
     }
 

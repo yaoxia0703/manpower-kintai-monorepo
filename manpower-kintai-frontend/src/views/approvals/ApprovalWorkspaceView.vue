@@ -25,7 +25,9 @@
         height="100%"
       >
         <el-table-column prop="approvalId" label="承認ID" width="90" />
-        <el-table-column prop="applicantId" label="申請者ID" width="105" />
+        <el-table-column label="申請者" min-width="190">
+          <template #default="{ row }">{{ applicantLabel(row) }}</template>
+        </el-table-column>
         <el-table-column label="種別" min-width="130">
           <template #default="{ row }">{{ requestTypeLabel(row.requestType) }}</template>
         </el-table-column>
@@ -72,7 +74,9 @@
         @row-click="handleHistoryRowClick"
       >
         <el-table-column prop="approvalId" label="承認ID" width="90" />
-        <el-table-column prop="applicantId" label="申請者ID" width="105" />
+        <el-table-column label="申請者" min-width="190">
+          <template #default="{ row }">{{ applicantLabel(row) }}</template>
+        </el-table-column>
         <el-table-column label="種別" min-width="140">
           <template #default="{ row }">{{ requestTypeLabel(row.requestType) }}</template>
         </el-table-column>
@@ -107,7 +111,7 @@
         :type="decisionAction === 'approve' ? 'success' : 'warning'"
         :closable="false"
         show-icon
-        :title="decisionTarget ? `${requestTypeLabel(decisionTarget.requestType)} / 申請者 #${decisionTarget.applicantId}` : ''"
+        :title="decisionTarget ? `${requestTypeLabel(decisionTarget.requestType)} / ${applicantLabel(decisionTarget)}` : ''"
       />
       <el-form label-position="top" class="dialog-form">
         <el-form-item label="コメント">
@@ -132,8 +136,24 @@
       width="min(460px, calc(100vw - 24px))"
     >
       <el-form label-position="top">
-        <el-form-item label="委譲先社員ID" required>
-          <el-input-number v-model="delegateEmployeeId" :min="1" class="full-width" />
+        <el-form-item label="委譲先" required>
+          <el-select
+            v-model="delegateEmployeeId"
+            class="full-width"
+            filterable
+            remote
+            reserve-keyword
+            :remote-method="loadDelegateCandidates"
+            :loading="delegateLoading"
+            placeholder="社員番号または氏名"
+          >
+            <el-option
+              v-for="candidate in delegateCandidates"
+              :key="candidate.employeeId"
+              :label="`${candidate.employeeCode} / ${candidate.displayName}`"
+              :value="candidate.employeeId"
+            />
+          </el-select>
         </el-form-item>
       </el-form>
       <template #footer>
@@ -163,7 +183,9 @@
           </div>
 
           <el-descriptions :column="2" border>
-            <el-descriptions-item label="申請者">#{{ detail.applicantId }}</el-descriptions-item>
+            <el-descriptions-item label="申請者">
+              {{ detail.applicantEmployeeCode }} / {{ detail.applicantName }}
+            </el-descriptions-item>
             <el-descriptions-item label="申請ID">#{{ detail.requestId }}</el-descriptions-item>
             <el-descriptions-item label="期間" :span="2">
               {{ formatPeriod(detail.startDate, detail.endDate) }}
@@ -181,7 +203,7 @@
             >
               <div class="step-row">
                 <strong>ステップ {{ step.step }}</strong>
-                <span>承認者 #{{ step.approverId }}</span>
+                <span>{{ step.approverEmployeeCode }} / {{ step.approverName }}</span>
                 <el-tag size="small" :type="statusMeta(step.status).type" effect="plain">
                   {{ statusMeta(step.status).label }}
                 </el-tag>
@@ -207,8 +229,10 @@ import {
   fetchApprovalHistory,
   fetchPendingApprovals,
   rejectRequest,
+  searchApprovalDelegates,
 } from '@/api/attendance/approvals'
 import type {
+  ApprovalDelegateCandidate,
   ApprovalDetail,
   ApprovalHistoryItem,
   ApprovalInboxItem,
@@ -235,6 +259,8 @@ const decisionComment = ref('')
 const delegateVisible = ref(false)
 const delegateTarget = ref<ApprovalInboxItem | null>(null)
 const delegateEmployeeId = ref<number | null>(null)
+const delegateCandidates = ref<ApprovalDelegateCandidate[]>([])
+const delegateLoading = ref(false)
 const detailVisible = ref(false)
 const detailLoading = ref(false)
 const detail = ref<ApprovalDetail | null>(null)
@@ -286,7 +312,23 @@ async function submitDecision() {
 function openDelegate(target: ApprovalInboxItem) {
   delegateTarget.value = target
   delegateEmployeeId.value = null
+  delegateCandidates.value = []
   delegateVisible.value = true
+  void loadDelegateCandidates('')
+}
+
+async function loadDelegateCandidates(keyword: string) {
+  delegateLoading.value = true
+  try {
+    const response = await searchApprovalDelegates(keyword)
+    delegateCandidates.value = (response.data.data.records ?? []).filter(
+      (candidate) => candidate.employeeId !== delegateTarget.value?.applicantId,
+    )
+  } catch {
+    delegateCandidates.value = []
+  } finally {
+    delegateLoading.value = false
+  }
 }
 
 async function submitDelegate() {
@@ -347,6 +389,10 @@ function requestTypeLabel(type: RequestType) {
     LEAVE_OF_ABSENCE: '休職',
   }
   return labels[type] ?? type
+}
+
+function applicantLabel(item: ApprovalInboxItem | ApprovalHistoryItem) {
+  return `${item.applicantEmployeeCode} / ${item.applicantName}`
 }
 
 function statusMeta(status: ApprovalStatus) {

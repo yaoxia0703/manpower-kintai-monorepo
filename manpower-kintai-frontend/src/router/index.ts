@@ -50,11 +50,13 @@ const router = createRouter({
           path: 'requests',
           name: 'attendance-requests',
           component: AttendanceRequestView,
+          meta: { permission: 'employee:request:read' },
         },
         {
           path: 'approvals',
           name: 'employee-approvals',
           component: ApprovalWorkspaceView,
+          meta: { permission: 'manager:approval:read' },
         },
         {
           path: 'subordinates',

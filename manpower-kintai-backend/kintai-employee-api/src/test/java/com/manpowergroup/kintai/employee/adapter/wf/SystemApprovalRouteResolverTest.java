@@ -23,9 +23,11 @@ import static org.mockito.Mockito.when;
 class SystemApprovalRouteResolverTest {
 
     @Test
-    void directOnlyUsesNearestManagerAndSkipsApplicant() {
+    void directOnlySkipsLeaderAndUsesNearestSectionManagerOrAbove() {
         Fixture fixture = fixture();
-        fixture.nodes(1L, 30L);
+        fixture.nodes(20L, 30L);
+        fixture.managerGrade(20L, 2L, "L4");
+        fixture.managerGrade(30L, 3L, "L3");
 
         assertEquals(List.of(30L), fixture.resolver.resolveApprovers(1L, 10L, null));
     }
@@ -34,6 +36,8 @@ class SystemApprovalRouteResolverTest {
     void reachDepartmentIncludesManagersThroughMatchingDepartment() {
         Fixture fixture = fixture();
         fixture.nodes(20L, 30L);
+        fixture.managerGrade(20L, 2L, "L3");
+        fixture.managerGrade(30L, 3L, "L2");
         when(fixture.nodeService.getById(100L)).thenReturn(node(100L, 20L, "SALES"));
         when(fixture.nodeService.getById(200L)).thenReturn(node(200L, 30L, "HR"));
         WfApprovalRule rule = WfApprovalRule.create(
@@ -48,13 +52,11 @@ class SystemApprovalRouteResolverTest {
     void reachGradeIncludesManagersThroughMatchingGrade() {
         Fixture fixture = fixture();
         fixture.nodes(20L, 30L);
-        when(fixture.positionService.getPrimaryByEmployee(20L)).thenReturn(position(20L, 2L));
-        when(fixture.positionService.getPrimaryByEmployee(30L)).thenReturn(position(30L, 3L));
-        when(fixture.gradeService.getById(2L)).thenReturn(grade(2L, "L3"));
-        when(fixture.gradeService.getById(3L)).thenReturn(grade(3L, "L4"));
+        fixture.managerGrade(20L, 2L, "L3");
+        fixture.managerGrade(30L, 3L, "L2");
         WfApprovalRule rule = WfApprovalRule.create(
                 10L, "PAID_LEAVE", "REACH_GRADE",
-                "L4", null, null, 1, Status.ENABLED);
+                "L2", null, null, 1, Status.ENABLED);
 
         assertEquals(List.of(20L, 30L),
                 fixture.resolver.resolveApprovers(1L, 10L, rule));
@@ -64,6 +66,8 @@ class SystemApprovalRouteResolverTest {
     void rejectsRouteWhenConfiguredStopConditionCannotBeReached() {
         Fixture fixture = fixture();
         fixture.nodes(20L, 30L);
+        fixture.managerGrade(20L, 2L, "L3");
+        fixture.managerGrade(30L, 3L, "L2");
         WfApprovalRule rule = WfApprovalRule.create(
                 10L, "PAID_LEAVE", "REACH_DEPARTMENT",
                 null, "FINANCE", null, 1, Status.ENABLED);
@@ -123,6 +127,15 @@ class SystemApprovalRouteResolverTest {
         private void nodes(Long directManager, Long parentManager) {
             when(nodeService.getById(100L)).thenReturn(node(100L, directManager, "SALES"));
             when(nodeService.getById(200L)).thenReturn(node(200L, parentManager, "GENERAL"));
+        }
+
+        private void managerGrade(Long managerId, Long gradeId, String level) {
+            when(positionService.getPrimaryByEmployee(managerId)).thenReturn(
+                    EmpEmployeePosition.assign(
+                            managerId, 10L, null, gradeId, 1, null, null, Status.ENABLED));
+            when(gradeService.getById(gradeId)).thenReturn(
+                    OrgGrade.create(10L, "Grade", "G" + gradeId, level, 1, Status.ENABLED)
+                            .setId(gradeId));
         }
 
         private OrgNode node(Long id, Long managerId, String departmentFunction) {

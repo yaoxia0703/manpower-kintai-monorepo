@@ -30,6 +30,8 @@ export interface ApprovalInboxItem {
   requestId: number
   requestType: RequestType
   applicantId: number
+  applicantEmployeeCode: string
+  applicantName: string
   currentStep: number
   totalSteps: number
   startDate: string
@@ -43,6 +45,8 @@ export interface ApprovalHistoryItem {
   requestId: number
   requestType: RequestType
   applicantId: number
+  applicantEmployeeCode: string
+  applicantName: string
   status: ApprovalStatus
   submittedAt?: string | null
   completedAt?: string | null
@@ -51,6 +55,8 @@ export interface ApprovalHistoryItem {
 export interface ApprovalStep {
   step: number
   approverId: number
+  approverEmployeeCode: string
+  approverName: string
   status: ApprovalStatus
   comment?: string | null
   decidedAt?: string | null
@@ -61,6 +67,8 @@ export interface ApprovalDetail {
   requestId: number
   requestType: RequestType
   applicantId: number
+  applicantEmployeeCode: string
+  applicantName: string
   currentStep: number
   totalSteps: number
   status: ApprovalStatus
@@ -70,4 +78,10 @@ export interface ApprovalDetail {
   submittedAt?: string | null
   completedAt?: string | null
   steps: ApprovalStep[]
+}
+
+export interface ApprovalDelegateCandidate {
+  employeeId: number
+  employeeCode: string
+  displayName: string
 }
