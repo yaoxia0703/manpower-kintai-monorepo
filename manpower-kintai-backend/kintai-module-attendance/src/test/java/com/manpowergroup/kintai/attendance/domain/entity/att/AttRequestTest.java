@@ -69,6 +69,16 @@ class AttRequestTest {
     }
 
     @Test
+    void cancelRecordsActor() {
+        AttRequest request = createRequest();
+
+        request.cancel(2L);
+
+        assertEquals(ApprovalStatus.CANCELLED, request.getStatus());
+        assertEquals(2L, request.getUpdatedBy());
+    }
+
+    @Test
     void approvedRequestCannotChangeStatusAgain() {
         AttRequest request = AttRequest.pending();
         request.approve();
@@ -96,5 +106,72 @@ class AttRequestTest {
         assertThrows(BizException.class, request::approve);
         assertThrows(BizException.class, request::reject);
         assertThrows(BizException.class, request::cancel);
+    }
+
+    @Test
+    void createRejectsEndDateBeforeStartDate() {
+        assertThrows(BizException.class, () -> AttRequest.create(
+                1L,
+                10L,
+                "PAID_LEAVE",
+                LocalDate.of(2026, 7, 2),
+                LocalDate.of(2026, 7, 1),
+                null,
+                null,
+                BigDecimal.ONE,
+                null,
+                "leave"));
+    }
+
+    @Test
+    void pendingRequestCanUpdateDetails() {
+        AttRequest request = createRequest();
+
+        request.updateDetails(
+                "OVERTIME",
+                LocalDate.of(2026, 7, 10),
+                LocalDate.of(2026, 7, 10),
+                LocalTime.of(18, 0),
+                LocalTime.of(20, 0),
+                null,
+                120,
+                "overtime",
+                2L);
+
+        assertEquals("OVERTIME", request.getRequestType());
+        assertEquals(120, request.getMinutes());
+        assertEquals("overtime", request.getReason());
+        assertEquals(2L, request.getUpdatedBy());
+    }
+
+    @Test
+    void approvedRequestCannotUpdateDetails() {
+        AttRequest request = createRequest();
+        request.approve();
+
+        assertThrows(BizException.class, () -> request.updateDetails(
+                "OVERTIME",
+                LocalDate.of(2026, 7, 10),
+                LocalDate.of(2026, 7, 10),
+                LocalTime.of(18, 0),
+                LocalTime.of(20, 0),
+                null,
+                120,
+                "overtime",
+                2L));
+    }
+
+    private AttRequest createRequest() {
+        return AttRequest.create(
+                1L,
+                10L,
+                "PAID_LEAVE",
+                LocalDate.of(2026, 7, 1),
+                LocalDate.of(2026, 7, 1),
+                null,
+                null,
+                BigDecimal.ONE,
+                null,
+                "leave");
     }
 }

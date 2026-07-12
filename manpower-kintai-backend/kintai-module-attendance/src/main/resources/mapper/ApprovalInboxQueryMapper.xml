@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.manpowergroup.kintai.attendance.infrastructure.mapper.wf.ApprovalInboxQueryMapper">
+
+    <resultMap id="approvalInboxItemMap"
+               type="com.manpowergroup.kintai.attendance.application.dto.wf.response.ApprovalInboxItem">
+        <id property="approvalId" column="approval_id"/>
+        <result property="requestId" column="request_id"/>
+        <result property="requestType" column="request_type"/>
+        <result property="applicantId" column="applicant_id"/>
+        <result property="currentStep" column="current_step"/>
+        <result property="totalSteps" column="total_steps"/>
+        <result property="startDate" column="start_date"/>
+        <result property="endDate" column="end_date"/>
+        <result property="reason" column="reason"/>
+        <result property="submittedAt" column="submitted_at"/>
+    </resultMap>
+
+    <select id="selectCurrentPendingByApprover" resultMap="approvalInboxItemMap">
+        SELECT a.id AS approval_id,
+               a.request_id,
+               a.request_type,
+               a.applicant_id,
+               a.current_step,
+               a.total_steps,
+               r.start_date,
+               r.end_date,
+               r.reason,
+               a.created_at AS submitted_at
+        FROM wf_approval_step s
+        INNER JOIN wf_approval a
+                ON a.id = s.approval_id
+               AND a.is_deleted = 0
+        INNER JOIN att_request r
+                ON r.id = a.request_id
+               AND r.is_deleted = 0
+        WHERE s.is_deleted = 0
+          AND s.status = 'PENDING'
+          AND a.status = 'PENDING'
+          AND r.status = 'PENDING'
+          AND s.step = a.current_step
+          AND ((a.escalated = 0 AND s.approver_id = #{approverId})
+               OR (a.escalated = 1 AND a.escalated_to = #{approverId}))
+        ORDER BY a.created_at ASC, a.id ASC
+    </select>
+</mapper>

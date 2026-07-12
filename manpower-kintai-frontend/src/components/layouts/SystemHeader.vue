@@ -61,6 +61,7 @@
                 :key="notification.id"
                 class="notification-item"
                 type="button"
+                @click="handleNotificationClick(notification)"
               >
                 <span class="notification-item-title">{{ notification.title }}</span>
                 <span class="notification-item-content">{{ notification.content }}</span>
@@ -103,9 +104,11 @@
 <script setup lang="ts">
 import { Bell, Refresh } from '@element-plus/icons-vue'
 import { computed, onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import {
   fetchUnreadNotificationCount,
   fetchUnreadNotifications,
+  markNotificationsAsRead,
 } from '@/api/system/notification'
 import MenuItem from '@/components/layouts/MenuItem.vue'
 import { useAuthStore } from '@/stores/auth'
@@ -121,6 +124,7 @@ interface HeaderMenu {
 }
 
 const authStore = useAuthStore()
+const router = useRouter()
 const userStore = useUserStore()
 const permissionStore = usePermissionStore()
 const unreadCount = ref(0)
@@ -137,8 +141,7 @@ const userInitial = computed(() => {
 
 const displayMenus = computed<HeaderMenu[]>(() => {
   const menus = permissionStore.menus
-
-  return menus
+  const dynamicMenus = menus
     .filter((menu) => menu.visible !== 0)
     .sort((a, b) => (a.sort ?? 0) - (b.sort ?? 0))
     .map((menu) => ({
@@ -147,6 +150,20 @@ const displayMenus = computed<HeaderMenu[]>(() => {
       path: menu.path,
       chevron: menu.type === 1,
     }))
+
+  const workflowMenus: HeaderMenu[] = [
+    { name: '勤怠申請', code: 'attendance-requests', path: '/admin/requests' },
+    { name: '承認', code: 'employee-approvals', path: '/admin/approvals' },
+  ]
+  const paths = new Set(
+    dynamicMenus
+      .map((menu) => menu.path)
+      .filter((path): path is string => typeof path === 'string' && path.length > 0),
+  )
+  return [
+    ...dynamicMenus,
+    ...workflowMenus.filter((menu) => !menu.path || !paths.has(menu.path)),
+  ]
 })
 
 async function handleUserCommand(command: string) {
@@ -181,6 +198,23 @@ async function loadNotifications() {
 
 function handleNotificationOpen() {
   void loadNotifications()
+}
+
+async function handleNotificationClick(notification: SysNotification) {
+  notifications.value = notifications.value.filter((item) => item.id !== notification.id)
+  unreadCount.value = Math.max(0, unreadCount.value - 1)
+  try {
+    await markNotificationsAsRead([notification.id])
+  } catch {
+    void loadUnreadCount()
+  }
+
+  if (!notification.refId) return
+  const path =
+    notification.type === 'REQUEST_APPROVED' || notification.type === 'REQUEST_REJECTED'
+      ? '/admin/requests'
+      : '/admin/approvals'
+  await router.push({ path, query: { requestId: String(notification.refId) } })
 }
 
 function formatNotificationTime(value?: string | null) {
@@ -308,9 +342,13 @@ onMounted(() => {
   background: transparent;
   padding: 10px 2px;
   color: inherit;
-  cursor: default;
+  cursor: pointer;
   font: inherit;
   text-align: left;
+}
+
+.notification-item:hover {
+  background: var(--el-fill-color-light);
 }
 
 .notification-item:last-child {

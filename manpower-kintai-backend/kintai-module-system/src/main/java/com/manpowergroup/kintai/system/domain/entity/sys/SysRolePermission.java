@@ -3,19 +3,21 @@ package com.manpowergroup.kintai.system.domain.entity.sys;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.experimental.Accessors;
 
 import java.time.LocalDateTime;
 
 // ロール権限関連
-@Data
+@Getter
+@Setter(AccessLevel.PRIVATE)
 @NoArgsConstructor
-@AllArgsConstructor
 @Accessors(chain = true)
 @TableName("sys_role_permission")
+/** ロールと権限の割当関係を表す。 */
 public class SysRolePermission {
 
     // ロールID
@@ -30,5 +32,12 @@ public class SysRolePermission {
     // 作成日時
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createdAt;
+
+    /** ロールと権限を関連付ける。 */
+    public static SysRolePermission link(Long roleId, Long permissionId) {
+        return new SysRolePermission()
+                .setRoleId(roleId)
+                .setPermissionId(permissionId);
+    }
 }
 

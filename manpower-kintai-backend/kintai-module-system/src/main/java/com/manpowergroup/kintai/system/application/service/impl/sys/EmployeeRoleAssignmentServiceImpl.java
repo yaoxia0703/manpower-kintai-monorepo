@@ -26,12 +26,12 @@ public class EmployeeRoleAssignmentServiceImpl implements EmployeeRoleAssignment
                 .eq(SysEmployeeRole::getCompanyId, command.companyId())
                 .count() > 0;
         if (exists) throw new BizException(SystemErrorCode.EMPLOYEE_ROLE_ALREADY_EXISTS);
-        SysEmployeeRole employeeRole = new SysEmployeeRole()
-                .setEmployeeId(command.employeeId())
-                .setRoleId(command.roleId())
-                .setCompanyId(command.companyId())
-                .setStartDate(command.startDate())
-                .setEndDate(command.endDate());
+        SysEmployeeRole employeeRole = SysEmployeeRole.assign(
+                command.employeeId(),
+                command.roleId(),
+                command.companyId(),
+                command.startDate(),
+                command.endDate());
         employeeRoleService.save(employeeRole);
         return employeeRole;
     }
@@ -40,8 +40,7 @@ public class EmployeeRoleAssignmentServiceImpl implements EmployeeRoleAssignment
     @Transactional
     public SysEmployeeRole update(Long id, EmployeeRoleUpdateCommand command) {
         SysEmployeeRole existing = employeeRoleService.getById(id);
-        existing.setStartDate(command.startDate())
-                .setEndDate(command.endDate());
+        existing.changeValidity(command.startDate(), command.endDate());
         employeeRoleService.updateById(existing);
         return existing;
     }

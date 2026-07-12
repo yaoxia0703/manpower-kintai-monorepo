@@ -2,18 +2,23 @@ package com.manpowergroup.kintai.system.domain.entity.sys;
 
 import com.baomidou.mybatisplus.annotation.*;
 import com.manpowergroup.kintai.common.enums.Status;
-import lombok.Data;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.experimental.Accessors;
 
 import java.time.LocalDateTime;
 
 // 列挙型マスタ（ORG_NODE_TYPE / GRADE_LEVEL 等）
-@Data
+@Getter
+@Setter(AccessLevel.PRIVATE)
 @Accessors(chain = true)
 @TableName("sys_enum_type")
+/** 列挙型の名称、並び順および有効状態を管理する。 */
 public class SysEnumType {
 
     @TableId(type = IdType.AUTO)
+    @Setter
     // 列挙型ID
     private Long id;
 
@@ -49,6 +54,24 @@ public class SysEnumType {
     // 論理削除（0=有効 1=削除）
     @TableLogic
     private Integer isDeleted;
+
+    /** 列挙型を作成し、未指定の状態を有効に初期化する。 */
+    public static SysEnumType create(String code, String name, String remark, Integer sort, Status status) {
+        return new SysEnumType()
+                .setCode(code)
+                .setName(name)
+                .setRemark(remark)
+                .setSort(sort)
+                .setStatus(status == null ? Status.ENABLED : status);
+    }
+
+    /** 列挙型の編集可能な属性を更新する。 */
+    public void updateEditableFields(String code, String name, String remark, Integer sort) {
+        this.code = code;
+        this.name = name;
+        this.remark = remark;
+        this.sort = sort;
+    }
 
     public void enable() {
         this.status = Status.ENABLED;

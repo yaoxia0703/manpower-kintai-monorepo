@@ -76,20 +76,20 @@ public class EmpEmployeeServiceImpl extends ServiceImpl<EmpEmployeeMapper, EmpEm
     @Override
     @Transactional
     public EmpEmployee create(EmployeeCreateCommand command) {
-        EmpEmployee employee = new EmpEmployee()
-                .setCompanyId(command.companyId())
-                .setEmployeeCode(command.employeeCode())
-                .setLastName(command.lastName())
-                .setFirstName(command.firstName())
-                .setLastNameKana(command.lastNameKana())
-                .setFirstNameKana(command.firstNameKana())
-                .setEmail(command.email())
-                .setPhone(command.phone())
-                .setGender(command.gender())
-                .setBirthDate(command.birthDate())
-                .setHireDate(command.hireDate())
-                .setLeaveDate(command.leaveDate())
-                .setStatus(command.status() == null ? Status.ENABLED : command.status());
+        EmpEmployee employee = EmpEmployee.create(
+                command.companyId(),
+                command.employeeCode(),
+                command.lastName(),
+                command.firstName(),
+                command.lastNameKana(),
+                command.firstNameKana(),
+                command.email(),
+                command.phone(),
+                command.gender(),
+                command.birthDate(),
+                command.hireDate(),
+                command.leaveDate(),
+                command.status());
         if (existsByEmail(employee.getEmail(), null)) {
             throw new BizException(SystemErrorCode.EMPLOYEE_EMAIL_DUPLICATE);
         }
@@ -104,14 +104,15 @@ public class EmpEmployeeServiceImpl extends ServiceImpl<EmpEmployeeMapper, EmpEm
         if (existsByEmail(command.email(), id)) {
             throw new BizException(SystemErrorCode.EMPLOYEE_EMAIL_DUPLICATE);
         }
-        existing.setLastName(command.lastName())
-                .setFirstName(command.firstName())
-                .setLastNameKana(command.lastNameKana())
-                .setFirstNameKana(command.firstNameKana())
-                .setEmail(command.email())
-                .setPhone(command.phone())
-                .setGender(command.gender())
-                .setBirthDate(command.birthDate());
+        existing.updatePersonalInfo(
+                command.lastName(),
+                command.firstName(),
+                command.lastNameKana(),
+                command.firstNameKana(),
+                command.email(),
+                command.phone(),
+                command.gender(),
+                command.birthDate());
         updateById(existing);
         return existing;
     }

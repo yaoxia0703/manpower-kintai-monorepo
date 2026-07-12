@@ -6,6 +6,8 @@ import { useUserStore } from '@/stores/userStore'
 import LoginView from '@/views/login/LoginView.vue'
 import DashboardView from '@/views/DashboardView.vue'
 import TimesheetView from '@/views/timesheet/TimesheetView.vue'
+import AttendanceRequestView from '@/views/requests/AttendanceRequestView.vue'
+import ApprovalWorkspaceView from '@/views/approvals/ApprovalWorkspaceView.vue'
 import SubordinatesView from '@/views/manager/SubordinatesView.vue'
 import OnboardingView from '@/views/hr/OnboardingView.vue'
 import MenuManagementView from '@/views/system/MenuManagementView.vue'
@@ -43,6 +45,16 @@ const router = createRouter({
           name: 'timesheet',
           component: TimesheetView,
           meta: { permission: 'employee:timesheet:read' },
+        },
+        {
+          path: 'requests',
+          name: 'attendance-requests',
+          component: AttendanceRequestView,
+        },
+        {
+          path: 'approvals',
+          name: 'employee-approvals',
+          component: ApprovalWorkspaceView,
         },
         {
           path: 'subordinates',

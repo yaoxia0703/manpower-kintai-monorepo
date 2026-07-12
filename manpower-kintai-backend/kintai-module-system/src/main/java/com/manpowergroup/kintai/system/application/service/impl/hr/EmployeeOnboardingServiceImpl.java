@@ -31,6 +31,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 
@@ -137,9 +138,11 @@ public class EmployeeOnboardingServiceImpl implements EmployeeOnboardingService 
     }
 
     private boolean isSuperAdmin(Long employeeId) {
+        LocalDate today = LocalDate.now();
         List<Long> roleIds = employeeRoleMapper.selectList(Wrappers.<SysEmployeeRole>lambdaQuery()
                         .eq(SysEmployeeRole::getEmployeeId, employeeId))
                 .stream()
+                .filter(assignment -> assignment.isEffectiveOn(today))
                 .map(SysEmployeeRole::getRoleId)
                 .filter(Objects::nonNull)
                 .distinct()

@@ -53,15 +53,12 @@ public class SysI18nServiceImpl extends ServiceImpl<SysI18nMapper, SysI18n>
                 .eq(SysI18n::getLanguage, command.language())
                 .one();
         if (existing != null) {
-            existing.setContent(command.content());
+            existing.changeContent(command.content());
             updateById(existing);
             return existing;
         }
-        SysI18n i18n = new SysI18n()
-                .setRefType(command.refType())
-                .setRefId(command.refId())
-                .setLanguage(command.language())
-                .setContent(command.content());
+        SysI18n i18n = SysI18n.create(
+                command.refType(), command.refId(), command.language(), command.content());
         save(i18n);
         return i18n;
     }

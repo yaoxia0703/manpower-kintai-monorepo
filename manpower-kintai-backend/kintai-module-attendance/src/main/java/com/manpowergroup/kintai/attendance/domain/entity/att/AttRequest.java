@@ -19,7 +19,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
-// 各種申請
+/**
+ * 休暇や残業などの勤怠申請を表し、申請内容と承認状態を管理する。
+ */
 @Getter
 @Setter(AccessLevel.PRIVATE)
 @Accessors(chain = true)
@@ -81,6 +83,7 @@ public class AttRequest {
     @TableLogic
     private Integer isDeleted;
 
+    /** 入力期間を検証し、承認待ちの勤怠申請を作成する。 */
     public static AttRequest create(
             Long employeeId,
             Long companyId,
@@ -93,6 +96,7 @@ public class AttRequest {
             Integer minutes,
             String reason
     ) {
+        validatePeriod(startDate, endDate);
         return new AttRequest()
                 .setEmployeeId(employeeId)
                 .setCompanyId(companyId)
@@ -104,31 +108,84 @@ public class AttRequest {
                 .setDays(days)
                 .setMinutes(minutes)
                 .setReason(reason)
-                .setStatus(ApprovalStatus.PENDING);
+                .setStatus(ApprovalStatus.PENDING)
+                .setCreatedBy(employeeId)
+                .setUpdatedBy(employeeId);
     }
 
+    /** 承認待ちの申請内容を更新する。 */
+    public void updateDetails(
+            String requestType,
+            LocalDate startDate,
+            LocalDate endDate,
+            LocalTime startTime,
+            LocalTime endTime,
+            BigDecimal days,
+            Integer minutes,
+            String reason,
+            Long actorId
+    ) {
+        requirePending();
+        validatePeriod(startDate, endDate);
+        this.requestType = requestType;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.days = days;
+        this.minutes = minutes;
+        this.reason = reason;
+        this.updatedBy = actorId;
+    }
+
+    /** テストや復元用途で承認待ち状態の申請を生成する。 */
     public static AttRequest pending() {
         return new AttRequest().setStatus(ApprovalStatus.PENDING);
     }
 
     public void approve() {
+        approve(null);
+    }
+
+    /** 承認待ちの申請を承認済みにする。 */
+    public void approve(Long actorId) {
         requirePending();
         this.status = ApprovalStatus.APPROVED;
+        this.updatedBy = actorId;
     }
 
     public void reject() {
+        reject(null);
+    }
+
+    /** 承認待ちの申請を却下する。 */
+    public void reject(Long actorId) {
         requirePending();
         this.status = ApprovalStatus.REJECTED;
+        this.updatedBy = actorId;
     }
 
     public void cancel() {
+        cancel(null);
+    }
+
+    /** 承認待ちの申請を取消済みにする。 */
+    public void cancel(Long actorId) {
         requirePending();
         this.status = ApprovalStatus.CANCELLED;
+        this.updatedBy = actorId;
     }
 
     private void requirePending() {
         if (status != ApprovalStatus.PENDING) {
             throw BizException.withDetail(ErrorCode.CONFLICT, "Only pending attendance requests can change status");
+        }
+    }
+
+    private static void validatePeriod(LocalDate startDate, LocalDate endDate) {
+        if (startDate != null && endDate != null && endDate.isBefore(startDate)) {
+            throw BizException.withDetail(ErrorCode.VALIDATION_ERROR,
+                    "attendance request endDate must not be before startDate");
         }
     }
 }

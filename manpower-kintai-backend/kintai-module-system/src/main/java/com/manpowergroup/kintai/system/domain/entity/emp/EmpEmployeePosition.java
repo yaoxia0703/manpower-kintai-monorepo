@@ -2,19 +2,24 @@ package com.manpowergroup.kintai.system.domain.entity.emp;
 
 import com.baomidou.mybatisplus.annotation.*;
 import com.manpowergroup.kintai.common.enums.Status;
-import lombok.Data;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.experimental.Accessors;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 // 社員職位関連（兼任対応）
-@Data
+@Getter
+@Setter(AccessLevel.PRIVATE)
 @Accessors(chain = true)
 @TableName("emp_employee_position")
+/** 社員の組織・職級への任命期間と主務区分を管理する。 */
 public class EmpEmployeePosition {
 
     @TableId(type = IdType.AUTO)
+    @Setter
     // 社員職位関連ID
     private Long id;
 
@@ -60,6 +65,33 @@ public class EmpEmployeePosition {
     @TableLogic
     private Integer isDeleted;
 
+    /** 社員を組織ノードと職級へ任命する。 */
+    public static EmpEmployeePosition assign(Long employeeId, Long companyId,
+                                             Long nodeId, Long gradeId,
+                                             Integer isPrimary, LocalDate startDate,
+                                             LocalDate endDate, Status status) {
+        return new EmpEmployeePosition()
+                .setEmployeeId(employeeId)
+                .setCompanyId(companyId)
+                .setNodeId(nodeId)
+                .setGradeId(gradeId)
+                .setIsPrimary(isPrimary)
+                .setStartDate(startDate)
+                .setEndDate(endDate)
+                .setStatus(status == null ? Status.ENABLED : status);
+    }
+
+    /** 社員と会社を変更せずに任命内容を更新する。 */
+    public void updateAssignment(Long nodeId, Long gradeId, Integer isPrimary,
+                                 LocalDate startDate, LocalDate endDate) {
+        this.nodeId = nodeId;
+        this.gradeId = gradeId;
+        this.isPrimary = isPrimary;
+        this.startDate = startDate;
+        this.endDate = endDate;
+    }
+
+    /** 離任日を設定して任命を終了する。 */
     public void terminate(LocalDate endDate) {
         this.endDate = endDate;
     }

@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.manpowergroup.kintai.attendance.infrastructure.mapper.wf.ApprovalHistoryQueryMapper">
+
+    <resultMap id="detailHeaderMap"
+               type="com.manpowergroup.kintai.attendance.application.dto.wf.response.ApprovalDetailHeader">
+        <id property="approvalId" column="approval_id"/>
+        <result property="requestId" column="request_id"/>
+        <result property="requestType" column="request_type"/>
+        <result property="applicantId" column="applicant_id"/>
+        <result property="currentStep" column="current_step"/>
+        <result property="totalSteps" column="total_steps"/>
+        <result property="status" column="status"/>
+        <result property="startDate" column="start_date"/>
+        <result property="endDate" column="end_date"/>
+        <result property="reason" column="reason"/>
+        <result property="submittedAt" column="submitted_at"/>
+        <result property="completedAt" column="completed_at"/>
+    </resultMap>
+
+    <resultMap id="stepItemMap"
+               type="com.manpowergroup.kintai.attendance.application.dto.wf.response.ApprovalStepItem">
+        <id property="step" column="step"/>
+        <result property="approverId" column="approver_id"/>
+        <result property="status" column="status"/>
+        <result property="comment" column="comment"/>
+        <result property="decidedAt" column="decided_at"/>
+    </resultMap>
+
+    <resultMap id="historyItemMap"
+               type="com.manpowergroup.kintai.attendance.application.dto.wf.response.ApprovalHistoryItem">
+        <id property="approvalId" column="approval_id"/>
+        <result property="requestId" column="request_id"/>
+        <result property="requestType" column="request_type"/>
+        <result property="applicantId" column="applicant_id"/>
+        <result property="status" column="status"/>
+        <result property="submittedAt" column="submitted_at"/>
+        <result property="completedAt" column="completed_at"/>
+    </resultMap>
+
+    <select id="selectAccessibleDetail" resultMap="detailHeaderMap">
+        SELECT a.id AS approval_id,
+               a.request_id,
+               a.request_type,
+               a.applicant_id,
+               a.current_step,
+               a.total_steps,
+               a.status,
+               r.start_date,
+               r.end_date,
+               r.reason,
+               a.created_at AS submitted_at,
+               a.completed_at
+        FROM wf_approval a
+        INNER JOIN att_request r
+                ON r.id = a.request_id
+               AND r.is_deleted = 0
+        WHERE a.id = #{approvalId}
+          AND a.is_deleted = 0
+          AND (a.applicant_id = #{viewerId}
+               OR a.escalated_to = #{viewerId}
+               OR EXISTS (
+                   SELECT 1
+                   FROM wf_approval_step visible_step
+                   WHERE visible_step.approval_id = a.id
+                     AND visible_step.is_deleted = 0
+                     AND (visible_step.approver_id = #{viewerId}
+                          OR visible_step.updated_by = #{viewerId})
+               ))
+    </select>
+
+    <select id="selectSteps" resultMap="stepItemMap">
+        SELECT step,
+               approver_id,
+               status,
+               comment,
+               approved_at AS decided_at
+        FROM wf_approval_step
+        WHERE approval_id = #{approvalId}
+          AND is_deleted = 0
+        ORDER BY step ASC
+    </select>
+
+    <select id="selectHistory" resultMap="historyItemMap">
+        SELECT a.id AS approval_id,
+               a.request_id,
+               a.request_type,
+               a.applicant_id,
+               a.status,
+               a.created_at AS submitted_at,
+               a.completed_at
+        FROM wf_approval a
+        WHERE a.is_deleted = 0
+          AND a.status &lt;&gt; 'PENDING'
+          AND (a.applicant_id = #{viewerId}
+               OR EXISTS (
+                   SELECT 1
+                   FROM wf_approval_step history_step
+                   WHERE history_step.approval_id = a.id
+                     AND history_step.is_deleted = 0
+                     AND (history_step.approver_id = #{viewerId}
+                          OR history_step.updated_by = #{viewerId})
+               ))
+        ORDER BY a.completed_at DESC, a.id DESC
+    </select>
+</mapper>

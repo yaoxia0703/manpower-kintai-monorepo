@@ -2,18 +2,23 @@ package com.manpowergroup.kintai.system.domain.entity.sys;
 
 import com.baomidou.mybatisplus.annotation.*;
 import com.manpowergroup.kintai.common.enums.Status;
-import lombok.Data;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.experimental.Accessors;
 
 import java.time.LocalDateTime;
 
 // ロールマスタ
-@Data
+@Getter
+@Setter(AccessLevel.PRIVATE)
 @Accessors(chain = true)
 @TableName("sys_role")
+/** 会社単位または全社共通のロール定義を管理する。 */
 public class SysRole {
 
     @TableId(type = IdType.AUTO)
+    @Setter
     // ロールID
     private Long id;
 
@@ -52,6 +57,26 @@ public class SysRole {
     // 論理削除（0=有効 1=削除）
     @TableLogic
     private Integer isDeleted;
+
+    /** 有効状態のロールを作成する。 */
+    public static SysRole create(Long companyId, String code, String name, String remark, Integer sort) {
+        return new SysRole()
+                .setCompanyId(companyId)
+                .setCode(code)
+                .setName(name)
+                .setRemark(remark)
+                .setSort(sort)
+                .setStatus(Status.ENABLED);
+    }
+
+    /** ロールの編集可能な属性を更新する。 */
+    public void updateEditableFields(Long companyId, String code, String name, String remark, Integer sort) {
+        this.companyId = companyId;
+        this.code = code;
+        this.name = name;
+        this.remark = remark;
+        this.sort = sort;
+    }
 
     public void enable() {
         this.status = Status.ENABLED;

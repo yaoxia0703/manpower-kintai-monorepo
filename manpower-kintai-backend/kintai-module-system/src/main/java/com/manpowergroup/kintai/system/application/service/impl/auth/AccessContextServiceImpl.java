@@ -72,14 +72,9 @@ public class AccessContextServiceImpl implements AccessContextService {
     private List<Long> loadActiveRoleIds(Long employeeId) {
         LocalDate today = LocalDate.now();
         return employeeRoleMapper.selectList(Wrappers.<SysEmployeeRole>lambdaQuery()
-                        .eq(SysEmployeeRole::getEmployeeId, employeeId)
-                        .and(q -> q.isNull(SysEmployeeRole::getStartDate)
-                                .or()
-                                .le(SysEmployeeRole::getStartDate, today))
-                        .and(q -> q.isNull(SysEmployeeRole::getEndDate)
-                                .or()
-                                .ge(SysEmployeeRole::getEndDate, today)))
+                        .eq(SysEmployeeRole::getEmployeeId, employeeId))
                 .stream()
+                .filter(assignment -> assignment.isEffectiveOn(today))
                 .map(SysEmployeeRole::getRoleId)
                 .filter(Objects::nonNull)
                 .distinct()

@@ -1,0 +1,42 @@
+package com.manpowergroup.kintai.employee.adapter.wf;
+
+import com.manpowergroup.kintai.common.enums.Status;
+import com.manpowergroup.kintai.common.exception.BizException;
+import com.manpowergroup.kintai.system.application.service.emp.EmpEmployeeService;
+import com.manpowergroup.kintai.system.domain.entity.emp.EmpEmployee;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.when;
+
+class SystemApprovalDelegateValidatorTest {
+
+    @Test
+    void acceptsEnabledEmployeeFromApprovalCompany() {
+        EmpEmployeeService employeeService = Mockito.mock(EmpEmployeeService.class);
+        SystemApprovalDelegateValidator validator = new SystemApprovalDelegateValidator(employeeService);
+        when(employeeService.getById(30L)).thenReturn(employee(10L, Status.ENABLED));
+
+        assertDoesNotThrow(() -> validator.validateTarget(30L, 10L));
+    }
+
+    @Test
+    void rejectsEmployeeFromAnotherCompanyOrDisabledEmployee() {
+        EmpEmployeeService employeeService = Mockito.mock(EmpEmployeeService.class);
+        SystemApprovalDelegateValidator validator = new SystemApprovalDelegateValidator(employeeService);
+        when(employeeService.getById(30L)).thenReturn(employee(11L, Status.ENABLED));
+        assertThrows(BizException.class, () -> validator.validateTarget(30L, 10L));
+
+        when(employeeService.getById(30L)).thenReturn(employee(10L, Status.DISABLED));
+        assertThrows(BizException.class, () -> validator.validateTarget(30L, 10L));
+    }
+
+    private EmpEmployee employee(Long companyId, Status status) {
+        return EmpEmployee.create(
+                companyId, "E030", "Delegate", "User", null, null,
+                "delegate@example.com", null, null, null, null, null, status)
+                .setId(30L);
+    }
+}

@@ -420,6 +420,31 @@ CREATE TABLE `sys_menu` (
   KEY `idx_parent_id` (`parent_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='メニューマスタ';
 
+/*Table structure for table `sys_notification` */
+
+DROP TABLE IF EXISTS `sys_notification`;
+
+CREATE TABLE `sys_notification` (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '通知ID',
+  `company_id` bigint NOT NULL COMMENT '会社ID',
+  `recipient_id` bigint NOT NULL COMMENT '受信者社員ID',
+  `type` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '通知タイプ',
+  `title` varchar(200) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '通知タイトル',
+  `content` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '通知内容',
+  `ref_type` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '関連業務タイプ',
+  `ref_id` bigint DEFAULT NULL COMMENT '関連業務ID',
+  `is_read` tinyint NOT NULL DEFAULT '0' COMMENT '既読フラグ（0=未読 1=既読）',
+  `read_at` datetime DEFAULT NULL COMMENT '既読日時',
+  `created_by` bigint DEFAULT NULL COMMENT '作成者ID',
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '作成日時',
+  `updated_by` bigint DEFAULT NULL COMMENT '更新者ID',
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新日時',
+  `is_deleted` tinyint NOT NULL DEFAULT '0' COMMENT '論理削除（0=有効 1=削除）',
+  PRIMARY KEY (`id`),
+  KEY `idx_notification_recipient_unread` (`recipient_id`,`is_read`,`created_at`),
+  KEY `idx_notification_reference` (`ref_type`,`ref_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='システム通知';
+
 /*Table structure for table `sys_permission` */
 
 DROP TABLE IF EXISTS `sys_permission`;

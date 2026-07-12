@@ -18,6 +18,8 @@ public interface OrgNodeClosureRepository {
 
     // 指定ノードIDに関連する全Closureを削除
     void deleteByDescendantId(Long descendantId);
+
+    void deleteExternalAncestorLinks(List<Long> subtreeNodeIds);
 }
 
 

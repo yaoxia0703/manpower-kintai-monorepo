@@ -49,13 +49,13 @@ public class OrgCompanyServiceImpl extends ServiceImpl<OrgCompanyMapper, OrgComp
     public OrgCompany create(CompanyCreateCommand command) {
         boolean exists = lambdaQuery().eq(OrgCompany::getCompanyCode, command.companyCode()).count() > 0;
         if (exists) throw new BizException(SystemErrorCode.COMPANY_CODE_DUPLICATE);
-        OrgCompany company = new OrgCompany()
-                .setParentId(command.parentId())
-                .setName(command.name())
-                .setCompanyCode(command.companyCode())
-                .setLevel(command.level())
-                .setSort(command.sort())
-                .setStatus(command.status() == null ? Status.ENABLED : command.status());
+        OrgCompany company = OrgCompany.create(
+                command.parentId(),
+                command.name(),
+                command.companyCode(),
+                command.level(),
+                command.sort(),
+                command.status());
         save(company);
         return company;
     }
@@ -69,11 +69,12 @@ public class OrgCompanyServiceImpl extends ServiceImpl<OrgCompanyMapper, OrgComp
                 .ne(OrgCompany::getId, id)
                 .count() > 0;
         if (exists) throw new BizException(SystemErrorCode.COMPANY_CODE_DUPLICATE);
-        existing.setName(command.name())
-                .setCompanyCode(command.companyCode())
-                .setParentId(command.parentId())
-                .setLevel(command.level())
-                .setSort(command.sort());
+        existing.updateEditableFields(
+                command.parentId(),
+                command.name(),
+                command.companyCode(),
+                command.level(),
+                command.sort());
         updateById(existing);
         return existing;
     }

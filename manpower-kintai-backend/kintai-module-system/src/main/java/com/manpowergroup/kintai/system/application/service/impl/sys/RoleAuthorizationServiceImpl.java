@@ -13,6 +13,8 @@ import com.manpowergroup.kintai.system.domain.entity.sys.SysMenu;
 import com.manpowergroup.kintai.system.domain.entity.sys.SysPermission;
 import com.manpowergroup.kintai.system.domain.entity.sys.SysRoleMenu;
 import com.manpowergroup.kintai.system.domain.entity.sys.SysRolePermission;
+import com.manpowergroup.kintai.system.domain.model.sys.RoleAuthorization;
+import com.manpowergroup.kintai.system.domain.service.sys.RoleAuthorizationDomainService;
 import com.manpowergroup.kintai.system.infrastructure.mapper.sys.SysMenuMapper;
 import com.manpowergroup.kintai.system.infrastructure.mapper.sys.SysPermissionMapper;
 import com.manpowergroup.kintai.system.infrastructure.mapper.sys.SysRoleMenuMapper;
@@ -21,7 +23,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -34,6 +35,7 @@ public class RoleAuthorizationServiceImpl implements RoleAuthorizationService {
     private final SysRolePermissionMapper rolePermissionMapper;
     private final SysMenuMapper menuMapper;
     private final SysPermissionMapper permissionMapper;
+    private final RoleAuthorizationDomainService authorizationDomainService;
 
     @Override
     public RoleAuthorizationResponse getAuthorization(Long roleId) {
@@ -72,43 +74,43 @@ public class RoleAuthorizationServiceImpl implements RoleAuthorizationService {
     @Transactional
     public void assignMenus(RoleMenuAssignCommand command) {
         roleService.getById(command.roleId());
-        replaceMenus(command.roleId(), normalizeIds(command.menuIds()));
+        RoleAuthorization authorization = authorizationDomainService.replaceAuthorization(
+                command.roleId(),
+                command.menuIds(),
+                List.of());
+        replaceMenus(authorization);
     }
 
     @Override
     @Transactional
     public void assignPermissions(RolePermissionAssignCommand command) {
         roleService.getById(command.roleId());
-        replacePermissions(command.roleId(), normalizeIds(command.permissionIds()));
+        RoleAuthorization authorization = authorizationDomainService.replaceAuthorization(
+                command.roleId(),
+                List.of(),
+                command.permissionIds());
+        replacePermissions(authorization);
     }
 
     @Override
     @Transactional
     public void saveAuthorization(RoleAuthorizationSaveCommand command) {
         roleService.getById(command.roleId());
-        replaceMenus(command.roleId(), normalizeIds(command.menuIds()));
-        replacePermissions(command.roleId(), normalizeIds(command.permissionIds()));
+        RoleAuthorization authorization = authorizationDomainService.replaceAuthorization(
+                command.roleId(),
+                command.menuIds(),
+                command.permissionIds());
+        replaceMenus(authorization);
+        replacePermissions(authorization);
     }
 
-    private void replaceMenus(Long roleId, List<Long> menuIds) {
-        roleMenuMapper.delete(Wrappers.<SysRoleMenu>lambdaQuery().eq(SysRoleMenu::getRoleId, roleId));
-        menuIds.stream()
-                .map(menuId -> new SysRoleMenu().setRoleId(roleId).setMenuId(menuId))
-                .forEach(roleMenuMapper::insert);
+    private void replaceMenus(RoleAuthorization authorization) {
+        roleMenuMapper.delete(Wrappers.<SysRoleMenu>lambdaQuery().eq(SysRoleMenu::getRoleId, authorization.roleId()));
+        authorization.toRoleMenus().forEach(roleMenuMapper::insert);
     }
 
-    private void replacePermissions(Long roleId, List<Long> permissionIds) {
-        rolePermissionMapper.delete(Wrappers.<SysRolePermission>lambdaQuery().eq(SysRolePermission::getRoleId, roleId));
-        permissionIds.stream()
-                .map(permissionId -> new SysRolePermission().setRoleId(roleId).setPermissionId(permissionId))
-                .forEach(rolePermissionMapper::insert);
-    }
-
-    private List<Long> normalizeIds(List<Long> ids) {
-        if (ids == null || ids.isEmpty()) return Collections.emptyList();
-        return ids.stream()
-                .filter(Objects::nonNull)
-                .distinct()
-                .toList();
+    private void replacePermissions(RoleAuthorization authorization) {
+        rolePermissionMapper.delete(Wrappers.<SysRolePermission>lambdaQuery().eq(SysRolePermission::getRoleId, authorization.roleId()));
+        authorization.toRolePermissions().forEach(rolePermissionMapper::insert);
     }
 }

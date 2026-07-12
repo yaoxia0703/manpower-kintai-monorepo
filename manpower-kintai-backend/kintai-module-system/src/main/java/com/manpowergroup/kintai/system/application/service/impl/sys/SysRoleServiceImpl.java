@@ -5,7 +5,6 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.manpowergroup.kintai.common.dto.PageRequest;
 import com.manpowergroup.kintai.common.dto.PageResult;
-import com.manpowergroup.kintai.common.enums.Status;
 import com.manpowergroup.kintai.common.exception.BaseErrorCode;
 import com.manpowergroup.kintai.common.exception.BizException;
 import com.manpowergroup.kintai.system.application.command.sys.RoleCreateCommand;
@@ -72,13 +71,8 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole>
                 .eq(SysRole::getCode, command.code())
                 .count() > 0;
         if (exists) throw new BizException(SystemErrorCode.ROLE_CODE_DUPLICATE);
-        SysRole role = new SysRole()
-                .setCompanyId(command.companyId())
-                .setCode(command.code())
-                .setName(command.name())
-                .setRemark(command.remark())
-                .setSort(command.sort())
-                .setStatus(Status.ENABLED);
+        SysRole role = SysRole.create(
+                command.companyId(), command.code(), command.name(), command.remark(), command.sort());
         save(role);
         return role;
     }
@@ -94,11 +88,8 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole>
                 .ne(SysRole::getId, id)
                 .count() > 0;
         if (exists) throw new BizException(SystemErrorCode.ROLE_CODE_DUPLICATE);
-        existing.setCompanyId(command.companyId())
-                .setName(command.name())
-                .setCode(command.code())
-                .setRemark(command.remark())
-                .setSort(command.sort());
+        existing.updateEditableFields(
+                command.companyId(), command.code(), command.name(), command.remark(), command.sort());
         updateById(existing);
         return existing;
     }

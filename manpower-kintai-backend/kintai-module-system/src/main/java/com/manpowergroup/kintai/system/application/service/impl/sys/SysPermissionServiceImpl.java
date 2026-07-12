@@ -5,7 +5,6 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.manpowergroup.kintai.common.dto.PageRequest;
 import com.manpowergroup.kintai.common.dto.PageResult;
-import com.manpowergroup.kintai.common.enums.Status;
 import com.manpowergroup.kintai.common.exception.BaseErrorCode;
 import com.manpowergroup.kintai.common.exception.BizException;
 import com.manpowergroup.kintai.system.application.command.sys.PermissionCreateCommand;
@@ -62,13 +61,13 @@ public class SysPermissionServiceImpl extends ServiceImpl<SysPermissionMapper, S
 
     @Override
     public List<SysPermission> listByEmployeeId(Long employeeId) {
+        LocalDate today = LocalDate.now();
         List<Long> roleIds = employeeRoleMapper.selectList(Wrappers.<SysEmployeeRole>lambdaQuery()
-                        .eq(SysEmployeeRole::getEmployeeId, employeeId)
-                        .and(w -> w.isNull(SysEmployeeRole::getStartDate)
-                                .or().le(SysEmployeeRole::getStartDate, LocalDate.now()))
-                        .and(w -> w.isNull(SysEmployeeRole::getEndDate)
-                                .or().ge(SysEmployeeRole::getEndDate, LocalDate.now())))
-                .stream().map(SysEmployeeRole::getRoleId).collect(Collectors.toList());
+                        .eq(SysEmployeeRole::getEmployeeId, employeeId))
+                .stream()
+                .filter(assignment -> assignment.isEffectiveOn(today))
+                .map(SysEmployeeRole::getRoleId)
+                .collect(Collectors.toList());
         if (roleIds.isEmpty()) return Collections.emptyList();
 
         List<Long> permissionIds = rolePermissionMapper.selectList(Wrappers.<SysRolePermission>lambdaQuery()
@@ -86,15 +85,9 @@ public class SysPermissionServiceImpl extends ServiceImpl<SysPermissionMapper, S
     @Transactional
     public SysPermission create(PermissionCreateCommand command) {
         ensureCodeUnique(command.code(), null);
-        SysPermission permission = new SysPermission()
-                .setMenuId(command.menuId())
-                .setCode(command.code())
-                .setName(command.name())
-                .setMethod(command.method())
-                .setPath(command.path())
-                .setRemark(command.remark())
-                .setSort(command.sort())
-                .setStatus(Status.ENABLED);
+        SysPermission permission = SysPermission.create(
+                command.menuId(), command.code(), command.name(), command.method(),
+                command.path(), command.remark(), command.sort());
         save(permission);
         return permission;
     }
@@ -104,13 +97,9 @@ public class SysPermissionServiceImpl extends ServiceImpl<SysPermissionMapper, S
     public SysPermission update(Long id, PermissionUpdateCommand command) {
         SysPermission existing = requirePermission(id);
         ensureCodeUnique(command.code(), id);
-        existing.setCode(command.code())
-                .setName(command.name())
-                .setMethod(command.method())
-                .setPath(command.path())
-                .setRemark(command.remark())
-                .setMenuId(command.menuId())
-                .setSort(command.sort());
+        existing.updateEditableFields(
+                command.menuId(), command.code(), command.name(), command.method(),
+                command.path(), command.remark(), command.sort());
         updateById(existing);
         return existing;
     }

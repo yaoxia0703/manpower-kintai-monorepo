@@ -25,12 +25,13 @@ public class SysEmployeeRoleServiceImpl extends ServiceImpl<SysEmployeeRoleMappe
 
     @Override
     public List<SysEmployeeRole> listActiveByEmployee(Long employeeId) {
+        LocalDate today = LocalDate.now();
         return lambdaQuery()
                 .eq(SysEmployeeRole::getEmployeeId, employeeId)
-                .le(SysEmployeeRole::getStartDate, LocalDate.now())
-                .and(w -> w.isNull(SysEmployeeRole::getEndDate)
-                        .or().ge(SysEmployeeRole::getEndDate, LocalDate.now()))
-                .list();
+                .list()
+                .stream()
+                .filter(assignment -> assignment.isEffectiveOn(today))
+                .toList();
     }
 
     enum SystemErrorCode implements BaseErrorCode {

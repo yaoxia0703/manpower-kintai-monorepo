@@ -40,6 +40,16 @@ public class OrgNodeClosureRepositoryImpl implements OrgNodeClosureRepository {
         mapper.delete(Wrappers.<OrgNodeClosure>lambdaQuery()
                 .eq(OrgNodeClosure::getDescendantId, descendantId));
     }
+
+    @Override
+    public void deleteExternalAncestorLinks(List<Long> subtreeNodeIds) {
+        if (subtreeNodeIds == null || subtreeNodeIds.isEmpty()) {
+            return;
+        }
+        mapper.delete(Wrappers.<OrgNodeClosure>lambdaQuery()
+                .in(OrgNodeClosure::getDescendantId, subtreeNodeIds)
+                .notIn(OrgNodeClosure::getAncestorId, subtreeNodeIds));
+    }
 }
 
 

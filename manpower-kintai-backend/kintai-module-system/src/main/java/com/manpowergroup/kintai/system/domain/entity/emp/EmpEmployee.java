@@ -2,19 +2,24 @@ package com.manpowergroup.kintai.system.domain.entity.emp;
 
 import com.baomidou.mybatisplus.annotation.*;
 import com.manpowergroup.kintai.common.enums.Status;
-import lombok.Data;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.experimental.Accessors;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 // 社員マスタ
-@Data
+@Getter
+@Setter(AccessLevel.PRIVATE)
 @Accessors(chain = true)
 @TableName("emp_employee")
+/** 社員の所属、雇用情報および個人情報を管理する。 */
 public class EmpEmployee {
 
     @TableId(type = IdType.AUTO)
+    @Setter
     // 社員ID
     private Long id;
 
@@ -74,6 +79,44 @@ public class EmpEmployee {
     // 論理削除（0=有効 1=削除）
     @TableLogic
     private Integer isDeleted;
+
+    /** 社員番号と雇用情報を持つ社員を作成する。 */
+    public static EmpEmployee create(Long companyId, String employeeCode,
+                                     String lastName, String firstName,
+                                     String lastNameKana, String firstNameKana,
+                                     String email, String phone, Integer gender,
+                                     LocalDate birthDate, LocalDate hireDate,
+                                     LocalDate leaveDate, Status status) {
+        return new EmpEmployee()
+                .setCompanyId(companyId)
+                .setEmployeeCode(employeeCode)
+                .setLastName(lastName)
+                .setFirstName(firstName)
+                .setLastNameKana(lastNameKana)
+                .setFirstNameKana(firstNameKana)
+                .setEmail(email)
+                .setPhone(phone)
+                .setGender(gender)
+                .setBirthDate(birthDate)
+                .setHireDate(hireDate)
+                .setLeaveDate(leaveDate)
+                .setStatus(status == null ? Status.ENABLED : status);
+    }
+
+    /** 所属や雇用上の識別情報を維持したまま個人情報を更新する。 */
+    public void updatePersonalInfo(String lastName, String firstName,
+                                   String lastNameKana, String firstNameKana,
+                                   String email, String phone, Integer gender,
+                                   LocalDate birthDate) {
+        this.lastName = lastName;
+        this.firstName = firstName;
+        this.lastNameKana = lastNameKana;
+        this.firstNameKana = firstNameKana;
+        this.email = email;
+        this.phone = phone;
+        this.gender = gender;
+        this.birthDate = birthDate;
+    }
 
     public void enable() {
         this.status = Status.ENABLED;

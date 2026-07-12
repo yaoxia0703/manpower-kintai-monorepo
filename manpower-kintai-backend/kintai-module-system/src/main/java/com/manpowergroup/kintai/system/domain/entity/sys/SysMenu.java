@@ -2,18 +2,23 @@ package com.manpowergroup.kintai.system.domain.entity.sys;
 
 import com.baomidou.mybatisplus.annotation.*;
 import com.manpowergroup.kintai.common.enums.Status;
-import lombok.Data;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.experimental.Accessors;
 
 import java.time.LocalDateTime;
 
 // メニューマスタ
-@Data
+@Getter
+@Setter(AccessLevel.PRIVATE)
 @Accessors(chain = true)
 @TableName("sys_menu")
+/** メニュー階層、表示状態および有効状態を管理する。 */
 public class SysMenu {
 
     @TableId(type = IdType.AUTO)
+    @Setter
     // メニューID
     private Long id;
 
@@ -65,10 +70,48 @@ public class SysMenu {
     @TableLogic
     private Integer isDeleted;
 
+    /** 有効なメニューを作成し、未指定の表示状態を表示に初期化する。 */
+    public static SysMenu create(Long parentId, String name, String code, String path,
+                                 String component, String icon, Integer type, Integer sort,
+                                 Integer visible) {
+        return new SysMenu()
+                .setParentId(parentId)
+                .setName(name)
+                .setCode(code)
+                .setPath(path)
+                .setComponent(component)
+                .setIcon(icon)
+                .setType(type)
+                .setSort(sort)
+                .setVisible(defaultVisible(visible))
+                .setStatus(Status.ENABLED);
+    }
+
+    /** メニューの編集可能な属性を更新する。 */
+    public void updateEditableFields(Long parentId, String name, String code, String path,
+                                     String component, String icon, Integer type, Integer sort,
+                                     Integer visible) {
+        this.parentId = parentId;
+        this.name = name;
+        this.code = code;
+        this.path = path;
+        this.component = component;
+        this.icon = icon;
+        this.type = type;
+        this.sort = sort;
+        this.visible = defaultVisible(visible);
+    }
+
+    private static Integer defaultVisible(Integer visible) {
+        return visible == null ? 1 : visible;
+    }
+
+    /** メニューを表示対象にする。 */
     public void show() {
         this.visible = 1;
     }
 
+    /** メニューを非表示にする。 */
     public void hide() {
         this.visible = 0;
     }

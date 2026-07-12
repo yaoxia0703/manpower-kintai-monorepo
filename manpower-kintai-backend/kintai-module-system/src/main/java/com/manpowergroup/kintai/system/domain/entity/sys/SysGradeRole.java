@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @TableName("sys_grade_role")
+/** 職級と既定ロールの割当関係を表す。 */
 public class SysGradeRole {
 
     // 職級ID

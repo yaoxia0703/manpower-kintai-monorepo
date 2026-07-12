@@ -7,18 +7,26 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.manpowergroup.kintai.attendance.domain.enums.ApprovalStatus;
-import lombok.Data;
+import com.manpowergroup.kintai.common.exception.BizException;
+import com.manpowergroup.kintai.common.exception.ErrorCode;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.experimental.Accessors;
 
 import java.time.LocalDateTime;
 
-// 承認フロー
-@Data
+/**
+ * 申請全体の承認進行状況を管理する承認フロー集約である。
+ */
+@Getter
+@Setter(AccessLevel.PRIVATE)
 @Accessors(chain = true)
 @TableName("wf_approval")
 public class WfApproval {
 
     @TableId(type = IdType.AUTO)
+    @Setter
     // 承認フローID
     private Long id;
 
@@ -72,4 +80,71 @@ public class WfApproval {
     // 論理削除（0=有効 1=削除）
     @TableLogic
     private Integer isDeleted;
+
+    /** 指定された総ステップ数で承認フローを開始する。 */
+    public static WfApproval start(Long requestId, String requestType, Long applicantId,
+                                   Long companyId, Integer totalSteps, Long actorId) {
+        return new WfApproval()
+                .setRequestId(requestId)
+                .setRequestType(requestType)
+                .setApplicantId(applicantId)
+                .setCompanyId(companyId)
+                .setCurrentStep(1)
+                .setTotalSteps(totalSteps)
+                .setStatus(ApprovalStatus.PENDING)
+                .setEscalated(0)
+                .setCreatedBy(actorId)
+                .setUpdatedBy(actorId);
+    }
+
+    /** 現在のステップを承認し、次ステップへ進むかフローを完了する。 */
+    public void approveCurrentStep(LocalDateTime approvedAt, Long actorId) {
+        requirePending();
+        if (currentStep < totalSteps) {
+            this.currentStep = currentStep + 1;
+            clearEscalation();
+            this.updatedBy = actorId;
+            return;
+        }
+        this.status = ApprovalStatus.APPROVED;
+        this.completedAt = approvedAt;
+        this.updatedBy = actorId;
+    }
+
+    /** 承認待ちのフローを却下して完了する。 */
+    public void reject(LocalDateTime rejectedAt, Long actorId) {
+        requirePending();
+        this.status = ApprovalStatus.REJECTED;
+        this.completedAt = rejectedAt;
+        this.updatedBy = actorId;
+    }
+
+    /** 承認待ちのフローを取り消して完了する。 */
+    public void cancel(LocalDateTime cancelledAt, Long actorId) {
+        requirePending();
+        this.status = ApprovalStatus.CANCELLED;
+        this.completedAt = cancelledAt;
+        this.updatedBy = actorId;
+    }
+
+    /** 現在の承認先を指定社員へエスカレーションする。 */
+    public void escalateTo(Long employeeId, LocalDateTime escalatedAt, Long actorId) {
+        requirePending();
+        this.escalated = 1;
+        this.escalatedTo = employeeId;
+        this.escalatedAt = escalatedAt;
+        this.updatedBy = actorId;
+    }
+
+    private void clearEscalation() {
+        this.escalated = 0;
+        this.escalatedAt = null;
+        this.escalatedTo = null;
+    }
+
+    private void requirePending() {
+        if (status != ApprovalStatus.PENDING) {
+            throw BizException.withDetail(ErrorCode.CONFLICT, "Only pending approvals can change status");
+        }
+    }
 }

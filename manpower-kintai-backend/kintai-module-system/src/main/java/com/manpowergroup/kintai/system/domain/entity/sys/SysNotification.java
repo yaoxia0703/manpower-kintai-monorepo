@@ -2,18 +2,23 @@ package com.manpowergroup.kintai.system.domain.entity.sys;
 
 import com.baomidou.mybatisplus.annotation.*;
 import com.manpowergroup.kintai.system.domain.enums.NotificationType;
-import lombok.Data;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.experimental.Accessors;
 
 import java.time.LocalDateTime;
 
 // 通知
-@Data
+@Getter
+@Setter(AccessLevel.PRIVATE)
 @Accessors(chain = true)
 @TableName("sys_notification")
+/** 社員宛て通知と既読状態を管理する。 */
 public class SysNotification {
 
     @TableId(type = IdType.AUTO)
+    @Setter
     // 通知ID
     private Long id;
 
@@ -62,8 +67,27 @@ public class SysNotification {
     @TableLogic
     private Integer isDeleted;
 
+    /** 未読状態の通知を作成する。 */
+    public static SysNotification create(Long companyId, Long recipientId, NotificationType type,
+                                         String title, String content, String refType, Long refId) {
+        return new SysNotification()
+                .setCompanyId(companyId)
+                .setRecipientId(recipientId)
+                .setType(type)
+                .setTitle(title)
+                .setContent(content)
+                .setRefType(refType)
+                .setRefId(refId)
+                .setIsRead(false)
+                .setReadAt(null);
+    }
+
     // 既読にする（ドメインメソッド）
+    /** 初回の既読日時を保持したまま通知を既読にする。 */
     public void markAsRead() {
+        if (Boolean.TRUE.equals(this.isRead)) {
+            return;
+        }
         this.isRead = true;
         this.readAt = LocalDateTime.now();
     }

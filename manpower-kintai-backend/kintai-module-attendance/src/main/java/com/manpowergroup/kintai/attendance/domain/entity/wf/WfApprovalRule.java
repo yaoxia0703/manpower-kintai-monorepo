@@ -1,63 +1,155 @@
 package com.manpowergroup.kintai.attendance.domain.entity.wf;
 
-import com.baomidou.mybatisplus.annotation.*;
+import com.baomidou.mybatisplus.annotation.FieldFill;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableLogic;
+import com.baomidou.mybatisplus.annotation.TableName;
 import com.manpowergroup.kintai.common.enums.Status;
-import lombok.Data;
+import com.manpowergroup.kintai.common.exception.BizException;
+import com.manpowergroup.kintai.common.exception.ErrorCode;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.experimental.Accessors;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
-// 承認ルール定義
-@Data
+@Getter
+@Setter(AccessLevel.PRIVATE)
 @Accessors(chain = true)
 @TableName("wf_approval_rule")
+/**
+ * 申請種別と金額条件に応じて承認経路の終了条件を定義する。
+ */
 public class WfApprovalRule {
 
+    private static final String DIRECT_ONLY = "DIRECT_ONLY";
+    private static final String REACH_GRADE = "REACH_GRADE";
+    private static final String REACH_DEPARTMENT = "REACH_DEPARTMENT";
+
     @TableId(type = IdType.AUTO)
-    // 承認ルールID
+    @Setter
     private Long id;
 
-    // 会社ID
     private Long companyId;
 
-    // 申請タイプ（REQUEST_TYPE参照）
     private String requestType;
 
-    // 終止条件（DIRECT_ONLY/REACH_GRADE/REACH_DEPARTMENT）
     private String stopCondition;
 
-    // 終止職級（REACH_GRADE時使用）
     private String stopGradeLevel;
 
-    // 終止部門機能（REACH_DEPARTMENT時使用）
     private String stopDeptFunc;
 
-    // 金額閾値（NULLは常に発動）
     private BigDecimal amountThreshold;
 
-    // 表示順
     private Integer sort;
 
-    // ステータス
     private Status status;
 
-    // 作成者ID
     private Long createdBy;
 
-    // 作成日時
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createdAt;
 
-    // 更新者ID
     private Long updatedBy;
 
-    // 更新日時
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private LocalDateTime updatedAt;
 
-    // 論理削除（0=有効 1=削除）
     @TableLogic
     private Integer isDeleted;
-}
 
+    /** ルールの整合性を検証し、有効な承認ルールを作成する。 */
+    public static WfApprovalRule create(Long companyId, String requestType, String stopCondition,
+                                        String stopGradeLevel, String stopDeptFunc,
+                                        BigDecimal amountThreshold, Integer sort, Status status) {
+        validate(companyId, requestType, stopCondition, stopGradeLevel,
+                stopDeptFunc, amountThreshold, sort);
+        return new WfApprovalRule()
+                .setCompanyId(companyId)
+                .setRequestType(requestType)
+                .setStopCondition(stopCondition)
+                .setStopGradeLevel(stopGradeLevel)
+                .setStopDeptFunc(stopDeptFunc)
+                .setAmountThreshold(amountThreshold)
+                .setSort(sort)
+                .setStatus(status == null ? Status.ENABLED : status);
+    }
+
+    /** 会社を変更せずに承認経路条件を更新する。 */
+    public void updateRule(String requestType, String stopCondition, String stopGradeLevel,
+                           String stopDeptFunc, BigDecimal amountThreshold, Integer sort) {
+        validate(companyId, requestType, stopCondition, stopGradeLevel,
+                stopDeptFunc, amountThreshold, sort);
+        this.requestType = requestType;
+        this.stopCondition = stopCondition;
+        this.stopGradeLevel = stopGradeLevel;
+        this.stopDeptFunc = stopDeptFunc;
+        this.amountThreshold = amountThreshold;
+        this.sort = sort;
+    }
+
+    /** 申請種別と金額がこの有効ルールの適用条件を満たすか判定する。 */
+    public boolean appliesTo(String requestType, BigDecimal amount) {
+        if (this.status != Status.ENABLED) {
+            return false;
+        }
+        if (!Objects.equals(this.requestType, requestType)) {
+            return false;
+        }
+        return this.amountThreshold == null
+                || (amount != null && amount.compareTo(this.amountThreshold) >= 0);
+    }
+
+    /** ルールを有効化する。 */
+    public void enable() {
+        this.status = Status.ENABLED;
+    }
+
+    /** ルールを無効化する。 */
+    public void disable() {
+        this.status = Status.DISABLED;
+    }
+
+    private static void validate(
+            Long companyId,
+            String requestType,
+            String stopCondition,
+            String stopGradeLevel,
+            String stopDeptFunc,
+            BigDecimal amountThreshold,
+            Integer sort
+    ) {
+        if (companyId == null || requestType == null || requestType.isBlank()) {
+            throw invalidRule("approval rule company and request type are required");
+        }
+        if (!DIRECT_ONLY.equals(stopCondition)
+                && !REACH_GRADE.equals(stopCondition)
+                && !REACH_DEPARTMENT.equals(stopCondition)) {
+            throw invalidRule("unsupported approval stop condition");
+        }
+        if (REACH_GRADE.equals(stopCondition)
+                && (stopGradeLevel == null || stopGradeLevel.isBlank())) {
+            throw invalidRule("grade stop condition requires target grade level");
+        }
+        if (REACH_DEPARTMENT.equals(stopCondition)
+                && (stopDeptFunc == null || stopDeptFunc.isBlank())) {
+            throw invalidRule("department stop condition requires target department function");
+        }
+        if (amountThreshold != null && amountThreshold.signum() < 0) {
+            throw invalidRule("approval rule threshold must not be negative");
+        }
+        if (sort == null || sort < 0) {
+            throw invalidRule("approval rule sort must not be negative");
+        }
+    }
+
+    private static BizException invalidRule(String detail) {
+        return BizException.withDetail(ErrorCode.VALIDATION_ERROR, detail);
+    }
+}

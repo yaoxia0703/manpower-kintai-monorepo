@@ -95,6 +95,21 @@ class DynamicAuthorizationManagerTest {
         assertFalse(decision.isGranted());
     }
 
+    @Test
+    void grantsAuthenticatedEmployeeSelfServiceAccessWithoutPermissionRule() {
+        DynamicAuthorizationManager manager = new DynamicAuthorizationManager(List::of);
+
+        assertTrue(manager.authorize(
+                authenticated("ROLE_EMPLOYEE"),
+                context("GET", "/employee/notifications/unread-count")).isGranted());
+        assertTrue(manager.authorize(
+                authenticated("ROLE_EMPLOYEE"),
+                context("POST", "/employee/att/requests")).isGranted());
+        assertTrue(manager.authorize(
+                authenticated("ROLE_EMPLOYEE"),
+                context("GET", "/employee/approvals/pending")).isGranted());
+    }
+
     private static Supplier<Authentication> authenticated(String... authorities) {
         TestingAuthenticationToken authentication = new TestingAuthenticationToken(
                 "user",

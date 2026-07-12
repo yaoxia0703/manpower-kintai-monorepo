@@ -43,11 +43,8 @@ public class SysEnumValueServiceImpl extends ServiceImpl<SysEnumValueMapper, Sys
                 .eq(SysEnumValue::getCode, command.code())
                 .count() > 0;
         if (exists) throw new BizException(SystemErrorCode.ENUM_VALUE_CODE_DUPLICATE);
-        SysEnumValue enumValue = new SysEnumValue()
-                .setEnumTypeCode(command.enumTypeCode())
-                .setCode(command.code())
-                .setSort(command.sort())
-                .setStatus(command.status() == null ? Status.ENABLED : command.status());
+        SysEnumValue enumValue = SysEnumValue.create(
+                command.enumTypeCode(), command.code(), command.sort(), command.status());
         save(enumValue);
         return enumValue;
     }
@@ -62,8 +59,7 @@ public class SysEnumValueServiceImpl extends ServiceImpl<SysEnumValueMapper, Sys
                 .ne(SysEnumValue::getId, id)
                 .count() > 0;
         if (exists) throw new BizException(SystemErrorCode.ENUM_VALUE_CODE_DUPLICATE);
-        existing.setCode(command.code())
-                .setSort(command.sort());
+        existing.updateEditableFields(command.enumTypeCode(), command.code(), command.sort());
         updateById(existing);
         return existing;
     }

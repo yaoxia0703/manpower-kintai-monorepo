@@ -56,12 +56,8 @@ public class SysEnumTypeServiceImpl extends ServiceImpl<SysEnumTypeMapper, SysEn
     public SysEnumType create(EnumTypeCreateCommand command) {
         boolean exists = lambdaQuery().eq(SysEnumType::getCode, command.code()).count() > 0;
         if (exists) throw new BizException(SystemErrorCode.ENUM_TYPE_CODE_DUPLICATE);
-        SysEnumType enumType = new SysEnumType()
-                .setCode(command.code())
-                .setName(command.name())
-                .setRemark(command.remark())
-                .setSort(command.sort())
-                .setStatus(command.status() == null ? Status.ENABLED : command.status());
+        SysEnumType enumType = SysEnumType.create(
+                command.code(), command.name(), command.remark(), command.sort(), command.status());
         save(enumType);
         return enumType;
     }
@@ -75,10 +71,7 @@ public class SysEnumTypeServiceImpl extends ServiceImpl<SysEnumTypeMapper, SysEn
                 .ne(SysEnumType::getId, id)
                 .count() > 0;
         if (exists) throw new BizException(SystemErrorCode.ENUM_TYPE_CODE_DUPLICATE);
-        existing.setName(command.name())
-                .setCode(command.code())
-                .setRemark(command.remark())
-                .setSort(command.sort());
+        existing.updateEditableFields(command.code(), command.name(), command.remark(), command.sort());
         updateById(existing);
         return existing;
     }

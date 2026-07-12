@@ -1,6 +1,5 @@
 package com.manpowergroup.kintai.system.application.service.impl.auth;
 
-import com.manpowergroup.kintai.common.enums.Status;
 import com.manpowergroup.kintai.framework.security.authority.PermissionRule;
 import com.manpowergroup.kintai.system.domain.entity.sys.SysPermission;
 import com.manpowergroup.kintai.system.infrastructure.mapper.sys.SysPermissionMapper;
@@ -19,11 +18,14 @@ class PermissionRuleProviderImplTest {
     void loadsEnabledPermissionRulesFromSysPermission() {
         SysPermissionMapper permissionMapper = mock(SysPermissionMapper.class);
         when(permissionMapper.selectList(any())).thenReturn(List.of(
-                new SysPermission()
-                        .setCode("admin:employee:read")
-                        .setMethod("GET")
-                        .setPath("/admin/emp/employees/**")
-                        .setStatus(Status.ENABLED)));
+                SysPermission.create(
+                        null,
+                        "admin:employee:read",
+                        "Read employee",
+                        "GET",
+                        "/admin/emp/employees/**",
+                        null,
+                        1)));
         PermissionRuleProviderImpl provider = new PermissionRuleProviderImpl(permissionMapper);
 
         List<PermissionRule> rules = provider.loadEnabledRules();

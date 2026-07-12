@@ -17,6 +17,7 @@ import java.time.LocalDateTime;
 @Setter(AccessLevel.PRIVATE)
 @Accessors(chain = true)
 @TableName("emp_account")
+/** 社員のログイン資格情報と認証状態を管理する。 */
 public class EmpAccount {
 
     @TableId(type = IdType.AUTO)
@@ -56,6 +57,7 @@ public class EmpAccount {
     @TableLogic
     private Integer isDeleted;
 
+    /** パスワードをハッシュ化し、有効な社員アカウントを登録する。 */
     public static EmpAccount register(Long employeeId, String username, String rawPassword, PasswordEncoder passwordEncoder) {
         return new EmpAccount()
                 .setEmployeeId(employeeId)
@@ -64,10 +66,12 @@ public class EmpAccount {
                 .setStatus(Status.ENABLED);
     }
 
+    /** ログイン名を変更する。 */
     public void changeUsername(String username) {
         this.username = username;
     }
 
+    /** アカウント状態とパスワードを検証する。 */
     public void authenticate(String rawPassword, PasswordEncoder passwordEncoder) {
         if (this.status != Status.ENABLED) {
             throw BizException.withDetail(ErrorCode.FORBIDDEN, "Account is disabled");
@@ -77,6 +81,7 @@ public class EmpAccount {
         }
     }
 
+    /** 現在のパスワードを検証してから新しいパスワードへ変更する。 */
     public void changePassword(String oldRawPassword, String newRawPassword, PasswordEncoder passwordEncoder) {
         if (!passwordEncoder.matches(oldRawPassword, this.password)) {
             throw BizException.withDetail(ErrorCode.BAD_REQUEST, "Old password mismatch");
@@ -84,6 +89,7 @@ public class EmpAccount {
         this.password = passwordEncoder.encode(newRawPassword);
     }
 
+    /** 最終ログイン日時を記録する。 */
     public void recordLogin(LocalDateTime loggedInAt) {
         this.lastLogin = loggedInAt;
     }

@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @TableName("org_node_closure")
+/** 組織ノード間の祖先・子孫関係と階層の深さを表す Closure Table の行。 */
 public class OrgNodeClosure {
 
     // 祖先ノードID

@@ -63,13 +63,13 @@ public class OrgGradeServiceImpl extends ServiceImpl<OrgGradeMapper, OrgGrade>
                 .eq(OrgGrade::getCode, command.code())
                 .count() > 0;
         if (exists) throw new BizException(SystemErrorCode.GRADE_CODE_DUPLICATE);
-        OrgGrade grade = new OrgGrade()
-                .setCompanyId(command.companyId())
-                .setName(command.name())
-                .setCode(command.code())
-                .setGradeLevel(command.gradeLevel())
-                .setSort(command.sort())
-                .setStatus(command.status() == null ? Status.ENABLED : command.status());
+        OrgGrade grade = OrgGrade.create(
+                command.companyId(),
+                command.name(),
+                command.code(),
+                command.gradeLevel(),
+                command.sort(),
+                command.status());
         save(grade);
         return grade;
     }
@@ -84,10 +84,11 @@ public class OrgGradeServiceImpl extends ServiceImpl<OrgGradeMapper, OrgGrade>
                 .ne(OrgGrade::getId, id)
                 .count() > 0;
         if (exists) throw new BizException(SystemErrorCode.GRADE_CODE_DUPLICATE);
-        existing.setName(command.name())
-                .setCode(command.code())
-                .setGradeLevel(command.gradeLevel())
-                .setSort(command.sort());
+        existing.updateEditableFields(
+                command.name(),
+                command.code(),
+                command.gradeLevel(),
+                command.sort());
         updateById(existing);
         return existing;
     }

@@ -4,7 +4,6 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.manpowergroup.kintai.common.exception.BaseErrorCode;
 import com.manpowergroup.kintai.common.exception.BizException;
-import com.manpowergroup.kintai.common.enums.Status;
 import com.manpowergroup.kintai.system.application.command.sys.MenuCreateCommand;
 import com.manpowergroup.kintai.system.application.command.sys.MenuUpdateCommand;
 import com.manpowergroup.kintai.system.application.service.sys.SysMenuService;
@@ -55,13 +54,13 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu>
 
     @Override
     public List<SysMenu> listByEmployeeId(Long employeeId) {
+        LocalDate today = LocalDate.now();
         List<Long> roleIds = employeeRoleMapper.selectList(Wrappers.<SysEmployeeRole>lambdaQuery()
-                        .eq(SysEmployeeRole::getEmployeeId, employeeId)
-                        .and(w -> w.isNull(SysEmployeeRole::getStartDate)
-                                .or().le(SysEmployeeRole::getStartDate, LocalDate.now()))
-                        .and(w -> w.isNull(SysEmployeeRole::getEndDate)
-                                .or().ge(SysEmployeeRole::getEndDate, LocalDate.now())))
-                .stream().map(SysEmployeeRole::getRoleId).collect(Collectors.toList());
+                        .eq(SysEmployeeRole::getEmployeeId, employeeId))
+                .stream()
+                .filter(assignment -> assignment.isEffectiveOn(today))
+                .map(SysEmployeeRole::getRoleId)
+                .collect(Collectors.toList());
         if (roleIds.isEmpty()) return Collections.emptyList();
 
         List<Long> menuIds = roleMenuMapper.selectList(Wrappers.<SysRoleMenu>lambdaQuery()
@@ -80,17 +79,9 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu>
     public SysMenu create(MenuCreateCommand command) {
         boolean exists = lambdaQuery().eq(SysMenu::getCode, command.code()).count() > 0;
         if (exists) throw new BizException(SystemErrorCode.MENU_CODE_DUPLICATE);
-        SysMenu menu = new SysMenu()
-                .setParentId(command.parentId())
-                .setName(command.name())
-                .setCode(command.code())
-                .setPath(command.path())
-                .setComponent(command.component())
-                .setIcon(command.icon())
-                .setType(command.type())
-                .setSort(command.sort())
-                .setVisible(command.visible() == null ? 1 : command.visible())
-                .setStatus(Status.ENABLED);
+        SysMenu menu = SysMenu.create(
+                command.parentId(), command.name(), command.code(), command.path(),
+                command.component(), command.icon(), command.type(), command.sort(), command.visible());
         save(menu);
         return menu;
     }
@@ -104,15 +95,9 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu>
                 .ne(SysMenu::getId, id)
                 .count() > 0;
         if (exists) throw new BizException(SystemErrorCode.MENU_CODE_DUPLICATE);
-        existing.setName(command.name())
-                .setCode(command.code())
-                .setPath(command.path())
-                .setComponent(command.component())
-                .setIcon(command.icon())
-                .setType(command.type())
-                .setSort(command.sort())
-                .setVisible(command.visible() == null ? 1 : command.visible())
-                .setParentId(command.parentId());
+        existing.updateEditableFields(
+                command.parentId(), command.name(), command.code(), command.path(),
+                command.component(), command.icon(), command.type(), command.sort(), command.visible());
         updateById(existing);
         return existing;
     }

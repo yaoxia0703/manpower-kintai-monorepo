@@ -31,7 +31,7 @@ public record TimesheetSaveRequest(
         LocalTime clockOut,
 
         @Min(0)
-        @Max(480)
+        @Max(value = 480,message = "")
         @Schema(description = "休憩時間（分）", example = "60")
         Integer breakMinutes,
 

@@ -1,7 +1,6 @@
 package com.manpowergroup.kintai.system.application.service.impl.emp;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.manpowergroup.kintai.common.enums.Status;
 import com.manpowergroup.kintai.common.exception.BaseErrorCode;
 import com.manpowergroup.kintai.common.exception.BizException;
 import com.manpowergroup.kintai.system.application.command.emp.EmployeePositionCreateCommand;
@@ -65,15 +64,15 @@ public class EmpEmployeePositionServiceImpl extends ServiceImpl<EmpEmployeePosit
     @Override
     @Transactional
     public EmpEmployeePosition create(EmployeePositionCreateCommand command) {
-        EmpEmployeePosition position = new EmpEmployeePosition()
-                .setEmployeeId(command.employeeId())
-                .setCompanyId(command.companyId())
-                .setNodeId(command.nodeId())
-                .setGradeId(command.gradeId())
-                .setIsPrimary(command.isPrimary())
-                .setStartDate(command.startDate())
-                .setEndDate(command.endDate())
-                .setStatus(command.status() == null ? Status.ENABLED : command.status());
+        EmpEmployeePosition position = EmpEmployeePosition.assign(
+                command.employeeId(),
+                command.companyId(),
+                command.nodeId(),
+                command.gradeId(),
+                command.isPrimary(),
+                command.startDate(),
+                command.endDate(),
+                command.status());
         save(position);
         return position;
     }
@@ -82,11 +81,12 @@ public class EmpEmployeePositionServiceImpl extends ServiceImpl<EmpEmployeePosit
     @Transactional
     public EmpEmployeePosition update(Long id, EmployeePositionUpdateCommand command) {
         EmpEmployeePosition existing = requirePosition(id);
-        existing.setNodeId(command.nodeId())
-                .setGradeId(command.gradeId())
-                .setIsPrimary(command.isPrimary())
-                .setStartDate(command.startDate())
-                .setEndDate(command.endDate());
+        existing.updateAssignment(
+                command.nodeId(),
+                command.gradeId(),
+                command.isPrimary(),
+                command.startDate(),
+                command.endDate());
         updateById(existing);
         return existing;
     }
