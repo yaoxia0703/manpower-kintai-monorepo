@@ -6,6 +6,8 @@ import com.manpowergroup.kintai.attendance.application.dto.timesheet.response.Ti
 import com.manpowergroup.kintai.attendance.application.query.timesheet.TimesheetMonthQuery;
 import com.manpowergroup.kintai.attendance.application.service.att.AttTimesheetQueryService;
 import com.manpowergroup.kintai.attendance.domain.entity.att.AttRecord;
+import com.manpowergroup.kintai.attendance.domain.entity.att.AttRequest;
+import com.manpowergroup.kintai.attendance.domain.service.att.TimesheetEditLockPolicy;
 import com.manpowergroup.kintai.attendance.infrastructure.mapper.att.AttRecordMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -26,6 +28,7 @@ public class AttTimesheetQueryServiceImpl implements AttTimesheetQueryService {
     };
 
     private final AttRecordMapper recordMapper;
+    private final TimesheetEditLockPolicy editLockPolicy;
 
     @Override
     public TimesheetMonthResponse getMonthlyTimesheet(TimesheetMonthQuery query) {
@@ -38,6 +41,8 @@ public class AttTimesheetQueryServiceImpl implements AttTimesheetQueryService {
                         .eq(AttRecord::getCompanyId, query.companyId())
                         .between(AttRecord::getWorkDate, start, end)
         ).stream().collect(Collectors.toMap(AttRecord::getWorkDate, record -> record));
+        Map<LocalDate, AttRequest> lockMap = editLockPolicy.findLocks(
+                query.employeeId(), query.companyId(), start, end);
 
         List<TimesheetDayResponse> days = new ArrayList<>();
         LocalDate cursor = start;
@@ -46,7 +51,8 @@ public class AttTimesheetQueryServiceImpl implements AttTimesheetQueryService {
         int totalOvertime = 0;
 
         while (!cursor.isAfter(end)) {
-            TimesheetDayResponse day = buildDayResponse(cursor, recordMap.get(cursor));
+            TimesheetDayResponse day = buildDayResponse(
+                    cursor, recordMap.get(cursor), lockMap.get(cursor));
             days.add(day);
 
             if (day.getWorkMinutes() != null && day.getWorkMinutes() > 0) {
@@ -67,7 +73,8 @@ public class AttTimesheetQueryServiceImpl implements AttTimesheetQueryService {
                 .setTotalOvertimeMinutes(totalOvertime);
     }
 
-    private TimesheetDayResponse buildDayResponse(LocalDate date, AttRecord record) {
+    private TimesheetDayResponse buildDayResponse(
+            LocalDate date, AttRecord record, AttRequest lockingRequest) {
         DayOfWeek dayOfWeek = date.getDayOfWeek();
         boolean weekend = dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY;
 
@@ -75,7 +82,13 @@ public class AttTimesheetQueryServiceImpl implements AttTimesheetQueryService {
                 .setWorkDate(date)
                 .setDayOfWeek(JP_WEEKDAYS[dayOfWeek.getValue() % 7])
                 .setWeekend(weekend)
-                .setHoliday(false);
+                .setHoliday(false)
+                .setRequestLocked(lockingRequest != null);
+
+        if (lockingRequest != null) {
+            dto.setLockingRequestType(lockingRequest.getRequestType())
+                    .setLockingRequestStatus(lockingRequest.getStatus());
+        }
 
         if (record == null) {
             return dto;

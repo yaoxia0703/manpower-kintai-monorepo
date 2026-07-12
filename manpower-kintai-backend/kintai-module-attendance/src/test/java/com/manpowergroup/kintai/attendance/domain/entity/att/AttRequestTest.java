@@ -9,7 +9,9 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class AttRequestTest {
 
@@ -159,6 +161,32 @@ class AttRequestTest {
                 120,
                 "overtime",
                 2L));
+    }
+
+    @Test
+    void pendingAndApprovedLeaveRequestsLockCoveredTimesheetDates() {
+        AttRequest request = createRequest();
+
+        assertTrue(request.locksTimesheetOn(LocalDate.of(2026, 7, 1)));
+        assertFalse(request.locksTimesheetOn(LocalDate.of(2026, 7, 2)));
+
+        request.approve();
+
+        assertTrue(request.locksTimesheetOn(LocalDate.of(2026, 7, 1)));
+    }
+
+    @Test
+    void rejectedLeaveAndOvertimeRequestsDoNotLockTimesheet() {
+        AttRequest rejectedLeave = createRequest();
+        rejectedLeave.reject();
+        AttRequest overtime = AttRequest.create(
+                1L, 10L, "OVERTIME",
+                LocalDate.of(2026, 7, 1), LocalDate.of(2026, 7, 1),
+                LocalTime.of(18, 0), LocalTime.of(20, 0),
+                null, 120, "overtime");
+
+        assertFalse(rejectedLeave.locksTimesheetOn(LocalDate.of(2026, 7, 1)));
+        assertFalse(overtime.locksTimesheetOn(LocalDate.of(2026, 7, 1)));
     }
 
     private AttRequest createRequest() {

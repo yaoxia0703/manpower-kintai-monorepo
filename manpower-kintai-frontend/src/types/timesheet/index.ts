@@ -1,4 +1,6 @@
 export type AttendanceType = 'OFFICE' | 'REMOTE' | 'BUSINESS_TRIP' | 'HOLIDAY_WORK'
+export type TimesheetLockRequestType = 'PAID_LEAVE' | 'SUBSTITUTE' | 'LEAVE_OF_ABSENCE'
+export type TimesheetLockRequestStatus = 'PENDING' | 'APPROVED'
 
 export interface TimesheetDay {
   workDate: string
@@ -14,6 +16,9 @@ export interface TimesheetDay {
   remark: string | null
   status: number | null
   recordId: number | null
+  requestLocked: boolean
+  lockingRequestType: TimesheetLockRequestType | null
+  lockingRequestStatus: TimesheetLockRequestStatus | null
 }
 
 export interface TimesheetMonth {

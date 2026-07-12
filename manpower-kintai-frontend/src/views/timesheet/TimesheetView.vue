@@ -281,6 +281,7 @@ function dayTextType(day: TimesheetDay) {
 }
 
 function rowClassName({ row }: { row: TimesheetRow }) {
+  if (row.requestLocked) return 'timesheet-row-request-locked'
   if (row.holiday || row.dayOfWeek === '日') return 'timesheet-row-holiday'
   if (row.dayOfWeek === '土') return 'timesheet-row-saturday'
   return ''
@@ -388,13 +389,24 @@ function markDirty(workDate: string): void {
 }
 
 function isLocked(day: TimesheetDay): boolean {
-  return day.status === 1
+  return day.requestLocked || day.status === 1 || day.status === 2
 }
 
-function statusMeta(day: TimesheetDay): { label: string; type: 'success' | 'danger' | 'info' } {
-  if (day.status === 1) return { label: '承認済', type: 'success' }
-  if (day.status === 2) return { label: '否認', type: 'danger' }
-  if (day.recordId) return { label: '未承認', type: 'info' }
+function statusMeta(day: TimesheetDay): { label: string; type: 'success' | 'warning' | 'info' } {
+  if (day.requestLocked) {
+    const requestLabels = {
+      PAID_LEAVE: '有給',
+      SUBSTITUTE: '振替休暇',
+      LEAVE_OF_ABSENCE: '休職',
+    }
+    const requestLabel = day.lockingRequestType ? requestLabels[day.lockingRequestType] : '休暇'
+    return day.lockingRequestStatus === 'APPROVED'
+      ? { label: `${requestLabel}承認済`, type: 'success' }
+      : { label: `${requestLabel}申請中`, type: 'warning' }
+  }
+  if (day.status === 1) return { label: '提出済', type: 'success' }
+  if (day.status === 2) return { label: 'ロック済', type: 'info' }
+  if (day.recordId) return { label: '未提出', type: 'info' }
   return { label: '-', type: 'info' }
 }
 
@@ -419,6 +431,9 @@ function generateEmptyDays(year: number, month: number): TimesheetDay[] {
       remark: null,
       status: null,
       recordId: null,
+      requestLocked: false,
+      lockingRequestType: null,
+      lockingRequestStatus: null,
     }
   })
 }
@@ -673,6 +688,10 @@ onMounted(() => loadTimesheet())
 
 .timesheet-table :deep(.timesheet-row-holiday) {
   --el-table-tr-bg-color: var(--el-color-danger-light-9);
+}
+
+.timesheet-table :deep(.timesheet-row-request-locked) {
+  --el-table-tr-bg-color: var(--el-color-warning-light-9);
 }
 
 @media (max-width: 900px) {

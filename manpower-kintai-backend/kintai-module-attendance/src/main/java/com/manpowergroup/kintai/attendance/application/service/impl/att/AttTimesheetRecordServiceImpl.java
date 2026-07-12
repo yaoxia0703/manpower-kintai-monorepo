@@ -5,6 +5,7 @@ import com.manpowergroup.kintai.attendance.application.command.timesheet.Timeshe
 import com.manpowergroup.kintai.attendance.application.command.timesheet.TimesheetSaveCommand;
 import com.manpowergroup.kintai.attendance.application.service.att.AttTimesheetRecordService;
 import com.manpowergroup.kintai.attendance.domain.entity.att.AttRecord;
+import com.manpowergroup.kintai.attendance.domain.service.att.TimesheetEditLockPolicy;
 import com.manpowergroup.kintai.attendance.infrastructure.mapper.att.AttRecordMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -15,10 +16,13 @@ import org.springframework.transaction.annotation.Transactional;
 public class AttTimesheetRecordServiceImpl implements AttTimesheetRecordService {
 
     private final AttRecordMapper recordMapper;
+    private final TimesheetEditLockPolicy editLockPolicy;
 
     @Override
     @Transactional
     public void saveRecord(TimesheetSaveCommand command) {
+        editLockPolicy.ensureEditable(
+                command.employeeId(), command.companyId(), command.workDate());
         AttRecord existing = recordMapper.selectOne(
                 new LambdaQueryWrapper<AttRecord>()
                         .eq(AttRecord::getEmployeeId, command.employeeId())
@@ -60,6 +64,8 @@ public class AttTimesheetRecordServiceImpl implements AttTimesheetRecordService 
                         .eq(AttRecord::getEmployeeId, command.employeeId())
         );
         if (record != null) {
+            editLockPolicy.ensureEditable(
+                    record.getEmployeeId(), record.getCompanyId(), record.getWorkDate());
             record.ensureDeletable();
             recordMapper.deleteById(command.recordId());
         }

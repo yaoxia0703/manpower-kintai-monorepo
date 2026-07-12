@@ -18,6 +18,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.Set;
 
 /**
  * 休暇や残業などの勤怠申請を表し、申請内容と承認状態を管理する。
@@ -27,6 +28,9 @@ import java.time.LocalTime;
 @Accessors(chain = true)
 @TableName("att_request")
 public class AttRequest {
+
+    private static final Set<String> TIMESHEET_LOCKING_REQUEST_TYPES = Set.of(
+            "PAID_LEAVE", "SUBSTITUTE", "LEAVE_OF_ABSENCE");
 
     @TableId(type = IdType.AUTO)
     // 申請ID
@@ -174,6 +178,16 @@ public class AttRequest {
         requirePending();
         this.status = ApprovalStatus.CANCELLED;
         this.updatedBy = actorId;
+    }
+
+    /** 承認待ちまたは承認済みの休暇申請が指定日の勤務表編集を禁止するか判定する。 */
+    public boolean locksTimesheetOn(LocalDate workDate) {
+        if (workDate == null || startDate == null || endDate == null) {
+            return false;
+        }
+        boolean active = status == ApprovalStatus.PENDING || status == ApprovalStatus.APPROVED;
+        boolean covered = !workDate.isBefore(startDate) && !workDate.isAfter(endDate);
+        return active && covered && TIMESHEET_LOCKING_REQUEST_TYPES.contains(requestType);
     }
 
     private void requirePending() {
