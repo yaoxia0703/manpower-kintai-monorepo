@@ -94,7 +94,9 @@ class SysPermissionServiceImplTest {
         String sql = capturedWrapper.getSqlSegment();
         assertTrue(sql.contains("menu_id IN"));
         assertTrue(sql.contains("LOWER(code) LIKE"));
-        assertTrue(sql.contains("LOWER(name) LIKE"));
+        assertTrue(sql.contains("name LIKE"));
+        assertTrue(sql.contains("ESCAPE '!'"));
+        assertTrue(!sql.contains("LOWER(name)"));
         assertTrue(sql.contains("sort ASC"));
         assertTrue(sql.contains("id ASC"));
         AbstractWrapper<?, ?, ?> abstractWrapper = (AbstractWrapper<?, ?, ?>) capturedWrapper;
@@ -106,6 +108,62 @@ class SysPermissionServiceImplTest {
         assertEquals(11L, result.getTotal());
         assertEquals(2L, result.getPage());
         assertEquals(10L, result.getSize());
+        assertEquals(2L, result.getPages());
+    }
+
+    @Test
+    void pageEscapesLikeWildcardsAndKeepsNameCollation() {
+        SysPermissionMapper permissionMapper = Mockito.mock(SysPermissionMapper.class);
+        SysMenuMapper menuMapper = Mockito.mock(SysMenuMapper.class);
+        SysPermissionServiceImpl service = new SysPermissionServiceImpl(
+                Mockito.mock(SysEmployeeRoleMapper.class),
+                Mockito.mock(SysRolePermissionMapper.class), menuMapper);
+        ReflectionTestUtils.setField(service, "baseMapper", permissionMapper);
+        when(permissionMapper.selectPage(any(Page.class), any()))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        service.page(null, " Admin%_! ", PageRequest.of(1, 10));
+
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<Wrapper<SysPermission>> wrapperCaptor = ArgumentCaptor.forClass(Wrapper.class);
+        verify(permissionMapper).selectPage(any(Page.class), wrapperCaptor.capture());
+        AbstractWrapper<?, ?, ?> wrapper = (AbstractWrapper<?, ?, ?>) wrapperCaptor.getValue();
+        String sql = wrapper.getSqlSegment();
+        Set<Object> values = Set.copyOf(wrapper.getParamNameValuePairs().values());
+        assertTrue(values.contains("%admin!%!_!!%"));
+        assertTrue(values.contains("%Admin!%!_!!%"));
+        assertTrue(sql.contains("LOWER(code) LIKE"));
+        assertTrue(sql.contains("name LIKE"));
+        verify(menuMapper, never()).selectList(any());
+    }
+
+    @Test
+    void pageOmitsWhitespaceKeywordAndUsesOnlySelectedLeafMenu() {
+        SysPermissionMapper permissionMapper = Mockito.mock(SysPermissionMapper.class);
+        SysMenuMapper menuMapper = Mockito.mock(SysMenuMapper.class);
+        SysPermissionServiceImpl service = new SysPermissionServiceImpl(
+                Mockito.mock(SysEmployeeRoleMapper.class),
+                Mockito.mock(SysRolePermissionMapper.class), menuMapper);
+        ReflectionTestUtils.setField(service, "baseMapper", permissionMapper);
+        when(menuMapper.selectList(any())).thenReturn(List.of(
+                menu(1L, null), menu(2L, 1L), menu(3L, 2L)));
+        when(permissionMapper.selectPage(any(Page.class), any()))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        service.page(3L, "   ", PageRequest.of(1, 10));
+
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<Wrapper<SysPermission>> wrapperCaptor = ArgumentCaptor.forClass(Wrapper.class);
+        verify(permissionMapper).selectPage(any(Page.class), wrapperCaptor.capture());
+        AbstractWrapper<?, ?, ?> wrapper = (AbstractWrapper<?, ?, ?>) wrapperCaptor.getValue();
+        String sql = wrapper.getSqlSegment();
+        assertTrue(sql.contains("menu_id IN"));
+        assertTrue(!sql.contains("LIKE"));
+        Set<Long> menuIds = wrapper.getParamNameValuePairs().values().stream()
+                .filter(Long.class::isInstance)
+                .map(Long.class::cast)
+                .collect(Collectors.toSet());
+        assertEquals(Set.of(3L), menuIds);
     }
 
     @Test

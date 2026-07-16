@@ -6,13 +6,9 @@ import type {
   PermissionUpdateRequest,
   SystemPermission,
 } from '@/types/system'
+import type { PermissionQueryParams } from '@/utils/permissionQuery'
 
-export interface PermissionQueryParams {
-  page?: number
-  size?: number
-  menuId?: number
-  keyword?: string
-}
+export type { PermissionQueryParams } from '@/utils/permissionQuery'
 
 export function fetchPermissions(params: PermissionQueryParams = {}) {
   return request.get<ApiResponse<PageResult<SystemPermission>>>('/admin/sys/permissions', { params })

@@ -63,17 +63,25 @@ public class SysPermissionServiceImpl extends ServiceImpl<SysPermissionMapper, S
         LambdaQueryWrapper<SysPermission> wrapper = Wrappers.lambdaQuery(SysPermission.class)
                 .in(menuId != null, SysPermission::getMenuId, menuIds);
         if (normalizedKeyword != null) {
-            String pattern = "%" + normalizedKeyword.toLowerCase(Locale.ROOT) + "%";
+            String codePattern = "%" + escapeLikeLiteral(normalizedKeyword.toLowerCase(Locale.ROOT)) + "%";
+            String namePattern = "%" + escapeLikeLiteral(normalizedKeyword) + "%";
             wrapper.and(query -> query
-                    .apply("LOWER(code) LIKE {0}", pattern)
+                    .apply("LOWER(code) LIKE {0} ESCAPE '!'", codePattern)
                     .or()
-                    .apply("LOWER(name) LIKE {0}", pattern));
+                    .apply("name LIKE {0} ESCAPE '!'", namePattern));
         }
         wrapper.orderByAsc(SysPermission::getSort).orderByAsc(SysPermission::getId);
 
         Page<SysPermission> page = new Page<>(request.page(), request.size());
         baseMapper.selectPage(page, wrapper);
         return PageResult.of(page);
+    }
+
+    private String escapeLikeLiteral(String value) {
+        return value
+                .replace("!", "!!")
+                .replace("%", "!%")
+                .replace("_", "!_");
     }
 
     private List<Long> collectDescendantMenuIds(Long rootId) {

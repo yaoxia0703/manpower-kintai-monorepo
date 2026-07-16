@@ -142,9 +142,14 @@ import {
   fetchPermissions,
   updatePermission,
 } from '@/api/system/permission'
-import type { PermissionQueryParams } from '@/api/system/permission'
 import { CommonStatus } from '@/types/enums'
 import type { PermissionCreateRequest, SystemMenu, SystemPermission } from '@/types/system'
+import {
+  buildPermissionQuery,
+  resetPermissionFilters,
+  submitPermissionFilters,
+} from '@/utils/permissionQuery'
+import type { PermissionFilterState } from '@/utils/permissionQuery'
 
 interface PermissionFormState {
   menuId: number | null
@@ -154,11 +159,6 @@ interface PermissionFormState {
   path: string
   remark: string
   sort: number
-}
-
-interface PermissionFilterState {
-  keyword: string
-  menuId?: number
 }
 
 const loading = ref(false)
@@ -211,19 +211,16 @@ function buildTree(list: SystemMenu[]) {
 }
 
 async function loadMenus() {
-  const { data } = await fetchMenus()
-  menus.value = data.data
+  try {
+    const { data } = await fetchMenus()
+    menus.value = data.data
+  } catch {
+    ElMessage.error('メニュー一覧を取得できませんでした')
+  }
 }
 
 function toQueryParams() {
-  const params: PermissionQueryParams = {
-    page: page.value,
-    size: size.value,
-  }
-  const keyword = appliedFilters.keyword.trim()
-  if (keyword) params.keyword = keyword
-  if (appliedFilters.menuId) params.menuId = appliedFilters.menuId
-  return params
+  return buildPermissionQuery(appliedFilters, page.value, size.value)
 }
 
 async function loadData() {
@@ -243,17 +240,14 @@ async function loadData() {
 }
 
 async function handleSearch() {
-  appliedFilters.keyword = filters.keyword.trim()
-  appliedFilters.menuId = filters.menuId
+  Object.assign(appliedFilters, submitPermissionFilters(filters))
   page.value = 1
   await loadData()
 }
 
 async function handleReset() {
-  filters.keyword = ''
-  filters.menuId = undefined
-  appliedFilters.keyword = ''
-  appliedFilters.menuId = undefined
+  Object.assign(filters, resetPermissionFilters())
+  Object.assign(appliedFilters, resetPermissionFilters())
   page.value = 1
   await loadData()
 }
@@ -344,9 +338,9 @@ async function confirmDelete(row: SystemPermission) {
   await loadData()
 }
 
-onMounted(async () => {
-  await loadMenus()
-  await loadData()
+onMounted(() => {
+  void loadMenus()
+  void loadData()
 })
 </script>
 
