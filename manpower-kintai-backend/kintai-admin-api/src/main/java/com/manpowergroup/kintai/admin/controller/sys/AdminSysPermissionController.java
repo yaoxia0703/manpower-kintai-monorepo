@@ -20,8 +20,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/admin/sys/permissions")
 @RequiredArgsConstructor
@@ -31,16 +29,13 @@ public class AdminSysPermissionController {
 
     @GetMapping
     public Result<PageResult<PermissionResponse>> page(
+            @RequestParam(required = false) Long menuId,
+            @RequestParam(required = false) String keyword,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size) {
-        return Result.ok(service.page(PageRequest.of(page, size)).map(PermissionAssembler::toResponse));
+        return Result.ok(service.page(menuId, keyword, PageRequest.of(page, size))
+                .map(PermissionAssembler::toResponse));
     }
-
-//    @GetMapping("/by-menu/{menuId}")
-//    public Result<List<PermissionResponse>> listByMenu(@PathVariable Long menuId) {
-//        return Result.ok(service.listByMenu(menuId).stream().map(PermissionAssembler::toResponse).toList());
-//    }
-
 
     @GetMapping("/{id}")
     public Result<PermissionResponse> getById(@PathVariable Long id) {
