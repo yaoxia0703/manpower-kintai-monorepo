@@ -16,7 +16,7 @@ public interface SysPermissionService extends IService<SysPermission> {
     SysPermission getById(Long id);
 
     // 権限一覧をページング取得
-    PageResult<SysPermission> page(PageRequest request);
+    PageResult<SysPermission> page(Long menuId, String keyword, PageRequest request);
 
     // メニューIDで権限一覧を取得
     List<SysPermission> listByMenu(Long menuId);

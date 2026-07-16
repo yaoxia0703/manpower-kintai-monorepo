@@ -1,5 +1,6 @@
 package com.manpowergroup.kintai.system.application.service.impl.sys;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -11,18 +12,24 @@ import com.manpowergroup.kintai.system.application.command.sys.PermissionCreateC
 import com.manpowergroup.kintai.system.application.command.sys.PermissionUpdateCommand;
 import com.manpowergroup.kintai.system.application.service.sys.SysPermissionService;
 import com.manpowergroup.kintai.system.domain.entity.sys.SysEmployeeRole;
+import com.manpowergroup.kintai.system.domain.entity.sys.SysMenu;
 import com.manpowergroup.kintai.system.domain.entity.sys.SysPermission;
 import com.manpowergroup.kintai.system.domain.entity.sys.SysRolePermission;
 import com.manpowergroup.kintai.system.infrastructure.mapper.sys.SysEmployeeRoleMapper;
+import com.manpowergroup.kintai.system.infrastructure.mapper.sys.SysMenuMapper;
 import com.manpowergroup.kintai.system.infrastructure.mapper.sys.SysPermissionMapper;
 import com.manpowergroup.kintai.system.infrastructure.mapper.sys.SysRolePermissionMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.time.LocalDate;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -32,6 +39,7 @@ public class SysPermissionServiceImpl extends ServiceImpl<SysPermissionMapper, S
 
     private final SysEmployeeRoleMapper employeeRoleMapper;
     private final SysRolePermissionMapper rolePermissionMapper;
+    private final SysMenuMapper menuMapper;
 
     @Override
     public SysPermission getById(Long id) {
@@ -45,10 +53,58 @@ public class SysPermissionServiceImpl extends ServiceImpl<SysPermissionMapper, S
     }
 
     @Override
-    public PageResult<SysPermission> page(PageRequest request) {
-        Page<SysPermission> p = new Page<>(request.page(), request.size());
-        page(p, lambdaQuery().orderByAsc(SysPermission::getSort).getWrapper());
-        return PageResult.of(p);
+    public PageResult<SysPermission> page(Long menuId, String keyword, PageRequest request) {
+        List<Long> menuIds = menuId == null ? List.of() : collectDescendantMenuIds(menuId);
+        if (menuId != null && menuIds.isEmpty()) {
+            return emptyPage(request);
+        }
+
+        String normalizedKeyword = StringUtils.hasText(keyword) ? keyword.trim() : null;
+        LambdaQueryWrapper<SysPermission> wrapper = Wrappers.lambdaQuery(SysPermission.class)
+                .in(menuId != null, SysPermission::getMenuId, menuIds);
+        if (normalizedKeyword != null) {
+            String pattern = "%" + normalizedKeyword.toLowerCase(Locale.ROOT) + "%";
+            wrapper.and(query -> query
+                    .apply("LOWER(code) LIKE {0}", pattern)
+                    .or()
+                    .apply("LOWER(name) LIKE {0}", pattern));
+        }
+        wrapper.orderByAsc(SysPermission::getSort).orderByAsc(SysPermission::getId);
+
+        Page<SysPermission> page = new Page<>(request.page(), request.size());
+        baseMapper.selectPage(page, wrapper);
+        return PageResult.of(page);
+    }
+
+    private List<Long> collectDescendantMenuIds(Long rootId) {
+        List<SysMenu> menus = menuMapper.selectList(Wrappers.<SysMenu>lambdaQuery()
+                .select(SysMenu::getId, SysMenu::getParentId));
+        if (menus.stream().noneMatch(menu -> rootId.equals(menu.getId()))) {
+            return List.of();
+        }
+
+        Set<Long> collected = new LinkedHashSet<>();
+        collected.add(rootId);
+        boolean changed;
+        do {
+            changed = false;
+            for (SysMenu menu : menus) {
+                if (menu.getId() != null
+                        && menu.getParentId() != null
+                        && collected.contains(menu.getParentId())
+                        && collected.add(menu.getId())) {
+                    changed = true;
+                }
+            }
+        } while (changed);
+        return List.copyOf(collected);
+    }
+
+    private PageResult<SysPermission> emptyPage(PageRequest request) {
+        Page<SysPermission> page = new Page<>(request.page(), request.size());
+        page.setRecords(List.of());
+        page.setTotal(0L);
+        return PageResult.of(page);
     }
 
     @Override
