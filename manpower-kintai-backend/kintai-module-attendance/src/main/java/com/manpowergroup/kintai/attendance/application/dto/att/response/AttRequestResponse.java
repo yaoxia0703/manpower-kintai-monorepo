@@ -2,6 +2,7 @@ package com.manpowergroup.kintai.attendance.application.dto.att.response;
 
 import com.manpowergroup.kintai.attendance.domain.entity.att.AttRequest;
 import com.manpowergroup.kintai.attendance.domain.enums.ApprovalStatus;
+import com.manpowergroup.kintai.attendance.domain.enums.RequestType;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -10,7 +11,7 @@ import java.time.LocalTime;
 
 public record AttRequestResponse(
         Long id,
-        String requestType,
+        RequestType requestType,
         LocalDate startDate,
         LocalDate endDate,
         LocalTime startTime,

@@ -1,106 +1,143 @@
 <template>
-  <div class="approval-page">
-    <header class="page-toolbar">
-      <div>
-        <h1>承認ワークスペース</h1>
-        <el-text type="info">勤怠申請の確認と承認履歴</el-text>
+  <section class="page-section">
+    <el-card class="approval-card" shadow="never" body-class="approval-card-body">
+      <template #header>
+        <div class="card-header">
+          <div>
+            <div class="card-title">承認ワークスペース</div>
+            <el-text type="info">勤怠申請の確認と承認履歴</el-text>
+          </div>
+          <el-button :loading="loading" @click="loadAll">更新</el-button>
+        </div>
+      </template>
+
+      <div class="approval-tabs">
+        <el-segmented v-model="activeView" :options="viewOptions" />
+        <el-tag v-if="pending.length > 0" type="warning" effect="plain">
+          {{ pending.length }}件の承認待ち
+        </el-tag>
       </div>
-      <el-button :icon="Refresh" :loading="loading" circle aria-label="更新" @click="loadAll" />
-    </header>
 
-    <div class="approval-tabs">
-      <el-segmented v-model="activeView" :options="viewOptions" />
-      <el-tag v-if="pending.length > 0" type="warning" effect="plain">
-        {{ pending.length }}件の承認待ち
-      </el-tag>
-    </div>
+      <div class="approval-table">
+        <el-table
+          v-if="activeView === 'pending'"
+          v-loading="loading"
+          :data="pending"
+          row-key="approvalId"
+          stripe
+          border
+          height="100%"
+        >
+          <el-table-column prop="approvalId" label="承認ID" width="90" />
+          <el-table-column label="申請者" min-width="190">
+            <template #default="{ row }">{{ applicantLabel(row) }}</template>
+          </el-table-column>
+          <el-table-column label="種別" min-width="130">
+            <template #default="{ row }">{{ requestTypeLabel(row.requestType) }}</template>
+          </el-table-column>
+          <el-table-column label="期間" min-width="190">
+            <template #default="{ row }">{{ formatPeriod(row.startDate, row.endDate) }}</template>
+          </el-table-column>
+          <el-table-column prop="reason" label="理由" min-width="220" show-overflow-tooltip />
+          <el-table-column label="進捗" width="110" align="center">
+            <template #default="{ row }">
+              <el-tag type="warning" effect="plain"
+                >{{ row.currentStep }} / {{ row.totalSteps }}</el-tag
+              >
+            </template>
+          </el-table-column>
+          <el-table-column label="申請日時" width="155">
+            <template #default="{ row }">{{ formatDateTime(row.submittedAt) }}</template>
+          </el-table-column>
+          <el-table-column label="操作" width="238" fixed="right" align="center">
+            <template #default="{ row }">
+              <el-space :size="6">
+                <el-tooltip content="詳細">
+                  <el-button
+                    circle
+                    size="small"
+                    :icon="View"
+                    aria-label="詳細"
+                    @click="openDetail(row.approvalId)"
+                  />
+                </el-tooltip>
+                <el-button
+                  size="small"
+                  type="success"
+                  :icon="Check"
+                  @click="openDecision(row, 'approve')"
+                >
+                  承認
+                </el-button>
+                <el-button
+                  size="small"
+                  type="danger"
+                  plain
+                  :icon="Close"
+                  @click="openDecision(row, 'reject')"
+                >
+                  否認
+                </el-button>
+                <el-tooltip content="委譲">
+                  <el-button
+                    circle
+                    size="small"
+                    :icon="UserFilled"
+                    aria-label="委譲"
+                    @click="openDelegate(row)"
+                  />
+                </el-tooltip>
+              </el-space>
+            </template>
+          </el-table-column>
+          <template #empty><el-empty description="承認待ちはありません" /></template>
+        </el-table>
 
-    <section class="table-surface">
-      <el-table
-        v-if="activeView === 'pending'"
-        v-loading="loading"
-        :data="pending"
-        row-key="approvalId"
-        stripe
-        height="100%"
-      >
-        <el-table-column prop="approvalId" label="承認ID" width="90" />
-        <el-table-column label="申請者" min-width="190">
-          <template #default="{ row }">{{ applicantLabel(row) }}</template>
-        </el-table-column>
-        <el-table-column label="種別" min-width="130">
-          <template #default="{ row }">{{ requestTypeLabel(row.requestType) }}</template>
-        </el-table-column>
-        <el-table-column label="期間" min-width="190">
-          <template #default="{ row }">{{ formatPeriod(row.startDate, row.endDate) }}</template>
-        </el-table-column>
-        <el-table-column prop="reason" label="理由" min-width="220" show-overflow-tooltip />
-        <el-table-column label="進捗" width="110" align="center">
-          <template #default="{ row }">
-            <el-tag type="warning" effect="plain">{{ row.currentStep }} / {{ row.totalSteps }}</el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column label="申請日時" width="155">
-          <template #default="{ row }">{{ formatDateTime(row.submittedAt) }}</template>
-        </el-table-column>
-        <el-table-column label="操作" width="238" fixed="right" align="center">
-          <template #default="{ row }">
-            <el-space :size="6">
-              <el-tooltip content="詳細">
-                <el-button circle size="small" :icon="View" aria-label="詳細" @click="openDetail(row.approvalId)" />
-              </el-tooltip>
-              <el-button size="small" type="success" :icon="Check" @click="openDecision(row, 'approve')">
-                承認
-              </el-button>
-              <el-button size="small" type="danger" plain :icon="Close" @click="openDecision(row, 'reject')">
-                否認
-              </el-button>
-              <el-tooltip content="委譲">
-                <el-button circle size="small" :icon="UserFilled" aria-label="委譲" @click="openDelegate(row)" />
-              </el-tooltip>
-            </el-space>
-          </template>
-        </el-table-column>
-        <template #empty><el-empty description="承認待ちはありません" /></template>
-      </el-table>
-
-      <el-table
-        v-else
-        v-loading="loading"
-        :data="history"
-        row-key="approvalId"
-        stripe
-        height="100%"
-        @row-click="handleHistoryRowClick"
-      >
-        <el-table-column prop="approvalId" label="承認ID" width="90" />
-        <el-table-column label="申請者" min-width="190">
-          <template #default="{ row }">{{ applicantLabel(row) }}</template>
-        </el-table-column>
-        <el-table-column label="種別" min-width="140">
-          <template #default="{ row }">{{ requestTypeLabel(row.requestType) }}</template>
-        </el-table-column>
-        <el-table-column label="状態" width="110" align="center">
-          <template #default="{ row }">
-            <el-tag :type="statusMeta(row.status).type" effect="plain">
-              {{ statusMeta(row.status).label }}
-            </el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column label="申請日時" min-width="155">
-          <template #default="{ row }">{{ formatDateTime(row.submittedAt) }}</template>
-        </el-table-column>
-        <el-table-column label="完了日時" min-width="155">
-          <template #default="{ row }">{{ formatDateTime(row.completedAt) }}</template>
-        </el-table-column>
-        <el-table-column label="詳細" width="76" align="center">
-          <template #default="{ row }">
-            <el-button circle size="small" :icon="View" aria-label="詳細" @click.stop="openDetail(row.approvalId)" />
-          </template>
-        </el-table-column>
-        <template #empty><el-empty description="承認履歴はありません" /></template>
-      </el-table>
-    </section>
+        <el-table
+          v-else
+          v-loading="loading"
+          :data="history"
+          row-key="approvalId"
+          stripe
+          border
+          height="100%"
+          @row-click="handleHistoryRowClick"
+        >
+          <el-table-column prop="approvalId" label="承認ID" width="90" />
+          <el-table-column label="申請者" min-width="190">
+            <template #default="{ row }">{{ applicantLabel(row) }}</template>
+          </el-table-column>
+          <el-table-column label="種別" min-width="140">
+            <template #default="{ row }">{{ requestTypeLabel(row.requestType) }}</template>
+          </el-table-column>
+          <el-table-column label="状態" width="110" align="center">
+            <template #default="{ row }">
+              <el-tag :type="statusMeta(row.status).type" effect="plain">
+                {{ statusMeta(row.status).label }}
+              </el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column label="申請日時" min-width="155">
+            <template #default="{ row }">{{ formatDateTime(row.submittedAt) }}</template>
+          </el-table-column>
+          <el-table-column label="完了日時" min-width="155">
+            <template #default="{ row }">{{ formatDateTime(row.completedAt) }}</template>
+          </el-table-column>
+          <el-table-column label="詳細" width="76" align="center">
+            <template #default="{ row }">
+              <el-button
+                circle
+                size="small"
+                :icon="View"
+                aria-label="詳細"
+                @click.stop="openDetail(row.approvalId)"
+              />
+            </template>
+          </el-table-column>
+          <template #empty><el-empty description="承認履歴はありません" /></template>
+        </el-table>
+      </div>
+    </el-card>
 
     <el-dialog
       v-model="decisionVisible"
@@ -111,11 +148,21 @@
         :type="decisionAction === 'approve' ? 'success' : 'warning'"
         :closable="false"
         show-icon
-        :title="decisionTarget ? `${requestTypeLabel(decisionTarget.requestType)} / ${applicantLabel(decisionTarget)}` : ''"
+        :title="
+          decisionTarget
+            ? `${requestTypeLabel(decisionTarget.requestType)} / ${applicantLabel(decisionTarget)}`
+            : ''
+        "
       />
       <el-form label-position="top" class="dialog-form">
         <el-form-item label="コメント">
-          <el-input v-model="decisionComment" type="textarea" :rows="4" maxlength="500" show-word-limit />
+          <el-input
+            v-model="decisionComment"
+            type="textarea"
+            :rows="4"
+            maxlength="500"
+            show-word-limit
+          />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -130,11 +177,7 @@
       </template>
     </el-dialog>
 
-    <el-dialog
-      v-model="delegateVisible"
-      title="承認を委譲"
-      width="min(460px, calc(100vw - 24px))"
-    >
+    <el-dialog v-model="delegateVisible" title="承認を委譲" width="min(460px, calc(100vw - 24px))">
       <el-form label-position="top">
         <el-form-item label="委譲先" required>
           <el-select
@@ -158,18 +201,18 @@
       </el-form>
       <template #footer>
         <el-button @click="delegateVisible = false">キャンセル</el-button>
-        <el-button type="primary" :loading="submitting" :disabled="delegateEmployeeId == null" @click="submitDelegate">
+        <el-button
+          type="primary"
+          :loading="submitting"
+          :disabled="delegateEmployeeId == null"
+          @click="submitDelegate"
+        >
           委譲する
         </el-button>
       </template>
     </el-dialog>
 
-    <el-drawer
-      v-model="detailVisible"
-      title="承認詳細"
-      size="min(620px, 100vw)"
-      destroy-on-close
-    >
+    <el-drawer v-model="detailVisible" title="承認詳細" size="min(620px, 100vw)" destroy-on-close>
       <div v-loading="detailLoading" class="detail-content">
         <template v-if="detail">
           <div class="detail-header">
@@ -190,7 +233,9 @@
             <el-descriptions-item label="期間" :span="2">
               {{ formatPeriod(detail.startDate, detail.endDate) }}
             </el-descriptions-item>
-            <el-descriptions-item label="理由" :span="2">{{ detail.reason || '-' }}</el-descriptions-item>
+            <el-descriptions-item label="理由" :span="2">{{
+              detail.reason || '-'
+            }}</el-descriptions-item>
           </el-descriptions>
 
           <h3>承認経路</h3>
@@ -214,13 +259,13 @@
         </template>
       </div>
     </el-drawer>
-  </div>
+  </section>
 </template>
 
 <script setup lang="ts">
 import { onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import { Check, Close, Refresh, UserFilled, View } from '@element-plus/icons-vue'
+import { Check, Close, UserFilled, View } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import {
   approveRequest,
@@ -303,7 +348,9 @@ async function submitDecision() {
     decisionVisible.value = false
     await loadAll()
   } catch {
-    ElMessage.error(decisionAction.value === 'approve' ? '承認に失敗しました' : '否認に失敗しました')
+    ElMessage.error(
+      decisionAction.value === 'approve' ? '承認に失敗しました' : '否認に失敗しました',
+    )
   } finally {
     submitting.value = false
   }
@@ -413,21 +460,35 @@ function formatDateTime(value?: string | null) {
   return value ? value.replace('T', ' ').slice(0, 16) : '-'
 }
 
-watch(() => route.query.requestId, () => void openRequestedRecord())
+watch(
+  () => route.query.requestId,
+  () => void openRequestedRecord(),
+)
 onMounted(loadAll)
 </script>
 
 <style scoped>
-.approval-page {
-  display: grid;
-  min-height: 100%;
-  grid-template-rows: auto auto minmax(460px, 1fr);
-  gap: 12px;
+.page-section {
+  height: 100%;
+  min-height: 0;
   padding: 16px;
 }
 
-.page-toolbar,
-.approval-tabs,
+.approval-card {
+  display: flex;
+  height: 100%;
+  min-height: 0;
+  flex-direction: column;
+}
+
+.approval-card :deep(.approval-card-body) {
+  display: flex;
+  flex: 1 1 auto;
+  min-height: 0;
+  flex-direction: column;
+}
+
+.card-header,
 .detail-header,
 .step-row {
   display: flex;
@@ -436,14 +497,14 @@ onMounted(loadAll)
   gap: 12px;
 }
 
-h1,
 h2 {
   margin: 0 0 4px;
   letter-spacing: 0;
 }
 
-h1 {
-  font-size: 22px;
+.card-title {
+  margin-bottom: 4px;
+  font-size: 16px;
 }
 
 h2 {
@@ -456,14 +517,18 @@ h3 {
 }
 
 .approval-tabs {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
   justify-content: flex-start;
+  gap: 12px;
+  margin-bottom: 16px;
 }
 
-.table-surface {
+.approval-table {
+  flex: 1 1 auto;
   min-height: 0;
   overflow: hidden;
-  border: 1px solid var(--el-border-color-light);
-  background: var(--el-bg-color);
 }
 
 .dialog-form {
@@ -488,13 +553,14 @@ h3 {
 }
 
 @media (max-width: 760px) {
-  .approval-page {
-    grid-template-rows: auto auto minmax(560px, 1fr);
+  .page-section {
     padding: 12px;
   }
 
-  .page-toolbar {
+  .card-header,
+  .approval-tabs {
     align-items: flex-start;
+    flex-direction: column;
   }
 
   .detail-header,

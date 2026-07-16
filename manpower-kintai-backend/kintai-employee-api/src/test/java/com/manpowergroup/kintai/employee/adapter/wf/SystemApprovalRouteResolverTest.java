@@ -1,5 +1,7 @@
 package com.manpowergroup.kintai.employee.adapter.wf;
 
+import com.manpowergroup.kintai.attendance.domain.enums.ApprovalStopCondition;
+import com.manpowergroup.kintai.attendance.domain.enums.RequestType;
 import com.manpowergroup.kintai.attendance.domain.entity.wf.WfApprovalRule;
 import com.manpowergroup.kintai.common.enums.Status;
 import com.manpowergroup.kintai.common.exception.BizException;
@@ -41,7 +43,7 @@ class SystemApprovalRouteResolverTest {
         when(fixture.nodeService.getById(100L)).thenReturn(node(100L, 20L, "SALES"));
         when(fixture.nodeService.getById(200L)).thenReturn(node(200L, 30L, "HR"));
         WfApprovalRule rule = WfApprovalRule.create(
-                10L, "PAID_LEAVE", "REACH_DEPARTMENT",
+                10L, RequestType.PAID_LEAVE, ApprovalStopCondition.REACH_DEPARTMENT,
                 null, "HR", null, 1, Status.ENABLED);
 
         assertEquals(List.of(20L, 30L),
@@ -55,7 +57,7 @@ class SystemApprovalRouteResolverTest {
         fixture.managerGrade(20L, 2L, "L3");
         fixture.managerGrade(30L, 3L, "L2");
         WfApprovalRule rule = WfApprovalRule.create(
-                10L, "PAID_LEAVE", "REACH_GRADE",
+                10L, RequestType.PAID_LEAVE, ApprovalStopCondition.REACH_GRADE,
                 "L2", null, null, 1, Status.ENABLED);
 
         assertEquals(List.of(20L, 30L),
@@ -69,7 +71,7 @@ class SystemApprovalRouteResolverTest {
         fixture.managerGrade(20L, 2L, "L3");
         fixture.managerGrade(30L, 3L, "L2");
         WfApprovalRule rule = WfApprovalRule.create(
-                10L, "PAID_LEAVE", "REACH_DEPARTMENT",
+                10L, RequestType.PAID_LEAVE, ApprovalStopCondition.REACH_DEPARTMENT,
                 null, "FINANCE", null, 1, Status.ENABLED);
 
         assertThrows(BizException.class,

@@ -1,6 +1,7 @@
 package com.manpowergroup.kintai.system.domain.entity.sys;
 
 import com.baomidou.mybatisplus.annotation.*;
+import com.manpowergroup.kintai.common.enums.PermissionHttpMethod;
 import com.manpowergroup.kintai.common.enums.Status;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -32,7 +33,7 @@ public class SysPermission {
     private String name;
 
     // HTTPメソッド（GET/POST/PUT/DELETE）
-    private String method;
+    private PermissionHttpMethod method;
 
     // APIパス
     private String path;
@@ -65,7 +66,7 @@ public class SysPermission {
     private Integer isDeleted;
 
     /** 有効状態の権限を作成する。 */
-    public static SysPermission create(Long menuId, String code, String name, String method,
+    public static SysPermission create(Long menuId, String code, String name, PermissionHttpMethod method,
                                        String path, String remark, Integer sort) {
         return new SysPermission()
                 .setMenuId(menuId)
@@ -79,7 +80,7 @@ public class SysPermission {
     }
 
     /** 権限の編集可能な属性を更新する。 */
-    public void updateEditableFields(Long menuId, String code, String name, String method,
+    public void updateEditableFields(Long menuId, String code, String name, PermissionHttpMethod method,
                                      String path, String remark, Integer sort) {
         this.menuId = menuId;
         this.code = code;

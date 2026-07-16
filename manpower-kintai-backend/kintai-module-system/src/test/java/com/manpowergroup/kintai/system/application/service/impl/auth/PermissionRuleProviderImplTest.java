@@ -1,5 +1,6 @@
 package com.manpowergroup.kintai.system.application.service.impl.auth;
 
+import com.manpowergroup.kintai.common.enums.PermissionHttpMethod;
 import com.manpowergroup.kintai.framework.security.authority.PermissionRule;
 import com.manpowergroup.kintai.system.domain.entity.sys.SysPermission;
 import com.manpowergroup.kintai.system.infrastructure.mapper.sys.SysPermissionMapper;
@@ -22,7 +23,7 @@ class PermissionRuleProviderImplTest {
                         null,
                         "admin:employee:read",
                         "Read employee",
-                        "GET",
+                        PermissionHttpMethod.GET,
                         "/admin/emp/employees/**",
                         null,
                         1)));
@@ -32,7 +33,7 @@ class PermissionRuleProviderImplTest {
 
         assertEquals(List.of(new PermissionRule(
                 "admin:employee:read",
-                "GET",
+                PermissionHttpMethod.GET,
                 "/admin/emp/employees/**")), rules);
     }
 }

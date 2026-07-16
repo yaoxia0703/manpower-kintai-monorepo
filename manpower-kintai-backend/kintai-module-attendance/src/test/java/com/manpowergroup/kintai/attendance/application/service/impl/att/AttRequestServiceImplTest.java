@@ -1,5 +1,7 @@
 package com.manpowergroup.kintai.attendance.application.service.impl.att;
 
+import com.manpowergroup.kintai.attendance.domain.enums.ApprovalStopCondition;
+import com.manpowergroup.kintai.attendance.domain.enums.RequestType;
 import com.manpowergroup.kintai.attendance.application.command.att.AttRequestCreateCommand;
 import com.manpowergroup.kintai.attendance.application.command.att.AttRequestUpdateCommand;
 import com.manpowergroup.kintai.attendance.domain.entity.att.AttRequest;
@@ -46,10 +48,10 @@ class AttRequestServiceImplTest {
                 repository, approvalRepository, stepRepository, ruleRepository, routeResolver,
                 notificationPort);
         AttRequestCreateCommand command = new AttRequestCreateCommand(
-                1L, 10L, "PAID_LEAVE",
+                1L, 10L, RequestType.PAID_LEAVE,
                 LocalDate.of(2026, 7, 10), LocalDate.of(2026, 7, 10),
                 null, null, BigDecimal.ONE, null, "leave");
-        when(ruleRepository.findApplicable(10L, "PAID_LEAVE", BigDecimal.ONE))
+        when(ruleRepository.findApplicable(10L, RequestType.PAID_LEAVE, BigDecimal.ONE))
                 .thenReturn(Optional.empty());
         when(routeResolver.resolveApprovers(1L, 10L, null)).thenReturn(List.of(20L));
         when(repository.save(any(AttRequest.class))).thenAnswer(invocation -> {
@@ -78,7 +80,7 @@ class AttRequestServiceImplTest {
         assertEquals(7L, step.getApprovalId());
         assertEquals(20L, step.getApproverId());
         assertEquals(ApprovalStatus.PENDING, step.getStatus());
-        verify(notificationPort).requestSubmitted(10L, 20L, "PAID_LEAVE", 99L);
+        verify(notificationPort).requestSubmitted(10L, 20L, RequestType.PAID_LEAVE, 99L);
     }
 
     @Test
@@ -93,15 +95,16 @@ class AttRequestServiceImplTest {
                 repository, approvalRepository, stepRepository, ruleRepository, routeResolver,
                 notificationPort);
         AttRequestCreateCommand command = new AttRequestCreateCommand(
-                1L, 10L, "PAID_LEAVE",
+                1L, 10L, RequestType.PAID_LEAVE,
                 LocalDate.of(2026, 7, 10), LocalDate.of(2026, 7, 12),
-                null, null, BigDecimal.valueOf(3), null, "leave");
+                null, null, BigDecimal.valueOf(99), null, "leave");
         WfApprovalRule rule = WfApprovalRule.create(
-                10L, "PAID_LEAVE", "REACH_DEPARTMENT",
+                10L, RequestType.PAID_LEAVE, ApprovalStopCondition.REACH_DEPARTMENT,
                 null, "HR", null, 1, Status.ENABLED);
-        when(ruleRepository.findApplicable(10L, "PAID_LEAVE", BigDecimal.valueOf(3)))
+        when(ruleRepository.findApplicable(10L, RequestType.PAID_LEAVE, BigDecimal.ONE))
                 .thenReturn(Optional.of(rule));
         when(routeResolver.resolveApprovers(1L, 10L, rule)).thenReturn(List.of(20L, 30L));
+        when(routeResolver.resolveApprovers(1L, 10L, null)).thenReturn(List.of(20L, 30L));
         when(repository.save(any(AttRequest.class))).thenAnswer(invocation -> {
             AttRequest request = invocation.getArgument(0);
             var id = AttRequest.class.getDeclaredField("id");
@@ -118,6 +121,7 @@ class AttRequestServiceImplTest {
         ArgumentCaptor<WfApprovalStep> stepsCaptor = ArgumentCaptor.forClass(WfApprovalStep.class);
         verify(approvalRepository).save(approvalCaptor.capture());
         verify(stepRepository, Mockito.times(2)).save(stepsCaptor.capture());
+        verify(ruleRepository).findApplicable(10L, RequestType.PAID_LEAVE, BigDecimal.ONE);
         assertEquals(2, approvalCaptor.getValue().getTotalSteps());
         assertEquals(List.of(1, 2), stepsCaptor.getAllValues().stream()
                 .map(WfApprovalStep::getStep)
@@ -125,7 +129,7 @@ class AttRequestServiceImplTest {
         assertEquals(List.of(20L, 30L), stepsCaptor.getAllValues().stream()
                 .map(WfApprovalStep::getApproverId)
                 .toList());
-        verify(notificationPort).requestSubmitted(10L, 20L, "PAID_LEAVE", 99L);
+        verify(notificationPort).requestSubmitted(10L, 20L, RequestType.PAID_LEAVE, 99L);
     }
 
     @Test
@@ -135,14 +139,14 @@ class AttRequestServiceImplTest {
         AttRequest existing = request();
         when(repository.findByIdAndEmployee(99L, 1L)).thenReturn(Optional.of(existing));
         AttRequestUpdateCommand command = new AttRequestUpdateCommand(
-                99L, 1L, "OVERTIME",
+                99L, 1L, RequestType.OVERTIME,
                 LocalDate.of(2026, 7, 10), LocalDate.of(2026, 7, 10),
                 LocalTime.of(18, 0), LocalTime.of(20, 0),
                 null, 120, "overtime");
 
         AttRequest result = service.update(command);
 
-        assertEquals("OVERTIME", result.getRequestType());
+        assertEquals(RequestType.OVERTIME, result.getRequestType());
         assertEquals(120, result.getMinutes());
         verify(repository).update(existing);
     }
@@ -169,7 +173,7 @@ class AttRequestServiceImplTest {
                 Mockito.mock(WfApprovalRuleRepository.class),
                 Mockito.mock(ApprovalRouteResolver.class), notificationPort);
         AttRequest existing = request();
-        WfApproval approval = WfApproval.start(99L, "PAID_LEAVE", 1L, 10L, 1, 1L)
+        WfApproval approval = WfApproval.start(99L, RequestType.PAID_LEAVE, 1L, 10L, 1, 1L)
                 .setId(7L);
         WfApprovalStep step = WfApprovalStep.pending(7L, 1, 20L, 1L);
         when(repository.findByIdAndEmployee(99L, 1L)).thenReturn(Optional.of(existing));
@@ -185,7 +189,7 @@ class AttRequestServiceImplTest {
         verify(repository).update(existing);
         verify(approvalRepository).update(approval);
         verify(stepRepository).update(step);
-        verify(notificationPort).requestCancelled(10L, 20L, "PAID_LEAVE", 99L);
+        verify(notificationPort).requestCancelled(10L, 20L, RequestType.PAID_LEAVE, 99L);
     }
 
     @Test
@@ -200,7 +204,7 @@ class AttRequestServiceImplTest {
 
     private AttRequest request() {
         return AttRequest.create(
-                1L, 10L, "PAID_LEAVE",
+                1L, 10L, RequestType.PAID_LEAVE,
                 LocalDate.of(2026, 7, 10), LocalDate.of(2026, 7, 10),
                 null, null, BigDecimal.ONE, null, "leave");
     }

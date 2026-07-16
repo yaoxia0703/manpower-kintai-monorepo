@@ -1,5 +1,7 @@
 package com.manpowergroup.kintai.attendance.application.command.att;
 
+import com.manpowergroup.kintai.attendance.domain.enums.RequestType;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -12,7 +14,7 @@ public record AttRequestCreateCommand(
         Long companyId,
 
         // 申請タイプ（REQUEST_TYPE参照）
-        String requestType,
+        RequestType requestType,
 
         // 開始日
         LocalDate startDate,

@@ -1,5 +1,7 @@
 package com.manpowergroup.kintai.attendance.application.service.impl.wf;
 
+import com.manpowergroup.kintai.attendance.domain.enums.ApprovalStopCondition;
+import com.manpowergroup.kintai.attendance.domain.enums.RequestType;
 import com.manpowergroup.kintai.attendance.application.command.wf.ApprovalRuleCreateCommand;
 import com.manpowergroup.kintai.attendance.application.command.wf.ApprovalRuleUpdateCommand;
 import com.manpowergroup.kintai.attendance.domain.entity.wf.WfApprovalRule;
@@ -23,7 +25,7 @@ class WfApprovalRuleServiceImplTest {
         WfApprovalRuleServiceImpl service = new WfApprovalRuleServiceImpl(repository);
 
         WfApprovalRule result = service.create(new ApprovalRuleCreateCommand(
-                10L, "PAID_LEAVE", "DIRECT_ONLY",
+                10L, RequestType.PAID_LEAVE, ApprovalStopCondition.DIRECT_ONLY,
                 null, null, null, 1, null));
 
         assertEquals(Status.ENABLED, result.getStatus());
@@ -35,16 +37,16 @@ class WfApprovalRuleServiceImplTest {
         WfApprovalRuleRepository repository = Mockito.mock(WfApprovalRuleRepository.class);
         WfApprovalRuleServiceImpl service = new WfApprovalRuleServiceImpl(repository);
         WfApprovalRule existing = WfApprovalRule.create(
-                10L, "PAID_LEAVE", "DIRECT_ONLY",
+                10L, RequestType.PAID_LEAVE, ApprovalStopCondition.DIRECT_ONLY,
                 null, null, null, 1, Status.DISABLED).setId(7L);
         when(repository.findById(7L)).thenReturn(Optional.of(existing));
 
         WfApprovalRule result = service.update(7L, new ApprovalRuleUpdateCommand(
-                "PAID_LEAVE", "REACH_GRADE", "L4", null, null, 2));
+                RequestType.PAID_LEAVE, ApprovalStopCondition.REACH_GRADE, "L4", null, null, 2));
 
         assertEquals(10L, result.getCompanyId());
         assertEquals(Status.DISABLED, result.getStatus());
-        assertEquals("REACH_GRADE", result.getStopCondition());
+        assertEquals(ApprovalStopCondition.REACH_GRADE, result.getStopCondition());
         verify(repository).update(existing);
     }
 
@@ -53,7 +55,7 @@ class WfApprovalRuleServiceImplTest {
         WfApprovalRuleRepository repository = Mockito.mock(WfApprovalRuleRepository.class);
         WfApprovalRuleServiceImpl service = new WfApprovalRuleServiceImpl(repository);
         WfApprovalRule existing = WfApprovalRule.create(
-                10L, "PAID_LEAVE", "DIRECT_ONLY",
+                10L, RequestType.PAID_LEAVE, ApprovalStopCondition.DIRECT_ONLY,
                 null, null, null, 1, Status.ENABLED).setId(7L);
         when(repository.findById(7L)).thenReturn(Optional.of(existing));
         when(repository.listByCompany(10L)).thenReturn(List.of(existing));

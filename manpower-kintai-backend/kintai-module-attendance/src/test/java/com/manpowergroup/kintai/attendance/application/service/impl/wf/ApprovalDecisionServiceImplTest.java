@@ -1,5 +1,6 @@
 package com.manpowergroup.kintai.attendance.application.service.impl.wf;
 
+import com.manpowergroup.kintai.attendance.domain.enums.RequestType;
 import com.manpowergroup.kintai.attendance.domain.entity.att.AttRequest;
 import com.manpowergroup.kintai.attendance.domain.entity.wf.WfApproval;
 import com.manpowergroup.kintai.attendance.domain.entity.wf.WfApprovalStep;
@@ -40,7 +41,7 @@ class ApprovalDecisionServiceImplTest {
         verify(fixture.stepRepository).update(fixture.step);
         verify(fixture.approvalRepository).update(fixture.approval);
         verify(fixture.requestRepository).update(fixture.request);
-        verify(fixture.notificationPort).requestApproved(10L, 1L, "PAID_LEAVE", 99L);
+        verify(fixture.notificationPort).requestApproved(10L, 1L, RequestType.PAID_LEAVE, 99L);
     }
 
     @Test
@@ -54,7 +55,7 @@ class ApprovalDecisionServiceImplTest {
         assertEquals(2, fixture.approval.getCurrentStep());
         assertEquals(ApprovalStatus.PENDING, fixture.request.getStatus());
         verify(fixture.requestRepository, never()).update(fixture.request);
-        verify(fixture.notificationPort).requestSubmitted(10L, 30L, "PAID_LEAVE", 99L);
+        verify(fixture.notificationPort).requestSubmitted(10L, 30L, RequestType.PAID_LEAVE, 99L);
     }
 
     @Test
@@ -69,7 +70,7 @@ class ApprovalDecisionServiceImplTest {
         assertEquals(ApprovalStatus.REJECTED, fixture.request.getStatus());
         assertEquals(20L, fixture.request.getUpdatedBy());
         verify(fixture.requestRepository).update(fixture.request);
-        verify(fixture.notificationPort).requestRejected(10L, 1L, "PAID_LEAVE", 99L);
+        verify(fixture.notificationPort).requestRejected(10L, 1L, RequestType.PAID_LEAVE, 99L);
     }
 
     @Test
@@ -97,7 +98,7 @@ class ApprovalDecisionServiceImplTest {
         assertEquals(30L, fixture.approval.getEscalatedTo());
         verify(fixture.delegateValidator).validateTarget(30L, 10L);
         verify(fixture.approvalRepository).update(fixture.approval);
-        verify(fixture.notificationPort).approvalDelegated(10L, 30L, "PAID_LEAVE", 99L);
+        verify(fixture.notificationPort).approvalDelegated(10L, 30L, RequestType.PAID_LEAVE, 99L);
     }
 
     @Test
@@ -135,14 +136,14 @@ class ApprovalDecisionServiceImplTest {
                 approvalRepository, stepRepository, requestRepository, delegateValidator,
                 notificationPort);
 
-        WfApproval approval = WfApproval.start(99L, "PAID_LEAVE", 1L, 10L, totalSteps, 1L)
+        WfApproval approval = WfApproval.start(99L, RequestType.PAID_LEAVE, 1L, 10L, totalSteps, 1L)
                 .setId(7L);
         WfApprovalStep step = WfApprovalStep.pending(7L, 1, 20L, 1L);
         WfApprovalStep nextStep = totalSteps > 1
                 ? WfApprovalStep.pending(7L, 2, 30L, 1L)
                 : null;
         AttRequest request = AttRequest.create(
-                1L, 10L, "PAID_LEAVE",
+                1L, 10L, RequestType.PAID_LEAVE,
                 LocalDate.of(2026, 7, 10), LocalDate.of(2026, 7, 10),
                 null, null, BigDecimal.ONE, null, "leave");
 

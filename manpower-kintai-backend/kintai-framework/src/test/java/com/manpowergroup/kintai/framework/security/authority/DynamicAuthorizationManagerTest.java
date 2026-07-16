@@ -1,5 +1,6 @@
 package com.manpowergroup.kintai.framework.security.authority;
 
+import com.manpowergroup.kintai.common.enums.PermissionHttpMethod;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -21,7 +22,7 @@ class DynamicAuthorizationManagerTest {
     @Test
     void deniesAnonymousUser() {
         DynamicAuthorizationManager manager = new DynamicAuthorizationManager(() ->
-                List.of(new PermissionRule("admin:employee:read", "GET", "/admin/emp/employees/**")));
+                List.of(new PermissionRule("admin:employee:read", PermissionHttpMethod.GET, "/admin/emp/employees/**")));
 
         AuthorizationResult decision = manager.authorize(
                 () -> new AnonymousAuthenticationToken(
@@ -49,7 +50,7 @@ class DynamicAuthorizationManagerTest {
     @Test
     void grantsWhenRequestMatchesRuleAndUserHasAuthority() {
         DynamicAuthorizationManager manager = new DynamicAuthorizationManager(() ->
-                List.of(new PermissionRule("admin:employee:read", "GET", "/admin/emp/employees/**")));
+                List.of(new PermissionRule("admin:employee:read", PermissionHttpMethod.GET, "/admin/emp/employees/**")));
 
         AuthorizationResult decision = manager.authorize(
                 authenticated("admin:employee:read"),
@@ -61,7 +62,7 @@ class DynamicAuthorizationManagerTest {
     @Test
     void deniesWhenRequestMatchesRuleButUserLacksAuthority() {
         DynamicAuthorizationManager manager = new DynamicAuthorizationManager(() ->
-                List.of(new PermissionRule("admin:employee:read", "GET", "/admin/emp/employees/**")));
+                List.of(new PermissionRule("admin:employee:read", PermissionHttpMethod.GET, "/admin/emp/employees/**")));
 
         AuthorizationResult decision = manager.authorize(
                 authenticated("admin:employee:update"),
@@ -73,8 +74,8 @@ class DynamicAuthorizationManagerTest {
     @Test
     void grantsWhenAnyMatchingRuleAuthorityIsPresent() {
         DynamicAuthorizationManager manager = new DynamicAuthorizationManager(() -> List.of(
-                new PermissionRule("admin:access", "GET", "/admin/**"),
-                new PermissionRule("admin:employee:read", "GET", "/admin/emp/employees/**")));
+                new PermissionRule("admin:access", PermissionHttpMethod.GET, "/admin/**"),
+                new PermissionRule("admin:employee:read", PermissionHttpMethod.GET, "/admin/emp/employees/**")));
 
         AuthorizationResult decision = manager.authorize(
                 authenticated("admin:employee:read"),
@@ -86,11 +87,29 @@ class DynamicAuthorizationManagerTest {
     @Test
     void deniesWhenNoRuleMatchesMethodAndPath() {
         DynamicAuthorizationManager manager = new DynamicAuthorizationManager(() ->
-                List.of(new PermissionRule("admin:employee:read", "GET", "/admin/emp/employees/**")));
+                List.of(new PermissionRule("admin:employee:read", PermissionHttpMethod.GET, "/admin/emp/employees/**")));
 
         AuthorizationResult decision = manager.authorize(
                 authenticated("admin:employee:read"),
                 context("POST", "/admin/emp/employees"));
+
+        assertFalse(decision.isGranted());
+    }
+
+    @Test
+    void deniesUnknownRequestMethodWithoutThrowing() {
+        DynamicAuthorizationManager manager = new DynamicAuthorizationManager(() ->
+                List.of(
+                        new PermissionRule(
+                                "admin:employee:read", PermissionHttpMethod.GET,
+                                "/admin/emp/employees/**"),
+                        new PermissionRule(
+                                "admin:employee:read", null,
+                                "/admin/emp/employees/**")));
+
+        AuthorizationResult decision = manager.authorize(
+                authenticated("admin:employee:read"),
+                context("CUSTOM", "/admin/emp/employees/123"));
 
         assertFalse(decision.isGranted());
     }
@@ -113,8 +132,8 @@ class DynamicAuthorizationManagerTest {
     @Test
     void grantsRequestAndApprovalEndpointsOnlyWithMatchingAuthority() {
         DynamicAuthorizationManager manager = new DynamicAuthorizationManager(() -> List.of(
-                new PermissionRule("employee:request:create", "POST", "/employee/att/requests"),
-                new PermissionRule("manager:approval:read", "GET", "/employee/approvals/**")));
+                new PermissionRule("employee:request:create", PermissionHttpMethod.POST, "/employee/att/requests"),
+                new PermissionRule("manager:approval:read", PermissionHttpMethod.GET, "/employee/approvals/**")));
 
         assertTrue(manager.authorize(
                 authenticated("employee:request:create"),

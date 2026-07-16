@@ -1,5 +1,6 @@
 package com.manpowergroup.kintai.framework.security.authority;
 
+import com.manpowergroup.kintai.common.enums.PermissionHttpMethod;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.authorization.AuthorizationManager;
@@ -11,7 +12,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.AntPathMatcher;
 
 import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
 import java.util.function.Supplier;
 
@@ -44,7 +44,7 @@ public class DynamicAuthorizationManager implements AuthorizationManager<Request
         }
 
         HttpServletRequest request = context.getRequest();
-        String method = normalizeMethod(request.getMethod());
+        PermissionHttpMethod method = PermissionHttpMethod.fromCode(request.getMethod()).orElse(null);
         String path = requestPath(request);
 
         // ログイン済みなら sys_permission を経由せず許可するパス
@@ -70,9 +70,8 @@ public class DynamicAuthorizationManager implements AuthorizationManager<Request
         return AUTHENTICATED_ONLY_PATHS.stream().anyMatch(pattern -> pathMatcher.match(pattern, path));
     }
 
-    private boolean methodMatches(PermissionRule rule, String method) {
-        String ruleMethod = normalizeMethod(rule.method());
-        return !ruleMethod.isBlank() && ruleMethod.equals(method);
+    private boolean methodMatches(PermissionRule rule, PermissionHttpMethod method) {
+        return method != null && rule.method() == method;
     }
 
     private boolean pathMatches(PermissionRule rule, String path) {
@@ -88,10 +87,6 @@ public class DynamicAuthorizationManager implements AuthorizationManager<Request
 
     private boolean isAnonymous(Authentication authentication) {
         return authentication instanceof AnonymousAuthenticationToken;
-    }
-
-    private String normalizeMethod(String method) {
-        return method == null ? "" : method.trim().toUpperCase(Locale.ROOT);
     }
 
     private String requestPath(HttpServletRequest request) {

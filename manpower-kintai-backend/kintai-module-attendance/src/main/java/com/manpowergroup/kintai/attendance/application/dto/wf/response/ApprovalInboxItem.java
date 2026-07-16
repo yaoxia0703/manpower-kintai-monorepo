@@ -1,5 +1,6 @@
 package com.manpowergroup.kintai.attendance.application.dto.wf.response;
 
+import com.manpowergroup.kintai.attendance.domain.enums.RequestType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,7 +15,7 @@ public class ApprovalInboxItem {
 
     private Long approvalId;
     private Long requestId;
-    private String requestType;
+    private RequestType requestType;
     private Long applicantId;
     private String applicantEmployeeCode;
     private String applicantName;

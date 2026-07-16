@@ -1,5 +1,6 @@
 package com.manpowergroup.kintai.attendance.application.service.impl.wf;
 
+import com.manpowergroup.kintai.attendance.domain.enums.RequestType;
 import com.manpowergroup.kintai.attendance.application.dto.wf.response.ApprovalInboxItem;
 import com.manpowergroup.kintai.attendance.application.query.wf.ApprovalInboxQueryRepository;
 import org.junit.jupiter.api.Test;
@@ -20,7 +21,7 @@ class ApprovalInboxServiceImplTest {
         ApprovalInboxQueryRepository repository = Mockito.mock(ApprovalInboxQueryRepository.class);
         ApprovalInboxServiceImpl service = new ApprovalInboxServiceImpl(repository);
         ApprovalInboxItem item = new ApprovalInboxItem(
-                7L, 99L, "PAID_LEAVE", 1L, "JP-EMP-001", "山田 太郎",
+                7L, 99L, RequestType.PAID_LEAVE, 1L, "JP-EMP-001", "山田 太郎",
                 1, 2,
                 LocalDate.of(2026, 7, 10), LocalDate.of(2026, 7, 12),
                 "leave", LocalDateTime.of(2026, 7, 9, 9, 0));

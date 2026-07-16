@@ -60,6 +60,6 @@ class AttTimesheetRecordServiceImplTest {
                 1L, 10L, workDate, AttendanceType.OFFICE,
                 LocalTime.of(9, 0), LocalTime.of(18, 0), 60, null)));
 
-        verify(mapper, never()).insert(any());
+        verify(mapper, never()).insert(any(AttRecord.class));
     }
 }

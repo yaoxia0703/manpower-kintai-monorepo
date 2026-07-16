@@ -1,5 +1,7 @@
 package com.manpowergroup.kintai.system.application.command.sys;
 
+import com.manpowergroup.kintai.common.enums.PermissionHttpMethod;
+
 public record PermissionCreateCommand(
         // メニューID
         Long menuId,
@@ -11,7 +13,7 @@ public record PermissionCreateCommand(
         String name,
 
         // HTTPメソッド
-        String method,
+        PermissionHttpMethod method,
 
         // APIパス
         String path,

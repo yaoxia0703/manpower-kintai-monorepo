@@ -1,5 +1,6 @@
 package com.manpowergroup.kintai.attendance.application.service.impl.wf;
 
+import com.manpowergroup.kintai.attendance.domain.enums.RequestType;
 import com.manpowergroup.kintai.attendance.application.dto.wf.response.ApprovalDetailHeader;
 import com.manpowergroup.kintai.attendance.application.dto.wf.response.ApprovalHistoryItem;
 import com.manpowergroup.kintai.attendance.application.dto.wf.response.ApprovalStepItem;
@@ -55,7 +56,7 @@ class ApprovalHistoryServiceImplTest {
         ApprovalHistoryQueryRepository repository = Mockito.mock(ApprovalHistoryQueryRepository.class);
         ApprovalHistoryServiceImpl service = new ApprovalHistoryServiceImpl(repository);
         List<ApprovalHistoryItem> history = List.of(new ApprovalHistoryItem(
-                7L, 99L, "PAID_LEAVE", 1L, "JP-EMP-001", "山田 太郎", ApprovalStatus.APPROVED,
+                7L, 99L, RequestType.PAID_LEAVE, 1L, "JP-EMP-001", "山田 太郎", ApprovalStatus.APPROVED,
                 LocalDateTime.of(2026, 7, 9, 9, 0),
                 LocalDateTime.of(2026, 7, 10, 9, 0)));
         when(repository.listHistory(20L)).thenReturn(history);
@@ -65,7 +66,7 @@ class ApprovalHistoryServiceImplTest {
 
     private ApprovalDetailHeader header() {
         return new ApprovalDetailHeader(
-                7L, 99L, "PAID_LEAVE", 1L, "JP-EMP-001", "山田 太郎",
+                7L, 99L, RequestType.PAID_LEAVE, 1L, "JP-EMP-001", "山田 太郎",
                 2, 2, ApprovalStatus.PENDING,
                 LocalDate.of(2026, 7, 10), LocalDate.of(2026, 7, 12), "leave",
                 LocalDateTime.of(2026, 7, 9, 9, 0), null);

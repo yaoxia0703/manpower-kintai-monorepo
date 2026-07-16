@@ -2,6 +2,7 @@ package com.manpowergroup.kintai.employee.adapter.wf;
 
 import com.manpowergroup.kintai.attendance.application.port.wf.ApprovalRouteResolver;
 import com.manpowergroup.kintai.attendance.domain.entity.wf.WfApprovalRule;
+import com.manpowergroup.kintai.attendance.domain.enums.ApprovalStopCondition;
 import com.manpowergroup.kintai.common.exception.BizException;
 import com.manpowergroup.kintai.common.exception.ErrorCode;
 import com.manpowergroup.kintai.system.application.service.emp.EmpEmployeePositionService;
@@ -23,9 +24,6 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class SystemApprovalRouteResolver implements ApprovalRouteResolver {
 
-    private static final String DIRECT_ONLY = "DIRECT_ONLY";
-    private static final String REACH_GRADE = "REACH_GRADE";
-    private static final String REACH_DEPARTMENT = "REACH_DEPARTMENT";
     private static final Set<String> APPROVAL_GRADE_LEVELS = Set.of("L1", "L2", "L3");
 
     private final EmpEmployeePositionService positionService;
@@ -39,7 +37,9 @@ public class SystemApprovalRouteResolver implements ApprovalRouteResolver {
         requireCompany(applicantPosition.getCompanyId(), companyId,
                 "employee primary position belongs to another company");
 
-        String stopCondition = rule == null ? DIRECT_ONLY : rule.getStopCondition();
+        ApprovalStopCondition stopCondition = rule == null
+                ? ApprovalStopCondition.DIRECT_ONLY
+                : rule.getStopCondition();
         Set<Long> approvers = new LinkedHashSet<>();
         boolean stopReached = false;
 
@@ -57,15 +57,11 @@ public class SystemApprovalRouteResolver implements ApprovalRouteResolver {
             }
             approvers.add(managerId);
 
-            if (DIRECT_ONLY.equals(stopCondition)) {
-                stopReached = true;
-            } else if (REACH_DEPARTMENT.equals(stopCondition)) {
-                stopReached = Objects.equals(node.getDeptFunction(), rule.getStopDeptFunc());
-            } else if (REACH_GRADE.equals(stopCondition)) {
-                stopReached = Objects.equals(managerGradeLevel, rule.getStopGradeLevel());
-            } else {
-                throw invalidRoute("unsupported approval stop condition: " + stopCondition);
-            }
+            stopReached = switch (stopCondition) {
+                case DIRECT_ONLY -> true;
+                case REACH_DEPARTMENT -> Objects.equals(node.getDeptFunction(), rule.getStopDeptFunc());
+                case REACH_GRADE -> Objects.equals(managerGradeLevel, rule.getStopGradeLevel());
+            };
             if (stopReached) {
                 break;
             }

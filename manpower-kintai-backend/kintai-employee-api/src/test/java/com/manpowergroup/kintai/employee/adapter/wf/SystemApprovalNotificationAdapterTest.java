@@ -1,5 +1,6 @@
 package com.manpowergroup.kintai.employee.adapter.wf;
 
+import com.manpowergroup.kintai.attendance.domain.enums.RequestType;
 import com.manpowergroup.kintai.system.application.command.sys.SysNotificationCreateCommand;
 import com.manpowergroup.kintai.system.application.service.sys.SysNotificationService;
 import com.manpowergroup.kintai.system.domain.enums.NotificationType;
@@ -19,7 +20,7 @@ class SystemApprovalNotificationAdapterTest {
 
     @Test
     void submittedEventCreatesNotificationForApprover() {
-        adapter.requestSubmitted(10L, 20L, "PAID_LEAVE", 99L);
+        adapter.requestSubmitted(10L, 20L, RequestType.PAID_LEAVE, 99L);
 
         SysNotificationCreateCommand command = capture();
         assertEquals(10L, command.companyId());
@@ -31,10 +32,10 @@ class SystemApprovalNotificationAdapterTest {
 
     @Test
     void resultEventsMapToMatchingNotificationTypes() {
-        adapter.requestApproved(10L, 1L, "PAID_LEAVE", 99L);
-        adapter.requestRejected(10L, 1L, "PAID_LEAVE", 99L);
-        adapter.requestCancelled(10L, 20L, "PAID_LEAVE", 99L);
-        adapter.approvalDelegated(10L, 30L, "PAID_LEAVE", 99L);
+        adapter.requestApproved(10L, 1L, RequestType.PAID_LEAVE, 99L);
+        adapter.requestRejected(10L, 1L, RequestType.PAID_LEAVE, 99L);
+        adapter.requestCancelled(10L, 20L, RequestType.PAID_LEAVE, 99L);
+        adapter.approvalDelegated(10L, 30L, RequestType.PAID_LEAVE, 99L);
 
         ArgumentCaptor<SysNotificationCreateCommand> captor =
                 ArgumentCaptor.forClass(SysNotificationCreateCommand.class);

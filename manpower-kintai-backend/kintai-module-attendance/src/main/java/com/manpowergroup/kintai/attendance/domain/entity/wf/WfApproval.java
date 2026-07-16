@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.manpowergroup.kintai.attendance.domain.enums.ApprovalStatus;
+import com.manpowergroup.kintai.attendance.domain.enums.RequestType;
 import com.manpowergroup.kintai.common.exception.BizException;
 import com.manpowergroup.kintai.common.exception.ErrorCode;
 import lombok.AccessLevel;
@@ -34,7 +35,7 @@ public class WfApproval {
     private Long requestId;
 
     // 申請タイプ
-    private String requestType;
+    private RequestType requestType;
 
     // 申請者社員ID
     private Long applicantId;
@@ -82,7 +83,7 @@ public class WfApproval {
     private Integer isDeleted;
 
     /** 指定された総ステップ数で承認フローを開始する。 */
-    public static WfApproval start(Long requestId, String requestType, Long applicantId,
+    public static WfApproval start(Long requestId, RequestType requestType, Long applicantId,
                                    Long companyId, Integer totalSteps, Long actorId) {
         return new WfApproval()
                 .setRequestId(requestId)

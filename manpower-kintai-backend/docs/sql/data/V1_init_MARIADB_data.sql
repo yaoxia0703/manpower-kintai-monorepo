@@ -33,11 +33,11 @@ insert  into `att_record`(`id`,`employee_id`,`company_id`,`work_date`,`clock_in`
 /*Data for the table `emp_account` */
 
 insert  into `emp_account`(`id`,`employee_id`,`username`,`password`,`last_login`,`status`,`created_by`,`created_at`,`updated_by`,`updated_at`,`is_deleted`) values 
-(1,1,'admin','$2a$10$Zg3pJHTR0S/ysCoHid4JcOVeeLidl6QaXkBLWd6o66zSRsahIncAe','2026-06-04 13:19:31',1,NULL,'2026-05-27 23:19:16',1,'2026-06-02 13:47:07',0),
+(1,1,'admin','$2a$10$Zg3pJHTR0S/ysCoHid4JcOVeeLidl6QaXkBLWd6o66zSRsahIncAe','2026-07-02 15:35:19',1,NULL,'2026-05-27 23:19:16',1,'2026-06-02 13:47:07',0),
 (2,2,'testHR@manpower.jp','$2a$10$JU8LQtgNkeiljdkCVTLO5.dYc5ivOYhz5BumavSA58RcbSyB0..my',NULL,1,1,'2026-05-30 23:39:37',1,'2026-05-30 23:39:37',0),
 (3,3,'testManagerEXP@manpower.jp','$2a$10$JU8LQtgNkeiljdkCVTLO5.dYc5ivOYhz5BumavSA58RcbSyB0..my','2026-06-07 00:00:04',1,1,'2026-05-30 23:39:37',1,'2026-05-30 23:39:37',0),
 (4,4,'testManagerSD@manpower.jp','$2a$10$JU8LQtgNkeiljdkCVTLO5.dYc5ivOYhz5BumavSA58RcbSyB0..my','2026-06-07 00:00:29',1,1,'2026-05-30 23:39:37',1,'2026-05-30 23:39:37',0),
-(5,5,'testManagerWT@manpower.jp','$2a$10$JU8LQtgNkeiljdkCVTLO5.dYc5ivOYhz5BumavSA58RcbSyB0..my','2026-06-07 11:48:18',1,1,'2026-05-30 23:39:37',1,'2026-05-30 23:39:37',0),
+(5,5,'testManagerWT@manpower.jp','$2a$10$JU8LQtgNkeiljdkCVTLO5.dYc5ivOYhz5BumavSA58RcbSyB0..my','2026-06-27 16:56:06',1,1,'2026-05-30 23:39:37',1,'2026-05-30 23:39:37',0),
 (6,6,'testManagerSOL2@manpower.jp','$2a$10$JU8LQtgNkeiljdkCVTLO5.dYc5ivOYhz5BumavSA58RcbSyB0..my','2026-06-07 11:42:28',1,1,'2026-05-30 23:39:37',1,'2026-05-30 23:39:37',0),
 (7,7,'testManagerIT@manpower.jp','$2a$10$JU8LQtgNkeiljdkCVTLO5.dYc5ivOYhz5BumavSA58RcbSyB0..my',NULL,1,1,'2026-05-30 23:39:37',1,'2026-05-30 23:39:37',0),
 (8,8,'testEmployeeHR@manpower.jp','$2a$10$JU8LQtgNkeiljdkCVTLO5.dYc5ivOYhz5BumavSA58RcbSyB0..my',NULL,1,1,'2026-05-30 23:39:37',1,'2026-05-30 23:39:37',0),
@@ -258,7 +258,7 @@ insert  into `sys_i18n`(`id`,`ref_type`,`ref_id`,`language`,`content`,`created_b
 insert  into `sys_menu`(`id`,`parent_id`,`name`,`code`,`path`,`component`,`icon`,`type`,`sort`,`visible`,`status`,`created_by`,`created_at`,`updated_by`,`updated_at`,`is_deleted`) values 
 (1,NULL,'ホーム','home','/admin','DashboardView','Home',2,10,1,1,NULL,'2026-05-30 10:43:34',NULL,'2026-05-30 10:43:37',0),
 (2,NULL,'勤務表','timesheet','/admin/timesheet','timesheet/TimesheetView','Calendar',2,20,1,1,NULL,'2026-05-30 10:43:34',NULL,'2026-05-30 10:43:37',0),
-(3,NULL,'部下管理','manager-subordinates','/admin/subordinates','manager/SubordinatesView','Users',2,30,1,1,NULL,'2026-05-30 10:43:34',NULL,'2026-05-30 10:43:37',0),
+(3,NULL,'所属社員管理','manager-subordinates','/admin/subordinates','manager/SubordinatesView','Users',2,30,1,1,NULL,'2026-05-30 10:43:34',NULL,'2026-06-07 17:06:40',0),
 (4,NULL,'入社登録','hr-onboarding','/admin/hr/onboarding','hr/OnboardingView','UserPlus',2,40,1,1,NULL,'2026-05-30 10:43:34',NULL,'2026-05-30 10:43:37',0),
 (6,NULL,'システム管理','system-management',NULL,NULL,'Setting',1,900,1,1,1,'2026-06-02 13:47:06',1,'2026-06-02 13:47:06',0),
 (7,6,'メニュー管理','system-menus','/admin/system/menus','system/MenuManagementView','Menu',2,910,1,1,1,'2026-06-02 13:47:07',1,'2026-06-02 13:47:07',0),

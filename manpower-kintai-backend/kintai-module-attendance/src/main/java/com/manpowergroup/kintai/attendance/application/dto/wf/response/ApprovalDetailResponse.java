@@ -1,6 +1,7 @@
 package com.manpowergroup.kintai.attendance.application.dto.wf.response;
 
 import com.manpowergroup.kintai.attendance.domain.enums.ApprovalStatus;
+import com.manpowergroup.kintai.attendance.domain.enums.RequestType;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -9,7 +10,7 @@ import java.util.List;
 public record ApprovalDetailResponse(
         Long approvalId,
         Long requestId,
-        String requestType,
+        RequestType requestType,
         Long applicantId,
         String applicantEmployeeCode,
         String applicantName,

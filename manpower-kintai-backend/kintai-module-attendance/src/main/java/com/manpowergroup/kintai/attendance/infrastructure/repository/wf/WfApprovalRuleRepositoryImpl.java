@@ -2,6 +2,7 @@ package com.manpowergroup.kintai.attendance.infrastructure.repository.wf;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.manpowergroup.kintai.attendance.domain.entity.wf.WfApprovalRule;
+import com.manpowergroup.kintai.attendance.domain.enums.RequestType;
 import com.manpowergroup.kintai.attendance.domain.repository.wf.WfApprovalRuleRepository;
 import com.manpowergroup.kintai.attendance.infrastructure.mapper.wf.WfApprovalRuleMapper;
 import com.manpowergroup.kintai.common.enums.Status;
@@ -20,7 +21,7 @@ public class WfApprovalRuleRepositoryImpl implements WfApprovalRuleRepository {
 
     @Override
     public Optional<WfApprovalRule> findApplicable(
-            Long companyId, String requestType, BigDecimal amount) {
+            Long companyId, RequestType requestType, BigDecimal amount) {
         return mapper.selectList(Wrappers.<WfApprovalRule>lambdaQuery()
                         .eq(WfApprovalRule::getCompanyId, companyId)
                         .eq(WfApprovalRule::getRequestType, requestType)

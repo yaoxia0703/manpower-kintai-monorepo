@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.manpowergroup.kintai.attendance.domain.enums.ApprovalStatus;
+import com.manpowergroup.kintai.attendance.domain.enums.RequestType;
 import com.manpowergroup.kintai.common.exception.BizException;
 import com.manpowergroup.kintai.common.exception.ErrorCode;
 import lombok.AccessLevel;
@@ -15,10 +16,11 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 
 import java.math.BigDecimal;
+import java.time.DayOfWeek;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.Set;
 
 /**
  * 休暇や残業などの勤怠申請を表し、申請内容と承認状態を管理する。
@@ -28,9 +30,6 @@ import java.util.Set;
 @Accessors(chain = true)
 @TableName("att_request")
 public class AttRequest {
-
-    private static final Set<String> TIMESHEET_LOCKING_REQUEST_TYPES = Set.of(
-            "PAID_LEAVE", "SUBSTITUTE", "LEAVE_OF_ABSENCE");
 
     @TableId(type = IdType.AUTO)
     // 申請ID
@@ -43,7 +42,7 @@ public class AttRequest {
     private Long companyId;
 
     // 申請タイプ（REQUEST_TYPE参照）
-    private String requestType;
+    private RequestType requestType;
 
     // 開始日
     private LocalDate startDate;
@@ -91,7 +90,7 @@ public class AttRequest {
     public static AttRequest create(
             Long employeeId,
             Long companyId,
-            String requestType,
+            RequestType requestType,
             LocalDate startDate,
             LocalDate endDate,
             LocalTime startTime,
@@ -100,26 +99,19 @@ public class AttRequest {
             Integer minutes,
             String reason
     ) {
-        validatePeriod(startDate, endDate);
-        return new AttRequest()
+        AttRequest request = new AttRequest()
                 .setEmployeeId(employeeId)
                 .setCompanyId(companyId)
-                .setRequestType(requestType)
-                .setStartDate(startDate)
-                .setEndDate(endDate)
-                .setStartTime(startTime)
-                .setEndTime(endTime)
-                .setDays(days)
-                .setMinutes(minutes)
-                .setReason(reason)
                 .setStatus(ApprovalStatus.PENDING)
                 .setCreatedBy(employeeId)
                 .setUpdatedBy(employeeId);
+        request.applyDetails(requestType, startDate, endDate, startTime, endTime, reason);
+        return request;
     }
 
     /** 承認待ちの申請内容を更新する。 */
     public void updateDetails(
-            String requestType,
+            RequestType requestType,
             LocalDate startDate,
             LocalDate endDate,
             LocalTime startTime,
@@ -130,15 +122,7 @@ public class AttRequest {
             Long actorId
     ) {
         requirePending();
-        validatePeriod(startDate, endDate);
-        this.requestType = requestType;
-        this.startDate = startDate;
-        this.endDate = endDate;
-        this.startTime = startTime;
-        this.endTime = endTime;
-        this.days = days;
-        this.minutes = minutes;
-        this.reason = reason;
+        applyDetails(requestType, startDate, endDate, startTime, endTime, reason);
         this.updatedBy = actorId;
     }
 
@@ -187,7 +171,7 @@ public class AttRequest {
         }
         boolean active = status == ApprovalStatus.PENDING || status == ApprovalStatus.APPROVED;
         boolean covered = !workDate.isBefore(startDate) && !workDate.isAfter(endDate);
-        return active && covered && TIMESHEET_LOCKING_REQUEST_TYPES.contains(requestType);
+        return active && covered && requestType != null && requestType.isTimesheetLocking();
     }
 
     private void requirePending() {
@@ -196,8 +180,81 @@ public class AttRequest {
         }
     }
 
+    private void applyDetails(
+            RequestType requestType,
+            LocalDate startDate,
+            LocalDate endDate,
+            LocalTime startTime,
+            LocalTime endTime,
+            String reason
+    ) {
+        validateRequestType(requestType);
+        validatePeriod(startDate, endDate);
+        this.requestType = requestType;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.reason = reason;
+
+        if (requestType == RequestType.OVERTIME) {
+            validateSingleDayOvertime(startDate, endDate);
+            applyOvertime(startTime, endTime);
+            return;
+        }
+        applyWholeDayLeave(startDate, endDate);
+    }
+
+    private void applyOvertime(LocalTime startTime, LocalTime endTime) {
+        if (startTime == null || endTime == null || !endTime.isAfter(startTime)) {
+            throw BizException.withDetail(ErrorCode.VALIDATION_ERROR,
+                    "overtime endTime must be after startTime");
+        }
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.days = null;
+        this.minutes = Math.toIntExact(Duration.between(startTime, endTime).toMinutes());
+    }
+
+    private static void validateSingleDayOvertime(LocalDate startDate, LocalDate endDate) {
+        if (!startDate.equals(endDate)) {
+            throw BizException.withDetail(ErrorCode.VALIDATION_ERROR,
+                    "overtime request must be for a single date");
+        }
+    }
+
+    private void applyWholeDayLeave(LocalDate startDate, LocalDate endDate) {
+        long weekdayCount = countWeekdays(startDate, endDate);
+        if (weekdayCount == 0) {
+            throw BizException.withDetail(ErrorCode.VALIDATION_ERROR,
+                    "leave period must include at least one weekday");
+        }
+        this.startTime = null;
+        this.endTime = null;
+        this.days = BigDecimal.valueOf(weekdayCount);
+        this.minutes = null;
+    }
+
+    private static long countWeekdays(LocalDate startDate, LocalDate endDate) {
+        long count = 0;
+        LocalDate cursor = startDate;
+        while (!cursor.isAfter(endDate)) {
+            DayOfWeek dayOfWeek = cursor.getDayOfWeek();
+            if (dayOfWeek != DayOfWeek.SATURDAY && dayOfWeek != DayOfWeek.SUNDAY) {
+                count++;
+            }
+            cursor = cursor.plusDays(1);
+        }
+        return count;
+    }
+
+    private static void validateRequestType(RequestType requestType) {
+        if (requestType == null || !requestType.isCreatable()) {
+            throw BizException.withDetail(ErrorCode.VALIDATION_ERROR,
+                    "unsupported attendance request type");
+        }
+    }
+
     private static void validatePeriod(LocalDate startDate, LocalDate endDate) {
-        if (startDate != null && endDate != null && endDate.isBefore(startDate)) {
+        if (startDate == null || endDate == null || endDate.isBefore(startDate)) {
             throw BizException.withDetail(ErrorCode.VALIDATION_ERROR,
                     "attendance request endDate must not be before startDate");
         }

@@ -50,9 +50,9 @@ public class AttRequestServiceImpl implements AttRequestService {
                 command.reason());
         repository.save(request);
 
-        BigDecimal amount = requestAmount(command);
+        BigDecimal amount = requestAmount(request);
         WfApprovalRule rule = ruleRepository
-                .findApplicable(command.companyId(), command.requestType(), amount)
+                .findApplicable(request.getCompanyId(), request.getRequestType(), amount)
                 .orElse(null);
         List<Long> approvers = routeResolver.resolveApprovers(
                 command.employeeId(), command.companyId(), rule);
@@ -132,11 +132,11 @@ public class AttRequestServiceImpl implements AttRequestService {
                         ErrorCode.NOT_FOUND, "attendance request not found"));
     }
 
-    private BigDecimal requestAmount(AttRequestCreateCommand command) {
-        if (command.days() != null) {
-            return command.days();
+    private BigDecimal requestAmount(AttRequest request) {
+        if (request.getDays() != null) {
+            return request.getDays();
         }
-        return command.minutes() == null ? null : BigDecimal.valueOf(command.minutes());
+        return request.getMinutes() == null ? null : BigDecimal.valueOf(request.getMinutes());
     }
 
     private Long currentApprover(WfApproval approval, List<WfApprovalStep> pendingSteps) {

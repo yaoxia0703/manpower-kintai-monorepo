@@ -6,6 +6,8 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.manpowergroup.kintai.attendance.domain.enums.RequestType;
+import com.manpowergroup.kintai.attendance.domain.enums.ApprovalStopCondition;
 import com.manpowergroup.kintai.common.enums.Status;
 import com.manpowergroup.kintai.common.exception.BizException;
 import com.manpowergroup.kintai.common.exception.ErrorCode;
@@ -16,7 +18,6 @@ import lombok.experimental.Accessors;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Objects;
 
 @Getter
 @Setter(AccessLevel.PRIVATE)
@@ -27,19 +28,15 @@ import java.util.Objects;
  */
 public class WfApprovalRule {
 
-    private static final String DIRECT_ONLY = "DIRECT_ONLY";
-    private static final String REACH_GRADE = "REACH_GRADE";
-    private static final String REACH_DEPARTMENT = "REACH_DEPARTMENT";
-
     @TableId(type = IdType.AUTO)
     @Setter
     private Long id;
 
     private Long companyId;
 
-    private String requestType;
+    private RequestType requestType;
 
-    private String stopCondition;
+    private ApprovalStopCondition stopCondition;
 
     private String stopGradeLevel;
 
@@ -65,7 +62,7 @@ public class WfApprovalRule {
     private Integer isDeleted;
 
     /** ルールの整合性を検証し、有効な承認ルールを作成する。 */
-    public static WfApprovalRule create(Long companyId, String requestType, String stopCondition,
+    public static WfApprovalRule create(Long companyId, RequestType requestType, ApprovalStopCondition stopCondition,
                                         String stopGradeLevel, String stopDeptFunc,
                                         BigDecimal amountThreshold, Integer sort, Status status) {
         validate(companyId, requestType, stopCondition, stopGradeLevel,
@@ -82,7 +79,7 @@ public class WfApprovalRule {
     }
 
     /** 会社を変更せずに承認経路条件を更新する。 */
-    public void updateRule(String requestType, String stopCondition, String stopGradeLevel,
+    public void updateRule(RequestType requestType, ApprovalStopCondition stopCondition, String stopGradeLevel,
                            String stopDeptFunc, BigDecimal amountThreshold, Integer sort) {
         validate(companyId, requestType, stopCondition, stopGradeLevel,
                 stopDeptFunc, amountThreshold, sort);
@@ -95,11 +92,11 @@ public class WfApprovalRule {
     }
 
     /** 申請種別と金額がこの有効ルールの適用条件を満たすか判定する。 */
-    public boolean appliesTo(String requestType, BigDecimal amount) {
+    public boolean appliesTo(RequestType requestType, BigDecimal amount) {
         if (this.status != Status.ENABLED) {
             return false;
         }
-        if (!Objects.equals(this.requestType, requestType)) {
+        if (this.requestType != requestType) {
             return false;
         }
         return this.amountThreshold == null
@@ -118,26 +115,24 @@ public class WfApprovalRule {
 
     private static void validate(
             Long companyId,
-            String requestType,
-            String stopCondition,
+            RequestType requestType,
+            ApprovalStopCondition stopCondition,
             String stopGradeLevel,
             String stopDeptFunc,
             BigDecimal amountThreshold,
             Integer sort
     ) {
-        if (companyId == null || requestType == null || requestType.isBlank()) {
+        if (companyId == null || requestType == null) {
             throw invalidRule("approval rule company and request type are required");
         }
-        if (!DIRECT_ONLY.equals(stopCondition)
-                && !REACH_GRADE.equals(stopCondition)
-                && !REACH_DEPARTMENT.equals(stopCondition)) {
+        if (stopCondition == null) {
             throw invalidRule("unsupported approval stop condition");
         }
-        if (REACH_GRADE.equals(stopCondition)
+        if (stopCondition == ApprovalStopCondition.REACH_GRADE
                 && (stopGradeLevel == null || stopGradeLevel.isBlank())) {
             throw invalidRule("grade stop condition requires target grade level");
         }
-        if (REACH_DEPARTMENT.equals(stopCondition)
+        if (stopCondition == ApprovalStopCondition.REACH_DEPARTMENT
                 && (stopDeptFunc == null || stopDeptFunc.isBlank())) {
             throw invalidRule("department stop condition requires target department function");
         }

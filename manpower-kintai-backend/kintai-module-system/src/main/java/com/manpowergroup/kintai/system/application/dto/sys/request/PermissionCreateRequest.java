@@ -1,5 +1,6 @@
 package com.manpowergroup.kintai.system.application.dto.sys.request;
 
+import com.manpowergroup.kintai.common.enums.PermissionHttpMethod;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -24,10 +25,9 @@ public class PermissionCreateRequest {
     @Schema(description = "名称")
     private String name;
 
-    @NotBlank(message = "HTTPメソッドは必須です")
-    @Size(max = 20, message = "HTTPメソッドは20文字以内で入力してください")
+    @NotNull(message = "HTTPメソッドは必須です")
     @Schema(description = "HTTPメソッド")
-    private String method;
+    private PermissionHttpMethod method;
 
     @NotBlank(message = "APIパスは必須です")
     @Size(max = 255, message = "APIパスは255文字以内で入力してください")

@@ -1,5 +1,6 @@
 package com.manpowergroup.kintai.attendance.application.service.impl.att;
 
+import com.manpowergroup.kintai.attendance.domain.enums.RequestType;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.manpowergroup.kintai.attendance.application.query.timesheet.TimesheetMonthQuery;
 import com.manpowergroup.kintai.attendance.domain.entity.att.AttRequest;
@@ -28,7 +29,7 @@ class AttTimesheetQueryServiceImplTest {
         AttTimesheetQueryServiceImpl service = new AttTimesheetQueryServiceImpl(mapper, lockPolicy);
         LocalDate lockedDate = LocalDate.of(2026, 7, 10);
         AttRequest request = AttRequest.create(
-                1L, 10L, "PAID_LEAVE", lockedDate, lockedDate,
+                1L, 10L, RequestType.PAID_LEAVE, lockedDate, lockedDate,
                 null, null, BigDecimal.ONE, null, "leave");
         when(mapper.selectList(any(LambdaQueryWrapper.class))).thenReturn(List.of());
         when(lockPolicy.findLocks(
@@ -41,7 +42,7 @@ class AttTimesheetQueryServiceImplTest {
                 .findFirst().orElseThrow();
 
         assertTrue(day.isRequestLocked());
-        assertEquals("PAID_LEAVE", day.getLockingRequestType());
+        assertEquals(RequestType.PAID_LEAVE, day.getLockingRequestType());
         assertEquals(request.getStatus(), day.getLockingRequestStatus());
     }
 }

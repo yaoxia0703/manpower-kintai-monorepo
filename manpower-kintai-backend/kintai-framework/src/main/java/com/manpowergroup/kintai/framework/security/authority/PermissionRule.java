@@ -1,4 +1,6 @@
 package com.manpowergroup.kintai.framework.security.authority;
 
-public record PermissionRule(String code, String method, String path) {
+import com.manpowergroup.kintai.common.enums.PermissionHttpMethod;
+
+public record PermissionRule(String code, PermissionHttpMethod method, String path) {
 }

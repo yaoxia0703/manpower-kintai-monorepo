@@ -1,30 +1,41 @@
 <template>
   <div class="request-page">
-    <header class="page-toolbar">
-      <div>
-        <h1>勤怠申請</h1>
-        <el-text type="info">休暇・残業・出張などの申請状況</el-text>
+    <el-card class="toolbar-card" shadow="never">
+      <div class="toolbar">
+        <div>
+          <h1>勤怠申請</h1>
+          <el-text type="info">有給休暇・残業・振替休暇の申請状況</el-text>
+        </div>
+        <el-space>
+          <el-button
+            :icon="Refresh"
+            :loading="loading"
+            circle
+            aria-label="更新"
+            @click="loadRequests"
+          />
+          <el-button type="primary" :icon="Plus" @click="openCreate">新規申請</el-button>
+        </el-space>
       </div>
-      <el-space>
-        <el-button :icon="Refresh" :loading="loading" circle aria-label="更新" @click="loadRequests" />
-        <el-button type="primary" :icon="Plus" @click="openCreate">新規申請</el-button>
-      </el-space>
-    </header>
+    </el-card>
 
-    <div class="status-summary">
-      <div v-for="item in summary" :key="item.label" class="summary-item">
-        <span>{{ item.label }}</span>
-        <strong>{{ item.value }}</strong>
-      </div>
-    </div>
+    <el-row :gutter="12" class="summary-row">
+      <el-col v-for="item in summary" :key="item.label" :xs="12" :md="6">
+        <el-card class="summary-card" shadow="never">
+          <el-statistic :title="item.label" :value="item.value" />
+        </el-card>
+      </el-col>
+    </el-row>
 
-    <section class="table-surface">
+    <el-card class="table-card" shadow="never" body-class="table-card-body">
       <el-table
         v-loading="loading"
         :data="requests"
         row-key="id"
         stripe
+        border
         height="100%"
+        class="request-table"
         :row-class-name="requestRowClass"
       >
         <el-table-column prop="id" label="申請ID" width="90" />
@@ -80,7 +91,7 @@
           <el-empty description="申請はありません" />
         </template>
       </el-table>
-    </section>
+    </el-card>
 
     <el-dialog
       v-model="dialogVisible"
@@ -101,8 +112,21 @@
             </el-select>
           </el-form-item>
 
-          <el-form-item label="申請期間" prop="startDate">
+          <el-form-item
+            :label="form.requestType === 'OVERTIME' ? '申請日' : '申請期間'"
+            prop="startDate"
+          >
             <el-date-picker
+              v-if="form.requestType === 'OVERTIME'"
+              v-model="form.startDate"
+              type="date"
+              value-format="YYYY-MM-DD"
+              placeholder="申請日"
+              class="full-width"
+              @change="syncOvertimeDate"
+            />
+            <el-date-picker
+              v-else
               v-model="dateRange"
               type="daterange"
               value-format="YYYY-MM-DD"
@@ -134,19 +158,12 @@
                 @change="calculateMinutes"
               />
             </el-form-item>
-            <el-form-item label="申請時間（分）" prop="minutes">
-              <el-input-number v-model="form.minutes" :min="1" :max="1440" class="full-width" />
+            <el-form-item label="申請時間">
+              <div class="derived-amount">{{ derivedAmountText }}</div>
             </el-form-item>
           </template>
-          <el-form-item v-else label="申請日数" prop="days">
-            <el-input-number
-              v-model="form.days"
-              :min="0.5"
-              :max="365"
-              :step="0.5"
-              :precision="1"
-              class="full-width"
-            />
+          <el-form-item v-else label="申請日数">
+            <div class="derived-amount">{{ derivedAmountText }}</div>
           </el-form-item>
         </div>
 
@@ -183,19 +200,13 @@ import {
   fetchAttendanceRequests,
   updateAttendanceRequest,
 } from '@/api/attendance/requests'
-import type {
-  ApprovalStatus,
-  AttRequest,
-  AttRequestPayload,
-  RequestType,
-} from '@/types/attendance'
+import type { ApprovalStatus, AttRequest, AttRequestPayload, RequestType } from '@/types/attendance'
+import { calculateOvertimeMinutes, countWholeLeaveDays } from '@/utils/attendanceRequestAmount'
 
 const REQUEST_TYPE_OPTIONS: Array<{ value: RequestType; label: string }> = [
   { value: 'PAID_LEAVE', label: '有給休暇' },
   { value: 'OVERTIME', label: '残業' },
-  { value: 'BUSINESS_TRIP', label: '出張' },
   { value: 'SUBSTITUTE', label: '振替休暇' },
-  { value: 'LEAVE_OF_ABSENCE', label: '休職' },
 ]
 
 const route = useRoute()
@@ -222,6 +233,13 @@ const summary = computed(() => [
   { label: '取消', value: countStatus('CANCELLED') },
 ])
 
+const derivedAmountText = computed(() => {
+  if (form.requestType === 'OVERTIME') {
+    return form.minutes == null ? '開始・終了時刻を選択してください' : `${form.minutes}分`
+  }
+  return form.days == null || form.days === 0 ? '申請期間を選択してください' : `${form.days}日`
+})
+
 function emptyForm(): AttRequestPayload {
   return {
     requestType: 'PAID_LEAVE',
@@ -229,7 +247,7 @@ function emptyForm(): AttRequestPayload {
     endDate: '',
     startTime: null,
     endTime: null,
-    days: 1,
+    days: null,
     minutes: null,
     reason: '',
   }
@@ -266,40 +284,60 @@ function openEdit(request: AttRequest) {
     minutes: request.minutes,
     reason: request.reason,
   })
+  if (request.requestType === 'OVERTIME') form.endDate = request.startDate
   dateRange.value = [request.startDate, request.endDate]
+  recalculateDerivedAmount()
   dialogVisible.value = true
 }
 
 function syncDateRange(value: [string, string] | null) {
   form.startDate = value?.[0] ?? ''
   form.endDate = value?.[1] ?? ''
+  recalculateDerivedAmount()
+}
+
+function syncOvertimeDate(value: string | null) {
+  form.startDate = value ?? ''
+  form.endDate = form.startDate
 }
 
 function resetAmountFields() {
   if (form.requestType === 'OVERTIME') {
     form.days = null
-    form.minutes = null
+    form.endDate = form.startDate
   } else {
     form.startTime = null
     form.endTime = null
     form.minutes = null
-    form.days = 1
+    dateRange.value = form.startDate ? [form.startDate, form.endDate || form.startDate] : null
   }
+  recalculateDerivedAmount()
 }
 
 function calculateMinutes() {
-  if (!form.startTime || !form.endTime) return
-  const [startHour = 0, startMinute = 0] = form.startTime.split(':').map(Number)
-  const [endHour = 0, endMinute = 0] = form.endTime.split(':').map(Number)
-  const minutes = endHour * 60 + endMinute - (startHour * 60 + startMinute)
-  form.minutes = minutes > 0 ? minutes : null
+  form.minutes = calculateOvertimeMinutes(form.startTime, form.endTime)
+}
+
+function recalculateDerivedAmount() {
+  if (form.requestType === 'OVERTIME') {
+    form.days = null
+    calculateMinutes()
+    return
+  }
+  form.days = countWholeLeaveDays(form.startDate, form.endDate)
+  form.minutes = null
 }
 
 async function submitForm() {
+  recalculateDerivedAmount()
   const valid = await formRef.value?.validate().catch(() => false)
   if (!valid) return
   if (form.requestType === 'OVERTIME' && (!form.startTime || !form.endTime || !form.minutes)) {
-    ElMessage.warning('残業時間を入力してください')
+    ElMessage.warning('開始・終了時刻を確認してください')
+    return
+  }
+  if (form.requestType !== 'OVERTIME' && (!form.days || form.days < 1)) {
+    ElMessage.warning('申請期間には平日を含めてください')
     return
   }
 
@@ -378,18 +416,25 @@ onMounted(loadRequests)
 
 <style scoped>
 .request-page {
-  display: grid;
-  min-height: 100%;
-  grid-template-rows: auto auto minmax(420px, 1fr);
+  display: flex;
+  height: 100%;
+  min-height: 0;
+  flex-direction: column;
   gap: 12px;
-  padding: 16px;
+  overflow: hidden;
+  padding: 12px;
 }
 
-.page-toolbar {
+.toolbar-card,
+.summary-row {
+  flex-shrink: 0;
+}
+
+.toolbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  gap: 12px;
 }
 
 h1 {
@@ -398,40 +443,26 @@ h1 {
   letter-spacing: 0;
 }
 
-.status-summary {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(120px, 1fr));
-  border: 1px solid var(--el-border-color-light);
-  background: var(--el-bg-color);
+.summary-card :deep(.el-card__body) {
+  padding: 14px 16px;
 }
 
-.summary-item {
-  display: flex;
-  min-height: 68px;
-  align-items: center;
-  justify-content: space-between;
-  border-right: 1px solid var(--el-border-color-light);
-  padding: 12px 16px;
-  color: var(--el-text-color-secondary);
-}
-
-.summary-item:last-child {
-  border-right: 0;
-}
-
-.summary-item strong {
-  color: var(--el-text-color-primary);
-  font-size: 24px;
-}
-
-.table-surface {
+.table-card {
+  flex: 1 1 auto;
   min-height: 0;
-  overflow: hidden;
-  border: 1px solid var(--el-border-color-light);
-  background: var(--el-bg-color);
 }
 
-.table-surface :deep(.selected-request-row > td) {
+.table-card :deep(.table-card-body) {
+  height: 100%;
+  min-height: 0;
+  padding: 0;
+}
+
+.request-table {
+  height: 100%;
+}
+
+.request-table :deep(.selected-request-row > td) {
   background: var(--el-color-primary-light-9) !important;
 }
 
@@ -445,26 +476,29 @@ h1 {
   width: 100%;
 }
 
+.derived-amount {
+  width: 100%;
+  min-height: 32px;
+  padding: 0 12px;
+  border: 1px solid var(--el-border-color-light);
+  border-radius: var(--el-border-radius-base);
+  background: var(--el-fill-color-light);
+  color: var(--el-text-color-regular);
+  line-height: 30px;
+}
+
 @media (max-width: 760px) {
   .request-page {
-    grid-template-rows: auto auto minmax(520px, 1fr);
     padding: 12px;
   }
 
-  .page-toolbar {
+  .toolbar {
     align-items: flex-start;
+    flex-direction: column;
   }
 
-  .status-summary {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .summary-item:nth-child(2) {
-    border-right: 0;
-  }
-
-  .summary-item:nth-child(-n + 2) {
-    border-bottom: 1px solid var(--el-border-color-light);
+  .summary-row {
+    row-gap: 12px;
   }
 
   .form-grid {

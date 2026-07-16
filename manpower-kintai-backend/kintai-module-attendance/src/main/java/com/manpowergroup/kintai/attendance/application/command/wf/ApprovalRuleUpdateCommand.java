@@ -1,10 +1,13 @@
 package com.manpowergroup.kintai.attendance.application.command.wf;
 
+import com.manpowergroup.kintai.attendance.domain.enums.RequestType;
+import com.manpowergroup.kintai.attendance.domain.enums.ApprovalStopCondition;
+
 import java.math.BigDecimal;
 
 public record ApprovalRuleUpdateCommand(
-        String requestType,
-        String stopCondition,
+        RequestType requestType,
+        ApprovalStopCondition stopCondition,
         String stopGradeLevel,
         String stopDeptFunc,
         BigDecimal amountThreshold,

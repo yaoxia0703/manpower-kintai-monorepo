@@ -1,5 +1,6 @@
 package com.manpowergroup.kintai.attendance.domain.service.att;
 
+import com.manpowergroup.kintai.attendance.domain.enums.RequestType;
 import com.manpowergroup.kintai.attendance.domain.entity.att.AttRequest;
 import com.manpowergroup.kintai.attendance.domain.repository.att.AttRequestRepository;
 import com.manpowergroup.kintai.common.exception.BizException;
@@ -44,7 +45,7 @@ class TimesheetEditLockPolicyTest {
 
     private AttRequest leave(LocalDate start, LocalDate end) {
         return AttRequest.create(
-                1L, 10L, "PAID_LEAVE", start, end,
+                1L, 10L, RequestType.PAID_LEAVE, start, end,
                 null, null, BigDecimal.ONE, null, "leave");
     }
 }

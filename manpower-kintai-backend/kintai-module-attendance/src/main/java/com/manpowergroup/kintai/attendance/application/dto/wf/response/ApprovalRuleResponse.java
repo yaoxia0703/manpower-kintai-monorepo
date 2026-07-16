@@ -1,6 +1,8 @@
 package com.manpowergroup.kintai.attendance.application.dto.wf.response;
 
 import com.manpowergroup.kintai.attendance.domain.entity.wf.WfApprovalRule;
+import com.manpowergroup.kintai.attendance.domain.enums.RequestType;
+import com.manpowergroup.kintai.attendance.domain.enums.ApprovalStopCondition;
 import com.manpowergroup.kintai.common.enums.Status;
 
 import java.math.BigDecimal;
@@ -9,8 +11,8 @@ import java.time.LocalDateTime;
 public record ApprovalRuleResponse(
         Long id,
         Long companyId,
-        String requestType,
-        String stopCondition,
+        RequestType requestType,
+        ApprovalStopCondition stopCondition,
         String stopGradeLevel,
         String stopDeptFunc,
         BigDecimal amountThreshold,

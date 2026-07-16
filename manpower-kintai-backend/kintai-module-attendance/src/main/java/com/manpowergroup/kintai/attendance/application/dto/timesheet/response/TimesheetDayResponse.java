@@ -3,6 +3,7 @@ package com.manpowergroup.kintai.attendance.application.dto.timesheet.response;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.manpowergroup.kintai.attendance.domain.enums.AttRecordStatus;
 import com.manpowergroup.kintai.attendance.domain.enums.ApprovalStatus;
+import com.manpowergroup.kintai.attendance.domain.enums.RequestType;
 import com.manpowergroup.kintai.common.enums.AttendanceType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
@@ -62,7 +63,7 @@ public class TimesheetDayResponse {
     private boolean requestLocked;
 
     @Schema(description = "編集をロックしている申請タイプ")
-    private String lockingRequestType;
+    private RequestType lockingRequestType;
 
     @Schema(description = "編集をロックしている申請状態")
     private ApprovalStatus lockingRequestStatus;

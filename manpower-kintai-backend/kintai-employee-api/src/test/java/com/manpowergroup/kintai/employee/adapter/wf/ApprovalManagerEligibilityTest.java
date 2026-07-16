@@ -1,5 +1,6 @@
 package com.manpowergroup.kintai.employee.adapter.wf;
 
+import com.manpowergroup.kintai.common.enums.PermissionHttpMethod;
 import com.manpowergroup.kintai.system.application.service.sys.SysPermissionService;
 import com.manpowergroup.kintai.system.domain.entity.sys.SysPermission;
 import org.junit.jupiter.api.Test;
@@ -31,6 +32,6 @@ class ApprovalManagerEligibilityTest {
     }
 
     private SysPermission permission(String code) {
-        return SysPermission.create(null, code, code, "GET", "/test", null, 1);
+        return SysPermission.create(null, code, code, PermissionHttpMethod.GET, "/test", null, 1);
     }
 }

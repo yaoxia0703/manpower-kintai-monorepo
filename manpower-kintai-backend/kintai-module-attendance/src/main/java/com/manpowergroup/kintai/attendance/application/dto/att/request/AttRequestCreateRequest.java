@@ -1,11 +1,11 @@
 package com.manpowergroup.kintai.attendance.application.dto.att.request;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.manpowergroup.kintai.attendance.domain.enums.RequestType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
@@ -17,9 +17,8 @@ import java.time.LocalTime;
 public record AttRequestCreateRequest(
 
         @Schema(description = "申請タイプ（REQUEST_TYPE参照）", example = "PAID_LEAVE")
-        @NotBlank(message = "申請タイプは必須です")
-        @Size(max = 50, message = "申請タイプは50文字以内にしてください")
-        String requestType,
+        @NotNull(message = "申請タイプは必須です")
+        RequestType requestType,
 
         @Schema(description = "開始日", example = "2026-07-10")
         @NotNull(message = "開始日は必須です")

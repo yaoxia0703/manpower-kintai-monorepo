@@ -1,5 +1,6 @@
 package com.manpowergroup.kintai.system.domain.entity.sys;
 
+import com.manpowergroup.kintai.common.enums.PermissionHttpMethod;
 import com.manpowergroup.kintai.common.enums.Status;
 import org.junit.jupiter.api.Test;
 
@@ -15,12 +16,12 @@ class SysPermissionTest {
     @Test
     void createDefaultsPermissionToEnabled() {
         SysPermission permission = SysPermission.create(
-                10L, "employee:read", "Read employee", "GET", "/employees/**", null, 20);
+                10L, "employee:read", "Read employee", PermissionHttpMethod.GET, "/employees/**", null, 20);
 
         assertEquals(10L, permission.getMenuId());
         assertEquals("employee:read", permission.getCode());
         assertEquals("Read employee", permission.getName());
-        assertEquals("GET", permission.getMethod());
+        assertEquals(PermissionHttpMethod.GET, permission.getMethod());
         assertEquals("/employees/**", permission.getPath());
         assertEquals(20, permission.getSort());
         assertEquals(Status.ENABLED, permission.getStatus());
@@ -29,16 +30,17 @@ class SysPermissionTest {
     @Test
     void updateEditableFieldsKeepsIdentityAndStatus() {
         SysPermission permission = SysPermission.create(
-                10L, "old", "Old", "GET", "/old", null, 10).setId(7L);
+                10L, "old", "Old", PermissionHttpMethod.GET, "/old", null, 10).setId(7L);
         permission.disable();
 
-        permission.updateEditableFields(20L, "new", "New", "POST", "/new", "Changed", 30);
+        permission.updateEditableFields(
+                20L, "new", "New", PermissionHttpMethod.POST, "/new", "Changed", 30);
 
         assertEquals(7L, permission.getId());
         assertEquals(20L, permission.getMenuId());
         assertEquals("new", permission.getCode());
         assertEquals("New", permission.getName());
-        assertEquals("POST", permission.getMethod());
+        assertEquals(PermissionHttpMethod.POST, permission.getMethod());
         assertEquals("/new", permission.getPath());
         assertEquals("Changed", permission.getRemark());
         assertEquals(30, permission.getSort());

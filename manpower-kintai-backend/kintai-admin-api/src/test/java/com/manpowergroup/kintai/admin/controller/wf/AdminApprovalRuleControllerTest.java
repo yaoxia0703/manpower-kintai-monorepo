@@ -4,6 +4,8 @@ import com.manpowergroup.kintai.attendance.application.command.wf.ApprovalRuleCr
 import com.manpowergroup.kintai.attendance.application.dto.wf.request.ApprovalRuleCreateRequest;
 import com.manpowergroup.kintai.attendance.application.service.wf.WfApprovalRuleService;
 import com.manpowergroup.kintai.attendance.domain.entity.wf.WfApprovalRule;
+import com.manpowergroup.kintai.attendance.domain.enums.ApprovalStopCondition;
+import com.manpowergroup.kintai.attendance.domain.enums.RequestType;
 import com.manpowergroup.kintai.common.enums.Status;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -21,11 +23,11 @@ class AdminApprovalRuleControllerTest {
         WfApprovalRuleService service = Mockito.mock(WfApprovalRuleService.class);
         AdminApprovalRuleController controller = new AdminApprovalRuleController(service);
         ApprovalRuleCreateRequest request = new ApprovalRuleCreateRequest(
-                10L, "PAID_LEAVE", "DIRECT_ONLY",
+                10L, RequestType.PAID_LEAVE, ApprovalStopCondition.DIRECT_ONLY,
                 null, null, null, 1, null);
         when(service.create(any(ApprovalRuleCreateCommand.class))).thenReturn(
                 WfApprovalRule.create(
-                        10L, "PAID_LEAVE", "DIRECT_ONLY",
+                        10L, RequestType.PAID_LEAVE, ApprovalStopCondition.DIRECT_ONLY,
                         null, null, null, 1, Status.ENABLED));
 
         controller.create(request);
@@ -34,7 +36,7 @@ class AdminApprovalRuleControllerTest {
                 ArgumentCaptor.forClass(ApprovalRuleCreateCommand.class);
         verify(service).create(captor.capture());
         assertEquals(10L, captor.getValue().companyId());
-        assertEquals("PAID_LEAVE", captor.getValue().requestType());
+        assertEquals(RequestType.PAID_LEAVE, captor.getValue().requestType());
     }
 
     @Test

@@ -36,10 +36,11 @@ public class AdminSysPermissionController {
         return Result.ok(service.page(PageRequest.of(page, size)).map(PermissionAssembler::toResponse));
     }
 
-    @GetMapping("/by-menu/{menuId}")
-    public Result<List<PermissionResponse>> listByMenu(@PathVariable Long menuId) {
-        return Result.ok(service.listByMenu(menuId).stream().map(PermissionAssembler::toResponse).toList());
-    }
+//    @GetMapping("/by-menu/{menuId}")
+//    public Result<List<PermissionResponse>> listByMenu(@PathVariable Long menuId) {
+//        return Result.ok(service.listByMenu(menuId).stream().map(PermissionAssembler::toResponse).toList());
+//    }
+
 
     @GetMapping("/{id}")
     public Result<PermissionResponse> getById(@PathVariable Long id) {

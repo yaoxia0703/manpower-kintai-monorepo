@@ -1,5 +1,6 @@
 package com.manpowergroup.kintai.attendance.domain.entity.wf;
 
+import com.manpowergroup.kintai.attendance.domain.enums.RequestType;
 import com.manpowergroup.kintai.attendance.domain.enums.ApprovalStatus;
 import com.manpowergroup.kintai.common.exception.BizException;
 import org.junit.jupiter.api.Test;
@@ -14,10 +15,10 @@ class WfApprovalTest {
 
     @Test
     void startInitializesPendingApprovalAtFirstStep() {
-        WfApproval approval = WfApproval.start(1L, "PAID_LEAVE", 2L, 10L, 3, 2L);
+        WfApproval approval = WfApproval.start(1L, RequestType.PAID_LEAVE, 2L, 10L, 3, 2L);
 
         assertEquals(1L, approval.getRequestId());
-        assertEquals("PAID_LEAVE", approval.getRequestType());
+        assertEquals(RequestType.PAID_LEAVE, approval.getRequestType());
         assertEquals(2L, approval.getApplicantId());
         assertEquals(10L, approval.getCompanyId());
         assertEquals(1, approval.getCurrentStep());
@@ -31,7 +32,7 @@ class WfApprovalTest {
 
     @Test
     void approveCurrentStepMovesToNextStepWhenMoreStepsRemain() {
-        WfApproval approval = WfApproval.start(1L, "PAID_LEAVE", 2L, 10L, 3, 2L);
+        WfApproval approval = WfApproval.start(1L, RequestType.PAID_LEAVE, 2L, 10L, 3, 2L);
 
         approval.approveCurrentStep(LocalDateTime.of(2026, 7, 10, 9, 0), 20L);
 
@@ -44,7 +45,7 @@ class WfApprovalTest {
     @Test
     void approveCurrentStepCompletesApprovalAtFinalStep() {
         LocalDateTime completedAt = LocalDateTime.of(2026, 7, 10, 9, 0);
-        WfApproval approval = WfApproval.start(1L, "PAID_LEAVE", 2L, 10L, 1, 2L);
+        WfApproval approval = WfApproval.start(1L, RequestType.PAID_LEAVE, 2L, 10L, 1, 2L);
 
         approval.approveCurrentStep(completedAt, 20L);
 
@@ -57,7 +58,7 @@ class WfApprovalTest {
     @Test
     void rejectCompletesApprovalAsRejected() {
         LocalDateTime rejectedAt = LocalDateTime.of(2026, 7, 10, 9, 0);
-        WfApproval approval = WfApproval.start(1L, "PAID_LEAVE", 2L, 10L, 2, 2L);
+        WfApproval approval = WfApproval.start(1L, RequestType.PAID_LEAVE, 2L, 10L, 2, 2L);
 
         approval.reject(rejectedAt, 20L);
 
@@ -68,7 +69,7 @@ class WfApprovalTest {
 
     @Test
     void terminalApprovalCannotChangeAgain() {
-        WfApproval approval = WfApproval.start(1L, "PAID_LEAVE", 2L, 10L, 1, 2L);
+        WfApproval approval = WfApproval.start(1L, RequestType.PAID_LEAVE, 2L, 10L, 1, 2L);
         approval.approveCurrentStep(LocalDateTime.of(2026, 7, 10, 9, 0), 20L);
 
         assertThrows(BizException.class,
@@ -82,7 +83,7 @@ class WfApprovalTest {
     @Test
     void escalateRecordsEscalationTargetForPendingApproval() {
         LocalDateTime escalatedAt = LocalDateTime.of(2026, 7, 10, 9, 0);
-        WfApproval approval = WfApproval.start(1L, "PAID_LEAVE", 2L, 10L, 2, 2L);
+        WfApproval approval = WfApproval.start(1L, RequestType.PAID_LEAVE, 2L, 10L, 2, 2L);
 
         approval.escalateTo(30L, escalatedAt, 20L);
 
