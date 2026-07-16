@@ -1,34 +1,48 @@
 <template>
-  <section>
+  <section class="page-section">
     <el-card shadow="never">
       <template #header>
-        <el-row align="middle" justify="space-between">
-          <el-col :span="12">権限管理</el-col>
-          <el-col :span="12">
-            <el-row justify="end">
-              <el-button :loading="loading" @click="loadData">更新</el-button>
-              <el-button type="primary" @click="openCreate">新規作成</el-button>
-            </el-row>
-          </el-col>
-        </el-row>
+        <div class="card-header">
+          <span>権限管理</span>
+          <el-button type="primary" @click="openCreate">新規作成</el-button>
+        </div>
       </template>
 
-      <el-row :gutter="12" class="toolbar">
-        <el-col :xs="24" :md="8">
-          <el-tree-select
-            v-model="selectedMenuId"
-            :data="menuTree"
-            clearable
-            check-strictly
-            node-key="id"
-            placeholder="メニューで絞り込み"
-            :props="{ label: 'name', children: 'children' }"
-            @change="loadData"
-          />
-        </el-col>
-      </el-row>
+      <el-form :model="filters" class="query-form" label-width="90px">
+        <el-row :gutter="16">
+          <el-col :xs="24" :md="8">
+            <el-form-item label="キーワード">
+              <el-input
+                v-model="filters.keyword"
+                clearable
+                placeholder="名称・コード"
+                @keyup.enter="handleSearch"
+              />
+            </el-form-item>
+          </el-col>
+          <el-col :xs="24" :md="8">
+            <el-form-item label="所属メニュー">
+              <el-tree-select
+                v-model="filters.menuId"
+                :data="menuTree"
+                clearable
+                filterable
+                check-strictly
+                node-key="id"
+                :props="{ label: 'name', children: 'children' }"
+              />
+            </el-form-item>
+          </el-col>
+          <el-col :xs="24" :md="8">
+            <el-form-item class="query-actions">
+              <el-button type="primary" :loading="loading" @click="handleSearch">検索</el-button>
+              <el-button @click="handleReset">リセット</el-button>
+            </el-form-item>
+          </el-col>
+        </el-row>
+      </el-form>
 
-      <el-table v-loading="loading" :data="rows">
+      <el-table v-loading="loading" :data="rows" border>
         <el-table-column prop="name" label="名称" min-width="150" />
         <el-table-column prop="code" label="コード" min-width="220" />
         <el-table-column prop="method" label="メソッド" width="100" />
@@ -55,10 +69,11 @@
         <el-pagination
           v-model:current-page="page"
           v-model:page-size="size"
-          layout="total, sizes, prev, pager, next"
+          :page-sizes="[10, 20, 50, 100]"
+          layout="total, sizes, prev, pager, next, jumper"
           :total="total"
           @current-change="loadData"
-          @size-change="loadData"
+          @size-change="handleSizeChange"
         />
       </el-row>
     </el-card>
@@ -125,9 +140,9 @@ import {
   disablePermission,
   enablePermission,
   fetchPermissions,
-  fetchPermissionsByMenu,
   updatePermission,
 } from '@/api/system/permission'
+import type { PermissionQueryParams } from '@/api/system/permission'
 import { CommonStatus } from '@/types/enums'
 import type { PermissionCreateRequest, SystemMenu, SystemPermission } from '@/types/system'
 
@@ -141,6 +156,11 @@ interface PermissionFormState {
   sort: number
 }
 
+interface PermissionFilterState {
+  keyword: string
+  menuId?: number
+}
+
 const loading = ref(false)
 const saving = ref(false)
 const switchingId = ref<number>()
@@ -149,10 +169,12 @@ const editingId = ref<number>()
 const formRef = ref<FormInstance>()
 const rows = ref<SystemPermission[]>([])
 const menus = ref<SystemMenu[]>([])
-const selectedMenuId = ref<number>()
 const page = ref(1)
 const size = ref(10)
 const total = ref(0)
+
+const filters = reactive<PermissionFilterState>({ keyword: '' })
+const appliedFilters = reactive<PermissionFilterState>({ keyword: '' })
 
 const form = reactive<PermissionFormState>({
   menuId: null,
@@ -193,27 +215,58 @@ async function loadMenus() {
   menus.value = data.data
 }
 
+function toQueryParams() {
+  const params: PermissionQueryParams = {
+    page: page.value,
+    size: size.value,
+  }
+  const keyword = appliedFilters.keyword.trim()
+  if (keyword) params.keyword = keyword
+  if (appliedFilters.menuId) params.menuId = appliedFilters.menuId
+  return params
+}
+
 async function loadData() {
   loading.value = true
   try {
-    if (selectedMenuId.value) {
-      const { data } = await fetchPermissionsByMenu(selectedMenuId.value)
-      rows.value = data.data
-      total.value = data.data.length
-      return
-    }
-    const { data } = await fetchPermissions({ page: page.value, size: size.value })
-    rows.value = data.data.records
-    total.value = data.data.total
+    const { data } = await fetchPermissions(toQueryParams())
+    const result = data.data
+    rows.value = result.records ?? []
+    total.value = result.total ?? 0
+    page.value = result.page ? Number(result.page) : page.value
+    size.value = result.size ? Number(result.size) : size.value
+  } catch {
+    ElMessage.error('権限一覧を取得できませんでした')
   } finally {
     loading.value = false
   }
 }
 
+async function handleSearch() {
+  appliedFilters.keyword = filters.keyword.trim()
+  appliedFilters.menuId = filters.menuId
+  page.value = 1
+  await loadData()
+}
+
+async function handleReset() {
+  filters.keyword = ''
+  filters.menuId = undefined
+  appliedFilters.keyword = ''
+  appliedFilters.menuId = undefined
+  page.value = 1
+  await loadData()
+}
+
+async function handleSizeChange() {
+  page.value = 1
+  await loadData()
+}
+
 function resetForm() {
   editingId.value = undefined
   Object.assign(form, {
-    menuId: selectedMenuId.value ?? null,
+    menuId: appliedFilters.menuId ?? null,
     code: '',
     name: '',
     method: 'GET',
@@ -298,8 +351,22 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.toolbar {
-  margin-bottom: 16px;
+.page-section {
+  padding: 16px;
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.query-form {
+  margin-bottom: 8px;
+}
+
+.query-actions :deep(.el-form-item__content) {
+  justify-content: flex-end;
 }
 
 .pager {

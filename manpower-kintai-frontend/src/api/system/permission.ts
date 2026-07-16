@@ -7,12 +7,15 @@ import type {
   SystemPermission,
 } from '@/types/system'
 
-export function fetchPermissions(params: { page?: number; size?: number } = {}) {
-  return request.get<ApiResponse<PageResult<SystemPermission>>>('/admin/sys/permissions', { params })
+export interface PermissionQueryParams {
+  page?: number
+  size?: number
+  menuId?: number
+  keyword?: string
 }
 
-export function fetchPermissionsByMenu(menuId: number) {
-  return request.get<ApiResponse<SystemPermission[]>>(`/admin/sys/permissions/by-menu/${menuId}`)
+export function fetchPermissions(params: PermissionQueryParams = {}) {
+  return request.get<ApiResponse<PageResult<SystemPermission>>>('/admin/sys/permissions', { params })
 }
 
 export function createPermission(payload: PermissionCreateRequest) {
