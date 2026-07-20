@@ -10,8 +10,9 @@ import org.springframework.context.annotation.Configuration;
 // MyBatis-Plus設定（ページングプラグイン）
 @Configuration
 @MapperScan({
-        "com.manpowergroup.kintai.system.infrastructure.mapper",
-        "com.manpowergroup.kintai.attendance.infrastructure.mapper"
+    "com.manpowergroup.kintai.system.infrastructure.mapper",
+    "com.manpowergroup.kintai.employee.infrastructure.mapper",
+    "com.manpowergroup.kintai.attendance.infrastructure.mapper"
 })
 public class MyBatisPlusConfig {
 
