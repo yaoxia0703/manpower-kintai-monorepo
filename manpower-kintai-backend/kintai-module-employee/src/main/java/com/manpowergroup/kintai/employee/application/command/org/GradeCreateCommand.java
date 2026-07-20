@@ -1,0 +1,24 @@
+package com.manpowergroup.kintai.employee.application.command.org;
+
+import com.manpowergroup.kintai.common.enums.Status;
+
+public record GradeCreateCommand(
+        // 会社ID
+        Long companyId,
+
+        // 等級名
+        String name,
+
+        // 等級コード
+        String code,
+
+        // 等級レベル
+        String gradeLevel,
+
+        // 表示順
+        Integer sort,
+
+        // ステータス
+        Status status
+) {
+}

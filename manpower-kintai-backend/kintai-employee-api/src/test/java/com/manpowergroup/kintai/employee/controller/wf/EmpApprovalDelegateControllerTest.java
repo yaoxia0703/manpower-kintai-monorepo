@@ -4,8 +4,8 @@ import com.manpowergroup.kintai.common.dto.PageRequest;
 import com.manpowergroup.kintai.common.dto.PageResult;
 import com.manpowergroup.kintai.framework.security.jwt.LoginPrincipal;
 import com.manpowergroup.kintai.employee.adapter.wf.ApprovalManagerEligibility;
-import com.manpowergroup.kintai.system.application.service.emp.EmpEmployeeService;
-import com.manpowergroup.kintai.system.domain.entity.emp.EmpEmployee;
+import com.manpowergroup.kintai.employee.application.service.emp.EmpEmployeeService;
+import com.manpowergroup.kintai.employee.domain.entity.emp.EmpEmployee;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 

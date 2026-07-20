@@ -1,8 +1,8 @@
 package com.manpowergroup.kintai.employee.controller.org;
 
 import com.manpowergroup.kintai.common.result.Result;
-import com.manpowergroup.kintai.system.domain.entity.org.OrgNode;
-import com.manpowergroup.kintai.system.application.service.org.OrgNodeService;
+import com.manpowergroup.kintai.employee.domain.entity.org.OrgNode;
+import com.manpowergroup.kintai.employee.application.service.org.OrgNodeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 

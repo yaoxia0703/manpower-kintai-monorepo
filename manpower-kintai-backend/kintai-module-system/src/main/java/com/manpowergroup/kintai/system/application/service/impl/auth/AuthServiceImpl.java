@@ -8,12 +8,9 @@ import com.manpowergroup.kintai.common.enums.Status;
 import com.manpowergroup.kintai.common.exception.BaseErrorCode;
 import com.manpowergroup.kintai.common.exception.BizException;
 import com.manpowergroup.kintai.framework.security.jwt.JwtTokenProvider;
+import com.manpowergroup.kintai.system.application.port.auth.EmployeeIdentityProvider;
 import com.manpowergroup.kintai.system.application.service.auth.AccessContextService;
 import com.manpowergroup.kintai.system.application.service.auth.AuthService;
-import com.manpowergroup.kintai.system.application.service.emp.EmpAccountService;
-import com.manpowergroup.kintai.system.application.service.emp.EmpEmployeeService;
-import com.manpowergroup.kintai.system.domain.entity.emp.EmpAccount;
-import com.manpowergroup.kintai.system.domain.entity.emp.EmpEmployee;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -25,34 +22,34 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
 
-    private final EmpEmployeeService employeeService;
-    private final EmpAccountService accountService;
+    private final EmployeeIdentityProvider employeeIdentityProvider;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
     private final AccessContextService accessContextService;
 
     @Override
     public LoginResponse login(LoginRequest request) {
-        EmpEmployee employee = employeeService.findByEmail(request.getEmail())
+        EmployeeIdentityProvider.LoginIdentity identity = employeeIdentityProvider
+                .findLoginIdentityByEmail(request.getEmail())
                 .orElseThrow(() -> new BizException(AuthErrorCode.INVALID_CREDENTIALS));
 
-        if (employee.getStatus() != Status.ENABLED) {
+        if (identity.employeeStatus() != Status.ENABLED || identity.accountStatus() != Status.ENABLED) {
             throw new BizException(AuthErrorCode.ACCOUNT_DISABLED);
         }
 
-        EmpAccount account = accountService.getByEmployeeId(employee.getId());
-        account.authenticate(request.getPassword(), passwordEncoder);
-        account.recordLogin(LocalDateTime.now());
-        accountService.updateById(account);
+        if (!passwordEncoder.matches(request.getPassword(), identity.passwordHash())) {
+            throw new BizException(AuthErrorCode.INVALID_CREDENTIALS);
+        }
+        employeeIdentityProvider.recordSuccessfulLogin(identity.accountId(), LocalDateTime.now());
 
-        String token = jwtTokenProvider.generateToken(employee.getId(), account.getId(), List.of());
+        String token = jwtTokenProvider.generateToken(identity.employeeId(), identity.accountId(), List.of());
 
         return LoginResponse.builder()
                 .token(token)
-                .employeeId(employee.getId())
-                .accountId(account.getId())
-                .displayName(employee.getLastName() + " " + employee.getFirstName())
-                .email(employee.getEmail())
+                .employeeId(identity.employeeId())
+                .accountId(identity.accountId())
+                .displayName(identity.displayName())
+                .email(identity.email())
                 .build();
     }
 

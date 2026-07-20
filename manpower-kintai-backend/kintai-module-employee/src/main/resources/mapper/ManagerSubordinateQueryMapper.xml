@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.manpowergroup.kintai.employee.infrastructure.mapper.manager.ManagerSubordinateQueryMapper">
+
+    <sql id="optionFilter">
+        FROM org_node mn
+        INNER JOIN org_node_closure c ON c.ancestor_id = mn.id
+        INNER JOIN emp_employee_position p
+        ON p.node_id = c.descendant_id
+        AND p.status = 1
+        AND p.start_date &lt;= CURDATE()
+        AND (p.end_date IS NULL OR p.end_date &gt;= CURDATE())
+        INNER JOIN emp_employee ee ON ee.id = p.employee_id
+        INNER JOIN org_node n      ON n.id = p.node_id
+        LEFT  JOIN org_grade g     ON g.id = p.grade_id
+        WHERE mn.manager_id = #{q.managerId}
+        AND mn.status = 1
+        AND ee.status = 1
+        AND p.employee_id != #{q.managerId}
+    </sql>
+
+    <!-- 共通の絞り込み条件（一覧・件数で完全に同一のロジックを共有） -->
+    <sql id="baseFilter">
+        FROM org_node mn
+        INNER JOIN org_node_closure c ON c.ancestor_id = mn.id
+        INNER JOIN emp_employee_position p
+        ON p.node_id = c.descendant_id
+        AND p.status = 1
+        AND p.start_date &lt;= CURDATE()
+        AND (p.end_date IS NULL OR p.end_date &gt;= CURDATE())
+        INNER JOIN emp_employee ee ON ee.id = p.employee_id
+        INNER JOIN org_node n      ON n.id = p.node_id
+        LEFT  JOIN org_grade g     ON g.id = p.grade_id
+        WHERE mn.manager_id = #{q.managerId}
+        AND mn.status = 1
+        AND p.employee_id != #{q.managerId}
+        <!-- 在職状態：未指定なら在職(1)のみ、指定ありならその値 -->
+        <choose>
+            <when test="q.status != null">
+                AND ee.status = #{q.status}
+            </when>
+            <otherwise>
+                AND ee.status = 1
+            </otherwise>
+        </choose>
+        <!-- 氏名・社員コードの部分一致 -->
+        <if test="q.keyword != null and q.keyword != ''">
+            AND (ee.last_name     LIKE CONCAT('%', #{q.keyword}, '%')
+            OR ee.first_name    LIKE CONCAT('%', #{q.keyword}, '%')
+            OR ee.employee_code LIKE CONCAT('%', #{q.keyword}, '%'))
+        </if>
+        <!-- 所属ノードで絞り込み -->
+        <if test="q.nodeId != null">
+            AND p.node_id = #{q.nodeId}
+        </if>
+        <!-- 職級で絞り込み -->
+        <if test="q.gradeId != null">
+            AND p.grade_id = #{q.gradeId}
+        </if>
+    </sql>
+
+    <!-- 配下従業員一覧（主ポジション優先で重複排除 + ページング） -->
+    <select id="selectSubordinatePage"
+            resultType="com.manpowergroup.kintai.employee.application.dto.manager.response.SubordinateEmployeeResponse">
+        SELECT * FROM (
+        SELECT
+        ee.id            AS employeeId,
+        ee.employee_code AS employeeCode,
+        CONCAT(ee.last_name, ' ', ee.first_name) AS displayName,
+        ee.email         AS email,
+        ee.company_id    AS companyId,
+        p.node_id        AS nodeId,
+        n.name           AS nodeName,
+        p.grade_id       AS gradeId,
+        g.name           AS gradeName,
+        p.is_primary     AS isPrimary,
+        ROW_NUMBER() OVER (
+        PARTITION BY ee.id
+        ORDER BY p.is_primary DESC
+        ) AS rn
+        <include refid="baseFilter"/>
+        ) ranked
+        WHERE ranked.rn = 1
+        ORDER BY ranked.employeeCode
+        LIMIT #{offset}, #{size}
+    </select>
+
+    <!-- 配下従業員の総件数（重複排除後） -->
+    <select id="countSubordinatePage" resultType="java.lang.Long">
+        SELECT COUNT(DISTINCT ee.id)
+        <include refid="baseFilter"/>
+    </select>
+
+    <select id="selectSubordinateNodeOptions"
+            resultType="com.manpowergroup.kintai.employee.application.dto.manager.response.SubordinateFilterOptionsResponse$NodeOption">
+        SELECT DISTINCT
+        n.id        AS id,
+        n.parent_id AS parentId,
+        n.name      AS name,
+        n.code      AS code,
+        n.type_code AS typeCode,
+        n.level     AS level
+        <include refid="optionFilter"/>
+        ORDER BY n.level, n.name
+    </select>
+
+    <select id="selectSubordinateGradeOptions"
+            resultType="com.manpowergroup.kintai.employee.application.dto.manager.response.SubordinateFilterOptionsResponse$GradeOption">
+        SELECT DISTINCT
+        g.id          AS id,
+        g.name        AS name,
+        g.code        AS code,
+        g.grade_level AS gradeLevel
+        <include refid="optionFilter"/>
+        AND p.grade_id IS NOT NULL
+        ORDER BY g.grade_level, g.name
+    </select>
+
+</mapper>

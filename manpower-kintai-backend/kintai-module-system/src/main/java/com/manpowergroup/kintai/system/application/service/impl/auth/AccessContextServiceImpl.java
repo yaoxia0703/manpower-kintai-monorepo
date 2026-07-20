@@ -6,10 +6,9 @@ import com.manpowergroup.kintai.common.dto.auth.CurrentUserResponse;
 import com.manpowergroup.kintai.common.enums.Status;
 import com.manpowergroup.kintai.common.exception.BizException;
 import com.manpowergroup.kintai.common.exception.ErrorCode;
+import com.manpowergroup.kintai.system.application.port.auth.EmployeeIdentityProvider;
 import com.manpowergroup.kintai.system.application.service.auth.AccessContextService;
-import com.manpowergroup.kintai.system.application.service.emp.EmpEmployeeService;
 import com.manpowergroup.kintai.system.application.service.sys.SysMenuService;
-import com.manpowergroup.kintai.system.domain.entity.emp.EmpEmployee;
 import com.manpowergroup.kintai.system.domain.entity.sys.SysEmployeeRole;
 import com.manpowergroup.kintai.system.domain.entity.sys.SysMenu;
 import com.manpowergroup.kintai.system.domain.entity.sys.SysPermission;
@@ -33,7 +32,7 @@ public class AccessContextServiceImpl implements AccessContextService {
 
     private static final String SUPER_ADMIN_ROLE = "SUPER_ADMIN";
 
-    private final EmpEmployeeService employeeService;
+    private final EmployeeIdentityProvider employeeIdentityProvider;
     private final SysEmployeeRoleMapper employeeRoleMapper;
     private final SysRoleMapper roleMapper;
     private final SysRolePermissionMapper rolePermissionMapper;
@@ -42,7 +41,8 @@ public class AccessContextServiceImpl implements AccessContextService {
 
     @Override
     public AccessContext load(Long employeeId, Long accountId) {
-        EmpEmployee employee = employeeService.findById(employeeId)
+        EmployeeIdentityProvider.EmployeeProfile employee = employeeIdentityProvider
+                .findEmployeeProfile(employeeId)
                 .orElseThrow(() -> new BizException(ErrorCode.UNAUTHORIZED));
 
         List<Long> roleIds = loadActiveRoleIds(employeeId);
@@ -55,12 +55,12 @@ public class AccessContextServiceImpl implements AccessContextService {
 
         return AccessContext.builder()
                 .user(CurrentUserResponse.UserProfile.builder()
-                        .employeeId(employee.getId())
+                        .employeeId(employee.employeeId())
                         .accountId(accountId)
-                        .companyId(employee.getCompanyId())
-                        .employeeCode(employee.getEmployeeCode())
-                        .displayName(employee.getLastName() + " " + employee.getFirstName())
-                        .email(employee.getEmail())
+                        .companyId(employee.companyId())
+                        .employeeCode(employee.employeeCode())
+                        .displayName(employee.displayName())
+                        .email(employee.email())
                         .build())
                 .roles(roles)
                 .permissions(permissions)

@@ -1,11 +1,11 @@
 package com.manpowergroup.kintai.admin.controller.emp;
 
 import com.manpowergroup.kintai.common.result.Result;
-import com.manpowergroup.kintai.system.application.assembler.emp.AccountAssembler;
-import com.manpowergroup.kintai.system.application.dto.emp.response.AccountResponse;
-import com.manpowergroup.kintai.system.application.dto.emp.request.AccountCreateRequest;
-import com.manpowergroup.kintai.system.application.dto.emp.request.AccountUpdateRequest;
-import com.manpowergroup.kintai.system.application.service.emp.EmpAccountService;
+import com.manpowergroup.kintai.employee.application.assembler.emp.AccountAssembler;
+import com.manpowergroup.kintai.employee.application.dto.emp.response.AccountResponse;
+import com.manpowergroup.kintai.employee.application.dto.emp.request.AccountCreateRequest;
+import com.manpowergroup.kintai.employee.application.dto.emp.request.AccountUpdateRequest;
+import com.manpowergroup.kintai.employee.application.service.emp.EmpAccountService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;

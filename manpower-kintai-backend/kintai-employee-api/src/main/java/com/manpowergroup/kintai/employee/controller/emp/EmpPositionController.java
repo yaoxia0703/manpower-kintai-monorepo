@@ -2,8 +2,8 @@ package com.manpowergroup.kintai.employee.controller.emp;
 
 import com.manpowergroup.kintai.common.result.Result;
 import com.manpowergroup.kintai.framework.security.jwt.LoginPrincipal;
-import com.manpowergroup.kintai.system.domain.entity.emp.EmpEmployeePosition;
-import com.manpowergroup.kintai.system.application.service.emp.EmpEmployeePositionService;
+import com.manpowergroup.kintai.employee.domain.entity.emp.EmpEmployeePosition;
+import com.manpowergroup.kintai.employee.application.service.emp.EmpEmployeePositionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;

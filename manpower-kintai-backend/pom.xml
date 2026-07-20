@@ -107,6 +107,7 @@
         <module>kintai-common</module>
         <module>kintai-framework</module>
         <module>kintai-module-system</module>
+        <module>kintai-module-employee</module>
         <module>kintai-module-attendance</module>
         <module>kintai-admin-api</module>
         <module>kintai-employee-api</module>

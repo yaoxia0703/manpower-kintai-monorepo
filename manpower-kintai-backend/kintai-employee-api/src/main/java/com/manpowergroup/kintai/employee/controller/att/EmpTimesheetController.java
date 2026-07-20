@@ -7,8 +7,8 @@ import com.manpowergroup.kintai.attendance.application.service.att.AttTimesheetQ
 import com.manpowergroup.kintai.attendance.application.service.att.AttTimesheetRecordService;
 import com.manpowergroup.kintai.common.result.Result;
 import com.manpowergroup.kintai.framework.security.jwt.LoginPrincipal;
-import com.manpowergroup.kintai.system.application.service.emp.EmpEmployeeService;
-import com.manpowergroup.kintai.system.domain.entity.emp.EmpEmployee;
+import com.manpowergroup.kintai.employee.application.service.emp.EmpEmployeeService;
+import com.manpowergroup.kintai.employee.domain.entity.emp.EmpEmployee;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;

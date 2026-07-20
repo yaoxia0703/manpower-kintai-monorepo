@@ -1,11 +1,11 @@
 package com.manpowergroup.kintai.admin.controller.emp;
 
 import com.manpowergroup.kintai.common.result.Result;
-import com.manpowergroup.kintai.system.application.assembler.emp.EmployeePositionAssembler;
-import com.manpowergroup.kintai.system.application.dto.emp.response.EmployeePositionResponse;
-import com.manpowergroup.kintai.system.application.dto.emp.request.EmployeePositionCreateRequest;
-import com.manpowergroup.kintai.system.application.dto.emp.request.EmployeePositionUpdateRequest;
-import com.manpowergroup.kintai.system.application.service.emp.EmpEmployeePositionService;
+import com.manpowergroup.kintai.employee.application.assembler.emp.EmployeePositionAssembler;
+import com.manpowergroup.kintai.employee.application.dto.emp.response.EmployeePositionResponse;
+import com.manpowergroup.kintai.employee.application.dto.emp.request.EmployeePositionCreateRequest;
+import com.manpowergroup.kintai.employee.application.dto.emp.request.EmployeePositionUpdateRequest;
+import com.manpowergroup.kintai.employee.application.service.emp.EmpEmployeePositionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;

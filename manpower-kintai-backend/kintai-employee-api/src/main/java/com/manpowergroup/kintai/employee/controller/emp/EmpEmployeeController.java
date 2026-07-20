@@ -2,9 +2,9 @@ package com.manpowergroup.kintai.employee.controller.emp;
 
 import com.manpowergroup.kintai.common.result.Result;
 import com.manpowergroup.kintai.framework.security.jwt.LoginPrincipal;
-import com.manpowergroup.kintai.system.application.command.emp.EmployeeUpdateCommand;
-import com.manpowergroup.kintai.system.application.service.emp.EmpEmployeeService;
-import com.manpowergroup.kintai.system.domain.entity.emp.EmpEmployee;
+import com.manpowergroup.kintai.employee.application.command.emp.EmployeeUpdateCommand;
+import com.manpowergroup.kintai.employee.application.service.emp.EmpEmployeeService;
+import com.manpowergroup.kintai.employee.domain.entity.emp.EmpEmployee;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;

@@ -34,6 +34,11 @@
             <artifactId>kintai-module-system</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.manpowergroup.kintai</groupId>
+            <artifactId>kintai-module-employee</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <!-- 勤怠モジュール -->
         <dependency>
             <groupId>com.manpowergroup.kintai</groupId>
