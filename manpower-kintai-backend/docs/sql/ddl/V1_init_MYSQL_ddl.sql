@@ -451,7 +451,7 @@ DROP TABLE IF EXISTS `sys_permission`;
 
 CREATE TABLE `sys_permission` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '権限ID',
-  `menu_id` bigint DEFAULT NULL COMMENT 'メニューID',
+  `menu_id` bigint NOT NULL COMMENT 'メニューID',
   `code` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '権限コード',
   `name` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '権限名称',
   `method` varchar(10) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'HTTPメソッド（GET/POST/PUT/DELETE）',

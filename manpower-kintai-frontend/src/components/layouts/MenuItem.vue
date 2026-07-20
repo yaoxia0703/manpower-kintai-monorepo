@@ -1,10 +1,10 @@
 <template>
-  <RouterLink v-if="to" :to="to" class="menu-item" active-class="active">
+  <RouterLink v-if="to" :to="to" class="menu-item" :class="{ active }" active-class="active">
     <span>{{ label }}</span>
     <span v-if="chevron" class="chevron" aria-hidden="true"></span>
   </RouterLink>
 
-  <button v-else class="menu-item" type="button">
+  <button v-else class="menu-item" :class="{ active }" type="button">
     <span>{{ label }}</span>
     <span v-if="chevron" class="chevron" aria-hidden="true"></span>
   </button>
@@ -17,6 +17,7 @@ defineProps<{
   label: string
   to?: string
   chevron?: boolean
+  active?: boolean
 }>()
 </script>
 

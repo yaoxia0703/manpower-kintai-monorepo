@@ -90,13 +90,41 @@
     </div>
 
     <nav class="menu-bar" aria-label="メインメニュー">
-      <MenuItem
-        v-for="menu in displayMenus"
-        :key="menu.code"
-        :label="menu.name"
-        :to="menu.path || undefined"
-        :chevron="menu.chevron"
-      />
+      <template v-for="menu in displayMenus" :key="menu.code">
+        <el-dropdown
+          v-if="menu.children.length > 0"
+          class="menu-dropdown"
+          trigger="hover"
+          placement="bottom-start"
+          popper-class="header-menu-dropdown"
+          @command="handleMenuCommand"
+        >
+          <MenuItem
+            :label="menu.name"
+            :chevron="true"
+            :active="isMenuActive(menu)"
+          />
+          <template #dropdown>
+            <el-dropdown-menu>
+              <el-dropdown-item
+                v-for="child in menu.children"
+                :key="child.code"
+                :command="child.path"
+                :disabled="!child.path"
+                :class="{ 'is-active': isMenuActive(child) }"
+              >
+                {{ child.name }}
+              </el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
+        <MenuItem
+          v-else
+          :label="menu.name"
+          :to="menu.path || undefined"
+          :active="isMenuActive(menu)"
+        />
+      </template>
     </nav>
   </div>
 </template>
@@ -104,7 +132,7 @@
 <script setup lang="ts">
 import { Bell, Refresh } from '@element-plus/icons-vue'
 import { computed, onMounted, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import {
   fetchUnreadNotificationCount,
   fetchUnreadNotifications,
@@ -115,15 +143,11 @@ import { useAuthStore } from '@/stores/auth'
 import { usePermissionStore } from '@/stores/permissionStore'
 import { useUserStore } from '@/stores/userStore'
 import type { SysNotification } from '@/types/system'
-
-interface HeaderMenu {
-  name: string
-  code: string
-  path?: string | null
-  chevron?: boolean
-}
+import { buildVisibleMenuTree } from '@/utils/currentMenuTree'
+import type { CurrentMenuNode } from '@/utils/currentMenuTree'
 
 const authStore = useAuthStore()
+const route = useRoute()
 const router = useRouter()
 const userStore = useUserStore()
 const permissionStore = usePermissionStore()
@@ -139,17 +163,20 @@ const userInitial = computed(() => {
   return name.trim().charAt(0).toUpperCase()
 })
 
-const displayMenus = computed<HeaderMenu[]>(() => {
-  return permissionStore.menus
-    .filter((menu) => menu.visible !== 0)
-    .sort((a, b) => (a.sort ?? 0) - (b.sort ?? 0))
-    .map((menu) => ({
-      name: menu.name,
-      code: menu.code,
-      path: menu.path,
-      chevron: menu.type === 1,
-    }))
-})
+const displayMenus = computed(() => buildVisibleMenuTree(permissionStore.menus))
+
+function isMenuActive(menu: CurrentMenuNode): boolean {
+  const matchesCurrentPath =
+    Boolean(menu.path) &&
+    (route.path === menu.path || route.path.startsWith(`${menu.path}/`))
+  return matchesCurrentPath || menu.children.some(isMenuActive)
+}
+
+async function handleMenuCommand(path: string | null) {
+  if (path && path !== route.path) {
+    await router.push(path)
+  }
+}
 
 async function handleUserCommand(command: string) {
   if (command === 'logout') {
@@ -380,6 +407,16 @@ onMounted(() => {
   overflow-y: hidden;
   border-top: 1px solid var(--el-border-color-lighter);
   padding: 0 18px 0 68px;
+}
+
+.menu-dropdown {
+  display: inline-flex;
+  align-items: stretch;
+}
+
+:global(.header-menu-dropdown .el-dropdown-menu__item.is-active) {
+  background: var(--app-brand-color-light);
+  color: var(--el-color-primary);
 }
 
 @media (max-width: 860px) {

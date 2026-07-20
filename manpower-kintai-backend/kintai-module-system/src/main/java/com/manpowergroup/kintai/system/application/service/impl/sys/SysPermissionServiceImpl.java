@@ -148,6 +148,7 @@ public class SysPermissionServiceImpl extends ServiceImpl<SysPermissionMapper, S
     @Override
     @Transactional
     public SysPermission create(PermissionCreateCommand command) {
+        ensureMenuExists(command.menuId());
         ensureCodeUnique(command.code(), null);
         SysPermission permission = SysPermission.create(
                 command.menuId(), command.code(), command.name(), command.method(),
@@ -160,6 +161,7 @@ public class SysPermissionServiceImpl extends ServiceImpl<SysPermissionMapper, S
     @Transactional
     public SysPermission update(Long id, PermissionUpdateCommand command) {
         SysPermission existing = requirePermission(id);
+        ensureMenuExists(command.menuId());
         ensureCodeUnique(command.code(), id);
         existing.updateEditableFields(
                 command.menuId(), command.code(), command.name(), command.method(),
@@ -202,10 +204,17 @@ public class SysPermissionServiceImpl extends ServiceImpl<SysPermissionMapper, S
         if (exists) throw new BizException(SystemErrorCode.PERMISSION_CODE_DUPLICATE);
     }
 
+    private void ensureMenuExists(Long menuId) {
+        if (menuId == null || menuMapper.selectById(menuId) == null) {
+            throw new BizException(SystemErrorCode.PERMISSION_MENU_NOT_FOUND);
+        }
+    }
+
     enum SystemErrorCode implements BaseErrorCode {
         PERMISSION_NOT_FOUND(404, "error.permission.not_found"),
         PERMISSION_CODE_DUPLICATE(409, "error.permission.code_duplicate"),
-        PERMISSION_ASSIGNED_TO_ROLE(409, "error.permission.assigned_to_role");
+        PERMISSION_ASSIGNED_TO_ROLE(409, "error.permission.assigned_to_role"),
+        PERMISSION_MENU_NOT_FOUND(400, "error.permission.menu_not_found");
 
         private final int code;
         private final String messageKey;

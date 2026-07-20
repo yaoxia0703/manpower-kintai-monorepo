@@ -115,9 +115,15 @@ class DynamicAuthorizationManagerTest {
     }
 
     @Test
-    void grantsOnlyNotificationSelfServiceAccessWithoutPermissionRule() {
+    void grantsAuthenticatedOnlyAccessWithoutPermissionRule() {
         DynamicAuthorizationManager manager = new DynamicAuthorizationManager(List::of);
 
+        assertTrue(manager.authorize(
+                authenticated("ROLE_EMPLOYEE"),
+                context("GET", "/api/system/auth/me")).isGranted());
+        assertTrue(manager.authorize(
+                authenticated("ROLE_EMPLOYEE"),
+                context("POST", "/api/system/auth/logout")).isGranted());
         assertTrue(manager.authorize(
                 authenticated("ROLE_EMPLOYEE"),
                 context("GET", "/employee/notifications/unread-count")).isGranted());

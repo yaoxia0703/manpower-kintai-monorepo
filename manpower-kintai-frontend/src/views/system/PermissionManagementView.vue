@@ -8,7 +8,7 @@
         </div>
       </template>
 
-      <el-form :model="filters" class="query-form" label-width="90px">
+      <el-form :model="filters" class="query-form" label-width="100px">
         <el-row :gutter="16">
           <el-col :xs="24" :md="8">
             <el-form-item label="キーワード">
@@ -80,11 +80,10 @@
 
     <el-dialog v-model="dialogVisible" :title="editingId ? '権限編集' : '権限新規作成'" width="620px">
       <el-form ref="formRef" :model="form" :rules="rules" label-width="100px">
-        <el-form-item label="所属メニュー">
+        <el-form-item label="所属メニュー" prop="menuId">
           <el-tree-select
             v-model="form.menuId"
             :data="menuTree"
-            clearable
             check-strictly
             node-key="id"
             :props="{ label: 'name', children: 'children' }"
@@ -187,6 +186,7 @@ const form = reactive<PermissionFormState>({
 })
 
 const rules: FormRules<PermissionFormState> = {
+  menuId: [{ required: true, message: '所属メニューを選択してください', trigger: 'change' }],
   name: [{ required: true, message: '名称を入力してください', trigger: 'blur' }],
   code: [{ required: true, message: 'コードを入力してください', trigger: 'blur' }],
   method: [{ required: true, message: 'メソッドを選択してください', trigger: 'change' }],
