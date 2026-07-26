@@ -10,7 +10,7 @@ import com.manpowergroup.kintai.employee.domain.entity.org.OrgGrade;
 import java.util.List;
 
 // 職級マスタサービス（アプリケーション層）
-public interface OrgGradeService extends IService<OrgGrade> {
+public interface OrgGradeService  {
 
     // IDで職級を取得（存在しない場合は例外）
     OrgGrade getById(Long id);

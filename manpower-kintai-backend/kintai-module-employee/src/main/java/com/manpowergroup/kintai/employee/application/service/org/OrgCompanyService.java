@@ -10,7 +10,7 @@ import com.manpowergroup.kintai.employee.domain.entity.org.OrgCompany;
 import java.util.List;
 
 // 会社マスタサービス（アプリケーション層）
-public interface OrgCompanyService extends IService<OrgCompany> {
+public interface OrgCompanyService {
 
     // IDで会社を取得（存在しない場合は例外）
     OrgCompany getById(Long id);

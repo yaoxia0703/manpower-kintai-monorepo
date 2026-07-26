@@ -23,4 +23,8 @@ public interface OrgNodeRepository {
     OrgNode update(OrgNode node);
 
     void deleteById(Long id);
+
+    List<OrgNode> findListByCompany(Long companyId);
+
+    Long selectCountByNodeAndComoany(Long nodeId,Long companyId);
 }

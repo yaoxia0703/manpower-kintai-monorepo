@@ -1,14 +1,13 @@
 package com.manpowergroup.kintai.attendance.application.service.impl.att;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.manpowergroup.kintai.attendance.application.dto.timesheet.response.TimesheetDayResponse;
 import com.manpowergroup.kintai.attendance.application.dto.timesheet.response.TimesheetMonthResponse;
 import com.manpowergroup.kintai.attendance.application.query.timesheet.TimesheetMonthQuery;
 import com.manpowergroup.kintai.attendance.application.service.att.AttTimesheetQueryService;
 import com.manpowergroup.kintai.attendance.domain.entity.att.AttRecord;
 import com.manpowergroup.kintai.attendance.domain.entity.att.AttRequest;
+import com.manpowergroup.kintai.attendance.domain.repository.att.AttRecordRepository;
 import com.manpowergroup.kintai.attendance.domain.service.att.TimesheetEditLockPolicy;
-import com.manpowergroup.kintai.attendance.infrastructure.mapper.att.AttRecordMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -17,17 +16,16 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class AttTimesheetQueryServiceImpl implements AttTimesheetQueryService {
 
     private static final String[] JP_WEEKDAYS = {
-            "\u65e5", "\u6708", "\u706b", "\u6c34", "\u6728", "\u91d1", "\u571f"
+        "\u65e5", "\u6708", "\u706b", "\u6c34", "\u6728", "\u91d1", "\u571f"
     };
 
-    private final AttRecordMapper recordMapper;
+    private final AttRecordRepository attRecordRepository;
     private final TimesheetEditLockPolicy editLockPolicy;
 
     @Override
@@ -35,14 +33,9 @@ public class AttTimesheetQueryServiceImpl implements AttTimesheetQueryService {
         LocalDate start = LocalDate.of(query.year(), query.month(), 1);
         LocalDate end = start.withDayOfMonth(start.lengthOfMonth());
 
-        Map<LocalDate, AttRecord> recordMap = recordMapper.selectList(
-                new LambdaQueryWrapper<AttRecord>()
-                        .eq(AttRecord::getEmployeeId, query.employeeId())
-                        .eq(AttRecord::getCompanyId, query.companyId())
-                        .between(AttRecord::getWorkDate, start, end)
-        ).stream().collect(Collectors.toMap(AttRecord::getWorkDate, record -> record));
+        Map<LocalDate, AttRecord> recordMap = attRecordRepository.findAttRecordMap(query.employeeId(), query.companyId(), start, end);
         Map<LocalDate, AttRequest> lockMap = editLockPolicy.findLocks(
-                query.employeeId(), query.companyId(), start, end);
+            query.employeeId(), query.companyId(), start, end);
 
         List<TimesheetDayResponse> days = new ArrayList<>();
         LocalDate cursor = start;
@@ -52,7 +45,7 @@ public class AttTimesheetQueryServiceImpl implements AttTimesheetQueryService {
 
         while (!cursor.isAfter(end)) {
             TimesheetDayResponse day = buildDayResponse(
-                    cursor, recordMap.get(cursor), lockMap.get(cursor));
+                cursor, recordMap.get(cursor), lockMap.get(cursor));
             days.add(day);
 
             if (day.getWorkMinutes() != null && day.getWorkMinutes() > 0) {
@@ -65,29 +58,29 @@ public class AttTimesheetQueryServiceImpl implements AttTimesheetQueryService {
         }
 
         return new TimesheetMonthResponse()
-                .setYear(query.year())
-                .setMonth(query.month())
-                .setDays(days)
-                .setWorkDays(workDays)
-                .setTotalWorkMinutes(totalWork)
-                .setTotalOvertimeMinutes(totalOvertime);
+            .setYear(query.year())
+            .setMonth(query.month())
+            .setDays(days)
+            .setWorkDays(workDays)
+            .setTotalWorkMinutes(totalWork)
+            .setTotalOvertimeMinutes(totalOvertime);
     }
 
     private TimesheetDayResponse buildDayResponse(
-            LocalDate date, AttRecord record, AttRequest lockingRequest) {
+        LocalDate date, AttRecord record, AttRequest lockingRequest) {
         DayOfWeek dayOfWeek = date.getDayOfWeek();
         boolean weekend = dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY;
 
         TimesheetDayResponse dto = new TimesheetDayResponse()
-                .setWorkDate(date)
-                .setDayOfWeek(JP_WEEKDAYS[dayOfWeek.getValue() % 7])
-                .setWeekend(weekend)
-                .setHoliday(false)
-                .setRequestLocked(lockingRequest != null);
+            .setWorkDate(date)
+            .setDayOfWeek(JP_WEEKDAYS[dayOfWeek.getValue() % 7])
+            .setWeekend(weekend)
+            .setHoliday(false)
+            .setRequestLocked(lockingRequest != null);
 
         if (lockingRequest != null) {
             dto.setLockingRequestType(lockingRequest.getRequestType())
-                    .setLockingRequestStatus(lockingRequest.getStatus());
+                .setLockingRequestStatus(lockingRequest.getStatus());
         }
 
         if (record == null) {
@@ -95,14 +88,14 @@ public class AttTimesheetQueryServiceImpl implements AttTimesheetQueryService {
         }
 
         dto.setRecordId(record.getId())
-                .setAttendanceType(record.getAttendanceType())
-                .setClockIn(record.getClockIn())
-                .setClockOut(record.getClockOut())
-                .setWorkMinutes(record.getWorkMinutes())
-                .setOvertimeMinutes(record.getOvertimeMinutes())
-                .setRemark(record.getRemark())
-                .setStatus(record.getStatus())
-                .setBreakMinutes(record.calculateBreakMinutes());
+            .setAttendanceType(record.getAttendanceType())
+            .setClockIn(record.getClockIn())
+            .setClockOut(record.getClockOut())
+            .setWorkMinutes(record.getWorkMinutes())
+            .setOvertimeMinutes(record.getOvertimeMinutes())
+            .setRemark(record.getRemark())
+            .setStatus(record.getStatus())
+            .setBreakMinutes(record.calculateBreakMinutes());
 
         return dto;
     }

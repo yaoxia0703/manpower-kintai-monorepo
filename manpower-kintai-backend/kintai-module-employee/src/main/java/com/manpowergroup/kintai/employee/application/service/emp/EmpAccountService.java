@@ -4,8 +4,9 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.manpowergroup.kintai.employee.application.command.emp.AccountCreateCommand;
 import com.manpowergroup.kintai.employee.application.command.emp.AccountUpdateCommand;
 import com.manpowergroup.kintai.employee.domain.entity.emp.EmpAccount;
+import org.springframework.transaction.annotation.Transactional;
 
-public interface EmpAccountService extends IService<EmpAccount> {
+public interface EmpAccountService {
 
     EmpAccount getById(Long id);
 

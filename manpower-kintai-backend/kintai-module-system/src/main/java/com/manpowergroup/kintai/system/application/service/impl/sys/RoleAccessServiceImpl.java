@@ -1,13 +1,10 @@
 package com.manpowergroup.kintai.system.application.service.impl.sys;
 
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.manpowergroup.kintai.common.enums.Status;
 import com.manpowergroup.kintai.system.application.dto.sys.response.RoleSummary;
 import com.manpowergroup.kintai.system.application.service.sys.RoleAccessService;
 import com.manpowergroup.kintai.system.domain.entity.sys.SysEmployeeRole;
-import com.manpowergroup.kintai.system.domain.entity.sys.SysRole;
-import com.manpowergroup.kintai.system.infrastructure.mapper.sys.SysEmployeeRoleMapper;
-import com.manpowergroup.kintai.system.infrastructure.mapper.sys.SysRoleMapper;
+import com.manpowergroup.kintai.system.domain.repository.sys.SysEmployeeRoleRepository;
+import com.manpowergroup.kintai.system.domain.repository.sys.SysRoleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -20,18 +17,15 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class RoleAccessServiceImpl implements RoleAccessService {
 
-    private final SysEmployeeRoleMapper employeeRoleMapper;
-    private final SysRoleMapper roleMapper;
+    private final SysEmployeeRoleRepository sysEmployeeRoleRepository;
+    private final SysRoleRepository sysRoleRepository;
 
     @Override
     public List<RoleSummary> listEnabledByCompany(Long companyId) {
-        return roleMapper.selectList(Wrappers.<SysRole>lambdaQuery()
-                        .eq(SysRole::getCompanyId, companyId)
-                        .eq(SysRole::getStatus, Status.ENABLED)
-                        .orderByAsc(SysRole::getSort))
-                .stream()
-                .map(role -> new RoleSummary(role.getId(), role.getCode(), role.getName()))
-                .toList();
+        return sysRoleRepository.findByCompanyId(companyId)
+            .stream()
+            .map(role -> new RoleSummary(role.getId(), role.getCode(), role.getName()))
+            .toList();
     }
 
     @Override
@@ -43,29 +37,22 @@ public class RoleAccessServiceImpl implements RoleAccessService {
         if (distinctRoleIds != roleIds.size()) {
             return false;
         }
-        Long validRoleCount = roleMapper.selectCount(Wrappers.<SysRole>lambdaQuery()
-                .in(SysRole::getId, roleIds)
-                .eq(SysRole::getCompanyId, companyId)
-                .eq(SysRole::getStatus, Status.ENABLED));
+        Long validRoleCount = sysRoleRepository.selectCountBYCompanyIdAndRoleIds(companyId, roleIds);
         return validRoleCount == distinctRoleIds;
     }
 
     @Override
     public boolean employeeHasActiveRole(Long employeeId, String roleCode, LocalDate effectiveDate) {
-        List<Long> roleIds = employeeRoleMapper.selectList(Wrappers.<SysEmployeeRole>lambdaQuery()
-                        .eq(SysEmployeeRole::getEmployeeId, employeeId))
-                .stream()
-                .filter(assignment -> assignment.isEffectiveOn(effectiveDate))
-                .map(SysEmployeeRole::getRoleId)
-                .filter(Objects::nonNull)
-                .distinct()
-                .toList();
+        List<Long> roleIds = sysEmployeeRoleRepository.listByEmployee(employeeId)
+            .stream()
+            .filter(assignment -> assignment.isEffectiveOn(effectiveDate))
+            .map(SysEmployeeRole::getRoleId)
+            .filter(Objects::nonNull)
+            .distinct()
+            .toList();
         if (roleIds.isEmpty()) {
             return false;
         }
-        return roleMapper.selectCount(Wrappers.<SysRole>lambdaQuery()
-                .in(SysRole::getId, roleIds)
-                .eq(SysRole::getCode, roleCode)
-                .eq(SysRole::getStatus, Status.ENABLED)) > 0;
+        return sysRoleRepository.existsEnabledByIdsAndCode(roleIds, roleCode);
     }
 }

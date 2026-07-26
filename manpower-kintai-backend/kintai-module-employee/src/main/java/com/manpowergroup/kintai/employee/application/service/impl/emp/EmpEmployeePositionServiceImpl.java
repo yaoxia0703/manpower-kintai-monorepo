@@ -1,13 +1,12 @@
 package com.manpowergroup.kintai.employee.application.service.impl.emp;
 
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.manpowergroup.kintai.common.exception.BaseErrorCode;
 import com.manpowergroup.kintai.common.exception.BizException;
 import com.manpowergroup.kintai.employee.application.command.emp.EmployeePositionCreateCommand;
 import com.manpowergroup.kintai.employee.application.command.emp.EmployeePositionUpdateCommand;
 import com.manpowergroup.kintai.employee.application.service.emp.EmpEmployeePositionService;
 import com.manpowergroup.kintai.employee.domain.entity.emp.EmpEmployeePosition;
-import com.manpowergroup.kintai.employee.infrastructure.mapper.emp.EmpEmployeePositionMapper;
+import com.manpowergroup.kintai.employee.domain.repository.emp.EmpEmployeePositionRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,8 +15,13 @@ import java.util.List;
 
 // 社員職位サービス実装（アプリケーション層）
 @Service
-public class EmpEmployeePositionServiceImpl extends ServiceImpl<EmpEmployeePositionMapper, EmpEmployeePosition>
-        implements EmpEmployeePositionService {
+public class EmpEmployeePositionServiceImpl implements EmpEmployeePositionService {
+
+    private final EmpEmployeePositionRepository empEmployeePositionRepository;
+
+    public EmpEmployeePositionServiceImpl(EmpEmployeePositionRepository empEmployeePositionRepository) {
+        this.empEmployeePositionRepository = empEmployeePositionRepository;
+    }
 
     @Override
     public EmpEmployeePosition getById(Long id) {
@@ -25,38 +29,24 @@ public class EmpEmployeePositionServiceImpl extends ServiceImpl<EmpEmployeePosit
     }
 
     private EmpEmployeePosition requirePosition(Long id) {
-        EmpEmployeePosition pos = super.getById(id);
+        EmpEmployeePosition pos = empEmployeePositionRepository.getById(id);
         if (pos == null) throw new BizException(SystemErrorCode.POSITION_NOT_FOUND);
         return pos;
     }
 
     @Override
     public List<EmpEmployeePosition> listActiveByEmployee(Long employeeId) {
-        return lambdaQuery()
-                .eq(EmpEmployeePosition::getEmployeeId, employeeId)
-                .le(EmpEmployeePosition::getStartDate, LocalDate.now())
-                .and(w -> w.isNull(EmpEmployeePosition::getEndDate)
-                        .or().ge(EmpEmployeePosition::getEndDate, LocalDate.now()))
-                .list();
+        return empEmployeePositionRepository.getByEmployeeIdAndStartDateAndEndDate(employeeId);
     }
 
     @Override
     public List<EmpEmployeePosition> listAllByEmployee(Long employeeId) {
-        return lambdaQuery()
-                .eq(EmpEmployeePosition::getEmployeeId, employeeId)
-                .orderByDesc(EmpEmployeePosition::getStartDate)
-                .list();
+        return empEmployeePositionRepository.getByEmployeeId(employeeId);
     }
 
     @Override
     public EmpEmployeePosition getPrimaryByEmployee(Long employeeId) {
-        EmpEmployeePosition pos = lambdaQuery()
-                .eq(EmpEmployeePosition::getEmployeeId, employeeId)
-                .eq(EmpEmployeePosition::getIsPrimary, 1)
-                .le(EmpEmployeePosition::getStartDate, LocalDate.now())
-                .and(w -> w.isNull(EmpEmployeePosition::getEndDate)
-                        .or().ge(EmpEmployeePosition::getEndDate, LocalDate.now()))
-                .one();
+        EmpEmployeePosition pos = empEmployeePositionRepository.getPrimaryByEmployee(employeeId);
         if (pos == null) throw new BizException(SystemErrorCode.POSITION_NOT_FOUND);
         return pos;
     }
@@ -65,15 +55,15 @@ public class EmpEmployeePositionServiceImpl extends ServiceImpl<EmpEmployeePosit
     @Transactional
     public EmpEmployeePosition create(EmployeePositionCreateCommand command) {
         EmpEmployeePosition position = EmpEmployeePosition.assign(
-                command.employeeId(),
-                command.companyId(),
-                command.nodeId(),
-                command.gradeId(),
-                command.isPrimary(),
-                command.startDate(),
-                command.endDate(),
-                command.status());
-        save(position);
+            command.employeeId(),
+            command.companyId(),
+            command.nodeId(),
+            command.gradeId(),
+            command.isPrimary(),
+            command.startDate(),
+            command.endDate(),
+            command.status());
+        empEmployeePositionRepository.save(position);
         return position;
     }
 
@@ -82,12 +72,12 @@ public class EmpEmployeePositionServiceImpl extends ServiceImpl<EmpEmployeePosit
     public EmpEmployeePosition update(Long id, EmployeePositionUpdateCommand command) {
         EmpEmployeePosition existing = requirePosition(id);
         existing.updateAssignment(
-                command.nodeId(),
-                command.gradeId(),
-                command.isPrimary(),
-                command.startDate(),
-                command.endDate());
-        updateById(existing);
+            command.nodeId(),
+            command.gradeId(),
+            command.isPrimary(),
+            command.startDate(),
+            command.endDate());
+        empEmployeePositionRepository.updateById(existing);
         return existing;
     }
 
@@ -97,14 +87,14 @@ public class EmpEmployeePositionServiceImpl extends ServiceImpl<EmpEmployeePosit
         EmpEmployeePosition position = requirePosition(id);
         // 離任日を本日に設定して終了
         position.terminate(LocalDate.now());
-        updateById(position);
+        empEmployeePositionRepository.updateById(position);
     }
 
     @Override
     @Transactional
     public void remove(Long id) {
         requirePosition(id);
-        removeById(id);
+        empEmployeePositionRepository.deleteById(id);
     }
 
     enum SystemErrorCode implements BaseErrorCode {
@@ -118,8 +108,15 @@ public class EmpEmployeePositionServiceImpl extends ServiceImpl<EmpEmployeePosit
             this.messageKey = messageKey;
         }
 
-        @Override public int code() { return code; }
-        @Override public String messageKey() { return messageKey; }
+        @Override
+        public int code() {
+            return code;
+        }
+
+        @Override
+        public String messageKey() {
+            return messageKey;
+        }
     }
 }
 

@@ -10,7 +10,7 @@ import com.manpowergroup.kintai.system.domain.entity.sys.SysEnumType;
 import java.util.List;
 
 // 列挙型マスタサービス（アプリケーション層）
-public interface SysEnumTypeService extends IService<SysEnumType> {
+public interface SysEnumTypeService{
 
     // IDで列挙型を取得（存在しない場合は例外）
     SysEnumType getById(Long id);

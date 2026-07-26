@@ -1,6 +1,5 @@
 package com.manpowergroup.kintai.employee.application.service.impl.hr;
 
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.manpowergroup.kintai.common.enums.Status;
 import com.manpowergroup.kintai.common.exception.BizException;
 import com.manpowergroup.kintai.common.exception.ErrorCode;
@@ -12,6 +11,10 @@ import com.manpowergroup.kintai.employee.application.service.emp.EmpAccountServi
 import com.manpowergroup.kintai.employee.application.service.emp.EmpEmployeePositionService;
 import com.manpowergroup.kintai.employee.application.service.emp.EmpEmployeeService;
 import com.manpowergroup.kintai.employee.application.service.hr.EmployeeOnboardingService;
+import com.manpowergroup.kintai.employee.domain.repository.emp.EmpEmployeeRepository;
+import com.manpowergroup.kintai.employee.domain.repository.org.OrgCompanyRepository;
+import com.manpowergroup.kintai.employee.domain.repository.org.OrgGradeRepository;
+import com.manpowergroup.kintai.employee.domain.repository.org.OrgNodeRepository;
 import com.manpowergroup.kintai.system.application.service.sys.EmployeeRoleAssignmentService;
 import com.manpowergroup.kintai.system.application.service.sys.RoleAccessService;
 import com.manpowergroup.kintai.employee.domain.entity.emp.EmpAccount;
@@ -20,10 +23,6 @@ import com.manpowergroup.kintai.employee.domain.entity.emp.EmpEmployeePosition;
 import com.manpowergroup.kintai.employee.domain.entity.org.OrgCompany;
 import com.manpowergroup.kintai.employee.domain.entity.org.OrgGrade;
 import com.manpowergroup.kintai.employee.domain.entity.org.OrgNode;
-import com.manpowergroup.kintai.employee.infrastructure.mapper.emp.EmpEmployeeMapper;
-import com.manpowergroup.kintai.employee.infrastructure.mapper.org.OrgCompanyMapper;
-import com.manpowergroup.kintai.employee.infrastructure.mapper.org.OrgGradeMapper;
-import com.manpowergroup.kintai.employee.infrastructure.mapper.org.OrgNodeMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,10 +42,10 @@ public class EmployeeOnboardingServiceImpl implements EmployeeOnboardingService 
     private final EmpEmployeePositionService positionService;
     private final EmployeeRoleAssignmentService employeeRoleAssignmentService;
     private final RoleAccessService roleAccessService;
-    private final EmpEmployeeMapper employeeMapper;
-    private final OrgCompanyMapper companyMapper;
-    private final OrgNodeMapper nodeMapper;
-    private final OrgGradeMapper gradeMapper;
+    private final EmpEmployeeRepository empEmployeeRepository;
+    private final OrgCompanyRepository orgCompanyRepository;
+    private final OrgNodeRepository orgNodeRepository;
+    private final OrgGradeRepository orgGradeRepository;
 
     @Override
     public EmployeeOnboardingOptionsResponse options(Long operatorEmployeeId, Long companyId) {
@@ -54,34 +53,25 @@ public class EmployeeOnboardingServiceImpl implements EmployeeOnboardingService 
         boolean superAdmin = isSuperAdmin(operatorEmployeeId);
         Long targetCompanyId = resolveTargetCompanyId(operator, companyId, superAdmin);
 
-        List<OrgCompany> companies = companyMapper.selectList(Wrappers.<OrgCompany>lambdaQuery()
-                .eq(OrgCompany::getStatus, Status.ENABLED)
-                .orderByAsc(OrgCompany::getLevel)
-                .orderByAsc(OrgCompany::getSort));
+        List<OrgCompany> companies = orgCompanyRepository.findList();
         if (!superAdmin) {
             companies = companies.stream()
-                    .filter(company -> Objects.equals(company.getId(), operator.getCompanyId()))
-                    .toList();
+                .filter(company -> Objects.equals(company.getId(), operator.getCompanyId()))
+                .toList();
         }
 
-        List<OrgNode> nodes = nodeMapper.selectList(Wrappers.<OrgNode>lambdaQuery()
-                .eq(OrgNode::getCompanyId, targetCompanyId)
-                .eq(OrgNode::getStatus, Status.ENABLED)
-                .orderByAsc(OrgNode::getLevel)
-                .orderByAsc(OrgNode::getSort));
-        List<OrgGrade> grades = gradeMapper.selectList(Wrappers.<OrgGrade>lambdaQuery()
-                .eq(OrgGrade::getCompanyId, targetCompanyId)
-                .eq(OrgGrade::getStatus, Status.ENABLED)
-                .orderByAsc(OrgGrade::getSort));
+        List<OrgNode> nodes = orgNodeRepository.findListByCompany(targetCompanyId);
+        List<OrgGrade> grades = orgGradeRepository.findListByCompany(targetCompanyId);
+
         return EmployeeOnboardingOptionsResponse.builder()
-                .selectedCompanyId(targetCompanyId)
-                .companies(companies.stream().map(EmployeeOnboardingOptionsResponse.CompanyOption::from).toList())
-                .nodes(nodes.stream().map(EmployeeOnboardingOptionsResponse.NodeOption::from).toList())
-                .grades(grades.stream().map(EmployeeOnboardingOptionsResponse.GradeOption::from).toList())
-                .roles(roleAccessService.listEnabledByCompany(targetCompanyId).stream()
-                        .map(EmployeeOnboardingOptionsResponse.RoleOption::from)
-                        .toList())
-                .build();
+            .selectedCompanyId(targetCompanyId)
+            .companies(companies.stream().map(EmployeeOnboardingOptionsResponse.CompanyOption::from).toList())
+            .nodes(nodes.stream().map(EmployeeOnboardingOptionsResponse.NodeOption::from).toList())
+            .grades(grades.stream().map(EmployeeOnboardingOptionsResponse.GradeOption::from).toList())
+            .roles(roleAccessService.listEnabledByCompany(targetCompanyId).stream()
+                .map(EmployeeOnboardingOptionsResponse.RoleOption::from)
+                .toList())
+            .build();
     }
 
     @Override
@@ -97,29 +87,29 @@ public class EmployeeOnboardingServiceImpl implements EmployeeOnboardingService 
         }
 
         EmpEmployee employee = employeeService.create(
-                EmployeeOnboardingAssembler.toEmployee(request, operatorEmployeeId));
+            EmployeeOnboardingAssembler.toEmployee(request, operatorEmployeeId));
 
         EmpAccount account = accountService.create(
-                EmployeeOnboardingAssembler.toAccount(request, employee.getId(), operatorEmployeeId));
+            EmployeeOnboardingAssembler.toAccount(request, employee.getId(), operatorEmployeeId));
 
         EmpEmployeePosition position = positionService.create(
-                EmployeeOnboardingAssembler.toPosition(request, employee.getId(), operatorEmployeeId));
+            EmployeeOnboardingAssembler.toPosition(request, employee.getId(), operatorEmployeeId));
 
         EmployeeOnboardingAssembler.toEmployeeRoles(request, employee.getId(), operatorEmployeeId)
-                .forEach(employeeRoleAssignmentService::assign);
+            .forEach(employeeRoleAssignmentService::assign);
 
         return EmployeeOnboardingResponse.builder()
-                .employeeId(employee.getId())
-                .accountId(account.getId())
-                .positionId(position.getId())
-                .employeeCode(employee.getEmployeeCode())
-                .displayName(employee.getLastName() + " " + employee.getFirstName())
-                .email(employee.getEmail())
-                .build();
+            .employeeId(employee.getId())
+            .accountId(account.getId())
+            .positionId(position.getId())
+            .employeeCode(employee.getEmployeeCode())
+            .displayName(employee.getLastName() + " " + employee.getFirstName())
+            .email(employee.getEmail())
+            .build();
     }
 
     private EmpEmployee getOperator(Long operatorEmployeeId) {
-        EmpEmployee operator = employeeMapper.selectById(operatorEmployeeId);
+        EmpEmployee operator = empEmployeeRepository.getById(operatorEmployeeId);
         if (operator == null || operator.getStatus() != Status.ENABLED) {
             throw new BizException(ErrorCode.UNAUTHORIZED);
         }
@@ -144,27 +134,19 @@ public class EmployeeOnboardingServiceImpl implements EmployeeOnboardingService 
             throw BizException.withDetail(ErrorCode.FORBIDDEN, "HR can only onboard employees in own company");
         }
 
-        Long companyCount = companyMapper.selectCount(Wrappers.<OrgCompany>lambdaQuery()
-                .eq(OrgCompany::getId, targetCompanyId)
-                .eq(OrgCompany::getStatus, Status.ENABLED));
+        Long companyCount = orgCompanyRepository.selectCount(targetCompanyId);
         if (companyCount != 1) {
             throw BizException.withDetail(ErrorCode.VALIDATION_ERROR, "companyId is invalid");
         }
     }
 
     private void validateOnboardingReferences(EmployeeOnboardingRequest request) {
-        Long nodeCount = nodeMapper.selectCount(Wrappers.<OrgNode>lambdaQuery()
-                .eq(OrgNode::getId, request.getNodeId())
-                .eq(OrgNode::getCompanyId, request.getCompanyId())
-                .eq(OrgNode::getStatus, Status.ENABLED));
+        Long nodeCount = orgNodeRepository.selectCountByNodeAndComoany(request.getNodeId(), request.getCompanyId());
         if (nodeCount != 1) {
             throw BizException.withDetail(ErrorCode.VALIDATION_ERROR, "nodeId is invalid for company");
         }
 
-        Long gradeCount = gradeMapper.selectCount(Wrappers.<OrgGrade>lambdaQuery()
-                .eq(OrgGrade::getId, request.getGradeId())
-                .eq(OrgGrade::getCompanyId, request.getCompanyId())
-                .eq(OrgGrade::getStatus, Status.ENABLED));
+        Long gradeCount = orgGradeRepository.selectCountByCompanyAndGrade(request.getCompanyId(), request.getGradeId());
         if (gradeCount != 1) {
             throw BizException.withDetail(ErrorCode.VALIDATION_ERROR, "gradeId is invalid for company");
         }

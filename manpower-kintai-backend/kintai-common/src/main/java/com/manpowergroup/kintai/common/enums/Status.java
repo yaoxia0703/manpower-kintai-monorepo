@@ -30,9 +30,8 @@ public enum Status {
 
     @JsonCreator
     public static Status fromJson(int code) {
-        final byte b = (byte) code;
         return Arrays.stream(values())
-                .filter(v -> v.code == b)
+                .filter(v -> v.code == code)
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("無効な状態: " + code));
     }

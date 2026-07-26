@@ -5,7 +5,7 @@ import com.manpowergroup.kintai.system.domain.entity.sys.SysEmployeeRole;
 
 import java.util.List;
 
-public interface SysEmployeeRoleService extends IService<SysEmployeeRole> {
+public interface SysEmployeeRoleService  {
 
     SysEmployeeRole getById(Long id);
 

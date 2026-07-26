@@ -33,11 +33,12 @@ public class AccessContextServiceImpl implements AccessContextService {
     private static final String SUPER_ADMIN_ROLE = "SUPER_ADMIN";
 
     private final EmployeeIdentityProvider employeeIdentityProvider;
+    private final SysMenuService menuService;
     private final SysEmployeeRoleMapper employeeRoleMapper;
     private final SysRoleMapper roleMapper;
     private final SysRolePermissionMapper rolePermissionMapper;
     private final SysPermissionMapper permissionMapper;
-    private final SysMenuService menuService;
+
 
     @Override
     public AccessContext load(Long employeeId, Long accountId) {

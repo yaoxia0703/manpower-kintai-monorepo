@@ -7,7 +7,7 @@ import com.manpowergroup.kintai.employee.domain.entity.emp.EmpEmployeePosition;
 
 import java.util.List;
 
-public interface EmpEmployeePositionService extends IService<EmpEmployeePosition> {
+public interface EmpEmployeePositionService  {
 
     EmpEmployeePosition getById(Long id);
 

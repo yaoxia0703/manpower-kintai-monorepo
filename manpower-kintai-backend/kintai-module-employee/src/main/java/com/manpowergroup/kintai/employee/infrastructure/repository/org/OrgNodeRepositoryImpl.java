@@ -28,15 +28,15 @@ public class OrgNodeRepositoryImpl implements OrgNodeRepository {
     @Override
     public boolean existsByCompanyAndCode(Long companyId, String code) {
         return mapper.selectCount(Wrappers.<OrgNode>lambdaQuery()
-                .eq(OrgNode::getCompanyId, companyId)
-                .eq(OrgNode::getCode, code)) > 0;
+            .eq(OrgNode::getCompanyId, companyId)
+            .eq(OrgNode::getCode, code)) > 0;
     }
 
     @Override
     public boolean existsByCompanyAndCodeExcludingId(Long companyId, String code, Long excludeId) {
         LambdaQueryWrapper<OrgNode> wrapper = Wrappers.<OrgNode>lambdaQuery()
-                .eq(OrgNode::getCompanyId, companyId)
-                .eq(OrgNode::getCode, code);
+            .eq(OrgNode::getCompanyId, companyId)
+            .eq(OrgNode::getCode, code);
         if (excludeId != null) {
             wrapper.ne(OrgNode::getId, excludeId);
         }
@@ -47,17 +47,17 @@ public class OrgNodeRepositoryImpl implements OrgNodeRepository {
     public PageResult<OrgNode> findPageByCompany(Long companyId, int page, int size) {
         Page<OrgNode> p = new Page<>(page, size);
         mapper.selectPage(p, Wrappers.<OrgNode>lambdaQuery()
-                .eq(OrgNode::getCompanyId, companyId)
-                .orderByAsc(OrgNode::getSort));
+            .eq(OrgNode::getCompanyId, companyId)
+            .orderByAsc(OrgNode::getSort));
         return PageResult.of(p);
     }
 
     @Override
     public List<OrgNode> listEnabledByCompany(Long companyId) {
         return mapper.selectList(Wrappers.<OrgNode>lambdaQuery()
-                .eq(OrgNode::getCompanyId, companyId)
-                .eq(OrgNode::getStatus, Status.ENABLED)
-                .orderByAsc(OrgNode::getSort));
+            .eq(OrgNode::getCompanyId, companyId)
+            .eq(OrgNode::getStatus, Status.ENABLED)
+            .orderByAsc(OrgNode::getSort));
     }
 
     @Override
@@ -75,5 +75,22 @@ public class OrgNodeRepositoryImpl implements OrgNodeRepository {
     @Override
     public void deleteById(Long id) {
         mapper.deleteById(id);
+    }
+
+    @Override
+    public List<OrgNode> findListByCompany(Long companyId) {
+        return mapper.selectList(new LambdaQueryWrapper<OrgNode>()
+            .eq(OrgNode::getCompanyId, companyId)
+            .eq(OrgNode::getStatus, Status.ENABLED)
+            .orderByAsc(OrgNode::getLevel)
+            .orderByAsc(OrgNode::getSort));
+    }
+
+    @Override
+    public Long selectCountByNodeAndComoany(Long nodeId, Long companyId) {
+        return mapper.selectCount(new LambdaQueryWrapper<OrgNode>()
+            .eq(OrgNode::getCompanyId, companyId)
+            .eq(OrgNode::getStatus, Status.ENABLED)
+            .eq(OrgNode::getId, nodeId));
     }
 }

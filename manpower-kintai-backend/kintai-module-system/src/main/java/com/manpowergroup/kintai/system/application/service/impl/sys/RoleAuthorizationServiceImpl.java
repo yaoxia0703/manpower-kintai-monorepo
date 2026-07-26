@@ -14,6 +14,10 @@ import com.manpowergroup.kintai.system.domain.entity.sys.SysPermission;
 import com.manpowergroup.kintai.system.domain.entity.sys.SysRoleMenu;
 import com.manpowergroup.kintai.system.domain.entity.sys.SysRolePermission;
 import com.manpowergroup.kintai.system.domain.model.sys.RoleAuthorization;
+import com.manpowergroup.kintai.system.domain.repository.sys.SysMenuRepository;
+import com.manpowergroup.kintai.system.domain.repository.sys.SysPermissionRepository;
+import com.manpowergroup.kintai.system.domain.repository.sys.SysRoleMenuRepository;
+import com.manpowergroup.kintai.system.domain.repository.sys.SysRolePermissionRepository;
 import com.manpowergroup.kintai.system.domain.service.sys.RoleAuthorizationDomainService;
 import com.manpowergroup.kintai.system.infrastructure.mapper.sys.SysMenuMapper;
 import com.manpowergroup.kintai.system.infrastructure.mapper.sys.SysPermissionMapper;
@@ -31,43 +35,44 @@ import java.util.Objects;
 public class RoleAuthorizationServiceImpl implements RoleAuthorizationService {
 
     private final SysRoleService roleService;
-    private final SysRoleMenuMapper roleMenuMapper;
-    private final SysRolePermissionMapper rolePermissionMapper;
-    private final SysMenuMapper menuMapper;
-    private final SysPermissionMapper permissionMapper;
     private final RoleAuthorizationDomainService authorizationDomainService;
+    private final SysRoleMenuRepository sysRoleMenuRepository;
+    private final SysRolePermissionRepository sysRolePermissionRepository;
+    private final SysMenuRepository sysMenuRepository;
+    private final SysPermissionRepository sysPermissionRepository;
+//    private final SysRoleMenuMapper roleMenuMapper;
+//    private final SysRolePermissionMapper rolePermissionMapper;
+//    private final SysMenuMapper menuMapper;
+//    private final SysPermissionMapper permissionMapper;
+
 
     @Override
     public RoleAuthorizationResponse getAuthorization(Long roleId) {
         roleService.getById(roleId);
-        List<Long> selectedMenuIds = roleMenuMapper.selectList(Wrappers.<SysRoleMenu>lambdaQuery()
-                        .eq(SysRoleMenu::getRoleId, roleId))
-                .stream()
-                .map(SysRoleMenu::getMenuId)
-                .filter(Objects::nonNull)
-                .distinct()
-                .toList();
-        List<Long> selectedPermissionIds = rolePermissionMapper.selectList(Wrappers.<SysRolePermission>lambdaQuery()
-                        .eq(SysRolePermission::getRoleId, roleId))
-                .stream()
-                .map(SysRolePermission::getPermissionId)
-                .filter(Objects::nonNull)
-                .distinct()
-                .toList();
-        List<MenuResponse> menus = menuMapper.selectList(Wrappers.<SysMenu>lambdaQuery()
-                        .orderByAsc(SysMenu::getSort))
-                .stream()
-                .map(MenuResponse::from)
-                .toList();
-        List<SysPermission> permissions = permissionMapper.selectList(Wrappers.<SysPermission>lambdaQuery()
-                .orderByAsc(SysPermission::getSort));
+        List<Long> selectedMenuIds = sysRoleMenuRepository.findByRoleId(roleId)
+            .stream()
+            .map(SysRoleMenu::getMenuId)
+            .filter(Objects::nonNull)
+            .distinct()
+            .toList();
+        List<Long> selectedPermissionIds = sysRolePermissionRepository.findByRoleId(roleId)
+            .stream()
+            .map(SysRolePermission::getPermissionId)
+            .filter(Objects::nonNull)
+            .distinct()
+            .toList();
+        List<MenuResponse> menus = sysMenuRepository.findAll()
+            .stream()
+            .map(MenuResponse::from)
+            .toList();
+        List<SysPermission> permissions = sysPermissionRepository.findAll();
 
         return RoleAuthorizationResponse.builder()
-                .menus(menus)
-                .permissions(permissions.stream().map(PermissionAssembler::toResponse).toList())
-                .selectedMenuIds(selectedMenuIds)
-                .selectedPermissionIds(selectedPermissionIds)
-                .build();
+            .menus(menus)
+            .permissions(permissions.stream().map(PermissionAssembler::toResponse).toList())
+            .selectedMenuIds(selectedMenuIds)
+            .selectedPermissionIds(selectedPermissionIds)
+            .build();
     }
 
     @Override
@@ -75,9 +80,9 @@ public class RoleAuthorizationServiceImpl implements RoleAuthorizationService {
     public void assignMenus(RoleMenuAssignCommand command) {
         roleService.getById(command.roleId());
         RoleAuthorization authorization = authorizationDomainService.replaceAuthorization(
-                command.roleId(),
-                command.menuIds(),
-                List.of());
+            command.roleId(),
+            command.menuIds(),
+            List.of());
         replaceMenus(authorization);
     }
 
@@ -86,9 +91,9 @@ public class RoleAuthorizationServiceImpl implements RoleAuthorizationService {
     public void assignPermissions(RolePermissionAssignCommand command) {
         roleService.getById(command.roleId());
         RoleAuthorization authorization = authorizationDomainService.replaceAuthorization(
-                command.roleId(),
-                List.of(),
-                command.permissionIds());
+            command.roleId(),
+            List.of(),
+            command.permissionIds());
         replacePermissions(authorization);
     }
 
@@ -97,20 +102,20 @@ public class RoleAuthorizationServiceImpl implements RoleAuthorizationService {
     public void saveAuthorization(RoleAuthorizationSaveCommand command) {
         roleService.getById(command.roleId());
         RoleAuthorization authorization = authorizationDomainService.replaceAuthorization(
-                command.roleId(),
-                command.menuIds(),
-                command.permissionIds());
+            command.roleId(),
+            command.menuIds(),
+            command.permissionIds());
         replaceMenus(authorization);
         replacePermissions(authorization);
     }
 
     private void replaceMenus(RoleAuthorization authorization) {
-        roleMenuMapper.delete(Wrappers.<SysRoleMenu>lambdaQuery().eq(SysRoleMenu::getRoleId, authorization.roleId()));
-        authorization.toRoleMenus().forEach(roleMenuMapper::insert);
+        sysRoleMenuRepository.deleteByRoleId(authorization.roleId());
+        authorization.toRoleMenus().forEach(sysRoleMenuRepository::save);
     }
 
     private void replacePermissions(RoleAuthorization authorization) {
-        rolePermissionMapper.delete(Wrappers.<SysRolePermission>lambdaQuery().eq(SysRolePermission::getRoleId, authorization.roleId()));
-        authorization.toRolePermissions().forEach(rolePermissionMapper::insert);
+        sysRolePermissionRepository.deleteByRoleId(authorization.roleId());
+        authorization.toRolePermissions().forEach(sysRolePermissionRepository::save);
     }
 }
