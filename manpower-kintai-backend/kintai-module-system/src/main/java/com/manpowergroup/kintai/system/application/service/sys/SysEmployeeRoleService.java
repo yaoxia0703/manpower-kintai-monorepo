@@ -1,6 +1,5 @@
 package com.manpowergroup.kintai.system.application.service.sys;
 
-import com.baomidou.mybatisplus.extension.service.IService;
 import com.manpowergroup.kintai.system.domain.entity.sys.SysEmployeeRole;
 
 import java.util.List;

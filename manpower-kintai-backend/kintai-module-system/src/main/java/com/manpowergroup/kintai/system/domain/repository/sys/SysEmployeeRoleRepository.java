@@ -10,5 +10,12 @@ public interface SysEmployeeRoleRepository {
 
     SysEmployeeRole findById(Long id);
 
+    boolean existsByEmployeeAndRoleAndCompany(Long employeeId, Long roleId, Long companyId);
+
+    void save(SysEmployeeRole employeeRole);
+
+    void updateById(SysEmployeeRole employeeRole);
+
+    void deleteById(Long id);
 
 }

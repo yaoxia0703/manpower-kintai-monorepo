@@ -3,13 +3,12 @@ package com.manpowergroup.kintai.system.application.service.impl.auth;
 import com.manpowergroup.kintai.common.enums.PermissionHttpMethod;
 import com.manpowergroup.kintai.framework.security.authority.PermissionRule;
 import com.manpowergroup.kintai.system.domain.entity.sys.SysPermission;
-import com.manpowergroup.kintai.system.infrastructure.mapper.sys.SysPermissionMapper;
+import com.manpowergroup.kintai.system.domain.repository.sys.SysPermissionRepository;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -17,8 +16,8 @@ class PermissionRuleProviderImplTest {
 
     @Test
     void loadsEnabledPermissionRulesFromSysPermission() {
-        SysPermissionMapper permissionMapper = mock(SysPermissionMapper.class);
-        when(permissionMapper.selectList(any())).thenReturn(List.of(
+        SysPermissionRepository permissionRepository = mock(SysPermissionRepository.class);
+        when(permissionRepository.loadEnabled()).thenReturn(List.of(
                 SysPermission.create(
                         null,
                         "admin:employee:read",
@@ -27,7 +26,7 @@ class PermissionRuleProviderImplTest {
                         "/admin/emp/employees/**",
                         null,
                         1)));
-        PermissionRuleProviderImpl provider = new PermissionRuleProviderImpl(permissionMapper);
+        PermissionRuleProviderImpl provider = new PermissionRuleProviderImpl(permissionRepository);
 
         List<PermissionRule> rules = provider.loadEnabledRules();
 

@@ -7,6 +7,7 @@ import com.manpowergroup.kintai.system.application.command.sys.EmployeeRoleUpdat
 import com.manpowergroup.kintai.system.application.service.sys.EmployeeRoleAssignmentService;
 import com.manpowergroup.kintai.system.application.service.sys.SysEmployeeRoleService;
 import com.manpowergroup.kintai.system.domain.entity.sys.SysEmployeeRole;
+import com.manpowergroup.kintai.system.domain.repository.sys.SysEmployeeRoleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,15 +17,13 @@ import org.springframework.transaction.annotation.Transactional;
 public class EmployeeRoleAssignmentServiceImpl implements EmployeeRoleAssignmentService {
 
     private final SysEmployeeRoleService employeeRoleService;
+    private final SysEmployeeRoleRepository employeeRoleRepository;
 
     @Override
     @Transactional
     public SysEmployeeRole assign(EmployeeRoleAssignCommand command) {
-        boolean exists = employeeRoleService.lambdaQuery()
-                .eq(SysEmployeeRole::getEmployeeId, command.employeeId())
-                .eq(SysEmployeeRole::getRoleId, command.roleId())
-                .eq(SysEmployeeRole::getCompanyId, command.companyId())
-                .count() > 0;
+        boolean exists = employeeRoleRepository.existsByEmployeeAndRoleAndCompany(
+            command.employeeId(), command.roleId(), command.companyId());
         if (exists) throw new BizException(SystemErrorCode.EMPLOYEE_ROLE_ALREADY_EXISTS);
         SysEmployeeRole employeeRole = SysEmployeeRole.assign(
                 command.employeeId(),
@@ -32,7 +31,7 @@ public class EmployeeRoleAssignmentServiceImpl implements EmployeeRoleAssignment
                 command.companyId(),
                 command.startDate(),
                 command.endDate());
-        employeeRoleService.save(employeeRole);
+        employeeRoleRepository.save(employeeRole);
         return employeeRole;
     }
 
@@ -41,7 +40,7 @@ public class EmployeeRoleAssignmentServiceImpl implements EmployeeRoleAssignment
     public SysEmployeeRole update(Long id, EmployeeRoleUpdateCommand command) {
         SysEmployeeRole existing = employeeRoleService.getById(id);
         existing.changeValidity(command.startDate(), command.endDate());
-        employeeRoleService.updateById(existing);
+        employeeRoleRepository.updateById(existing);
         return existing;
     }
 
@@ -49,7 +48,7 @@ public class EmployeeRoleAssignmentServiceImpl implements EmployeeRoleAssignment
     @Transactional
     public void revoke(Long id) {
         employeeRoleService.getById(id);
-        employeeRoleService.removeById(id);
+        employeeRoleRepository.deleteById(id);
     }
 
     enum SystemErrorCode implements BaseErrorCode {

@@ -1,6 +1,5 @@
 package com.manpowergroup.kintai.system.application.service.impl.sys;
 
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.manpowergroup.kintai.system.application.assembler.sys.PermissionAssembler;
 import com.manpowergroup.kintai.system.application.command.sys.RoleAuthorizationSaveCommand;
 import com.manpowergroup.kintai.system.application.command.sys.RoleMenuAssignCommand;
@@ -19,10 +18,6 @@ import com.manpowergroup.kintai.system.domain.repository.sys.SysPermissionReposi
 import com.manpowergroup.kintai.system.domain.repository.sys.SysRoleMenuRepository;
 import com.manpowergroup.kintai.system.domain.repository.sys.SysRolePermissionRepository;
 import com.manpowergroup.kintai.system.domain.service.sys.RoleAuthorizationDomainService;
-import com.manpowergroup.kintai.system.infrastructure.mapper.sys.SysMenuMapper;
-import com.manpowergroup.kintai.system.infrastructure.mapper.sys.SysPermissionMapper;
-import com.manpowergroup.kintai.system.infrastructure.mapper.sys.SysRoleMenuMapper;
-import com.manpowergroup.kintai.system.infrastructure.mapper.sys.SysRolePermissionMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,12 +35,6 @@ public class RoleAuthorizationServiceImpl implements RoleAuthorizationService {
     private final SysRolePermissionRepository sysRolePermissionRepository;
     private final SysMenuRepository sysMenuRepository;
     private final SysPermissionRepository sysPermissionRepository;
-//    private final SysRoleMenuMapper roleMenuMapper;
-//    private final SysRolePermissionMapper rolePermissionMapper;
-//    private final SysMenuMapper menuMapper;
-//    private final SysPermissionMapper permissionMapper;
-
-
     @Override
     public RoleAuthorizationResponse getAuthorization(Long roleId) {
         roleService.getById(roleId);
