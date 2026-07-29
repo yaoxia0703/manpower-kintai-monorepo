@@ -1,7 +1,5 @@
 package com.manpowergroup.kintai.system.application.service.impl.sys;
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.manpowergroup.kintai.common.dto.PageRequest;
 import com.manpowergroup.kintai.common.dto.PageResult;
 import com.manpowergroup.kintai.common.enums.Status;
@@ -12,7 +10,6 @@ import com.manpowergroup.kintai.system.application.command.sys.EnumTypeUpdateCom
 import com.manpowergroup.kintai.system.application.service.sys.SysEnumTypeService;
 import com.manpowergroup.kintai.system.domain.entity.sys.SysEnumType;
 import com.manpowergroup.kintai.system.domain.repository.sys.SysEnumTypeRepository;
-import com.manpowergroup.kintai.system.infrastructure.mapper.sys.SysEnumTypeMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

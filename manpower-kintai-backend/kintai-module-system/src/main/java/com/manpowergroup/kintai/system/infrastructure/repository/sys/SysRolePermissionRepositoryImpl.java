@@ -1,5 +1,6 @@
 package com.manpowergroup.kintai.system.infrastructure.repository.sys;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.manpowergroup.kintai.system.domain.entity.sys.SysRolePermission;
 import com.manpowergroup.kintai.system.domain.repository.sys.SysRolePermissionRepository;
@@ -18,7 +19,7 @@ public class SysRolePermissionRepositoryImpl implements SysRolePermissionReposit
     }
 
     @Override
-    public List<SysRolePermission> findByRoleId(Long roleId) {
+    public List<SysRolePermission> listByRoleId(Long roleId) {
         return sysRolePermissionMapper.selectList(Wrappers.<SysRolePermission>lambdaQuery().eq(SysRolePermission::getRoleId, roleId));
     }
 
@@ -30,5 +31,20 @@ public class SysRolePermissionRepositoryImpl implements SysRolePermissionReposit
     @Override
     public void save(SysRolePermission sysRolePermission) {
         sysRolePermissionMapper.insert(sysRolePermission);
+    }
+
+    @Override
+    public List<SysRolePermission> listByRoleIds(List<Long> roleIds) {
+        if (roleIds == null || roleIds.isEmpty()) {
+            return List.of();
+        }
+        return sysRolePermissionMapper.selectList(new LambdaQueryWrapper<SysRolePermission>()
+            .in(SysRolePermission::getRoleId, roleIds));
+    }
+
+    @Override
+    public boolean existsByPermissionId(Long permissionId) {
+        return sysRolePermissionMapper.selectCount(new LambdaQueryWrapper<SysRolePermission>()
+            .eq(SysRolePermission::getPermissionId, permissionId)) > 0;
     }
 }

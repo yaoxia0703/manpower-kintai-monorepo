@@ -1,14 +1,12 @@
 package com.manpowergroup.kintai.system.application.service.impl.sys;
 
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.manpowergroup.kintai.common.enums.Status;
 import com.manpowergroup.kintai.common.exception.BaseErrorCode;
 import com.manpowergroup.kintai.common.exception.BizException;
 import com.manpowergroup.kintai.system.application.command.sys.EnumValueCreateCommand;
 import com.manpowergroup.kintai.system.application.command.sys.EnumValueUpdateCommand;
 import com.manpowergroup.kintai.system.application.service.sys.SysEnumValueService;
 import com.manpowergroup.kintai.system.domain.entity.sys.SysEnumValue;
-import com.manpowergroup.kintai.system.infrastructure.mapper.sys.SysEnumValueMapper;
+import com.manpowergroup.kintai.system.domain.repository.sys.SysEnumValueRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,36 +14,35 @@ import java.util.List;
 
 // 列挙値定義サービス実装（アプリケーション層）
 @Service
-public class SysEnumValueServiceImpl extends ServiceImpl<SysEnumValueMapper, SysEnumValue>
-        implements SysEnumValueService {
+public class SysEnumValueServiceImpl implements SysEnumValueService {
+
+    private final SysEnumValueRepository enumValueRepository;
+
+    public SysEnumValueServiceImpl(SysEnumValueRepository enumValueRepository) {
+        this.enumValueRepository = enumValueRepository;
+    }
 
     @Override
     public SysEnumValue getById(Long id) {
-        SysEnumValue ev = super.getById(id);
+        SysEnumValue ev = enumValueRepository.findById(id);
         if (ev == null) throw new BizException(SystemErrorCode.ENUM_VALUE_NOT_FOUND);
         return ev;
     }
 
     @Override
     public List<SysEnumValue> listByEnumTypeCode(String enumTypeCode) {
-        return lambdaQuery()
-                .eq(SysEnumValue::getEnumTypeCode, enumTypeCode)
-                .eq(SysEnumValue::getStatus, Status.ENABLED)
-                .orderByAsc(SysEnumValue::getSort)
-                .list();
+        return enumValueRepository.listEnabledByEnumTypeCode(enumTypeCode);
     }
 
     @Override
     @Transactional
     public SysEnumValue create(EnumValueCreateCommand command) {
-        boolean exists = lambdaQuery()
-                .eq(SysEnumValue::getEnumTypeCode, command.enumTypeCode())
-                .eq(SysEnumValue::getCode, command.code())
-                .count() > 0;
+        boolean exists = enumValueRepository.existsByEnumTypeCodeAndCodeExcludingId(
+            command.enumTypeCode(), command.code(), null);
         if (exists) throw new BizException(SystemErrorCode.ENUM_VALUE_CODE_DUPLICATE);
         SysEnumValue enumValue = SysEnumValue.create(
-                command.enumTypeCode(), command.code(), command.sort(), command.status());
-        save(enumValue);
+            command.enumTypeCode(), command.code(), command.sort(), command.status());
+        enumValueRepository.save(enumValue);
         return enumValue;
     }
 
@@ -53,14 +50,11 @@ public class SysEnumValueServiceImpl extends ServiceImpl<SysEnumValueMapper, Sys
     @Transactional
     public SysEnumValue update(Long id, EnumValueUpdateCommand command) {
         SysEnumValue existing = getById(id);
-        boolean exists = lambdaQuery()
-                .eq(SysEnumValue::getEnumTypeCode, command.enumTypeCode())
-                .eq(SysEnumValue::getCode, command.code())
-                .ne(SysEnumValue::getId, id)
-                .count() > 0;
+        boolean exists = enumValueRepository.existsByEnumTypeCodeAndCodeExcludingId(
+            command.enumTypeCode(), command.code(), id);
         if (exists) throw new BizException(SystemErrorCode.ENUM_VALUE_CODE_DUPLICATE);
         existing.updateEditableFields(command.enumTypeCode(), command.code(), command.sort());
-        updateById(existing);
+        enumValueRepository.updateById(existing);
         return existing;
     }
 
@@ -69,7 +63,7 @@ public class SysEnumValueServiceImpl extends ServiceImpl<SysEnumValueMapper, Sys
     public void enable(Long id) {
         SysEnumValue ev = getById(id);
         ev.enable();
-        updateById(ev);
+        enumValueRepository.updateById(ev);
     }
 
     @Override
@@ -77,14 +71,14 @@ public class SysEnumValueServiceImpl extends ServiceImpl<SysEnumValueMapper, Sys
     public void disable(Long id) {
         SysEnumValue ev = getById(id);
         ev.disable();
-        updateById(ev);
+        enumValueRepository.updateById(ev);
     }
 
     @Override
     @Transactional
     public void remove(Long id) {
         getById(id);
-        removeById(id);
+        enumValueRepository.deleteById(id);
     }
 
     enum SystemErrorCode implements BaseErrorCode {
@@ -99,8 +93,14 @@ public class SysEnumValueServiceImpl extends ServiceImpl<SysEnumValueMapper, Sys
             this.messageKey = messageKey;
         }
 
-        @Override public int code() { return code; }
-        @Override public String messageKey() { return messageKey; }
+        @Override
+        public int code() {
+            return code;
+        }
+
+        @Override
+        public String messageKey() {
+            return messageKey;
+        }
     }
 }
-

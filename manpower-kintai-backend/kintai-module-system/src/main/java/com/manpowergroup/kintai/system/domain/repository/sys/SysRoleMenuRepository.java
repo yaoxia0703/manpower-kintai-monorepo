@@ -6,9 +6,13 @@ import java.util.List;
 
 public interface SysRoleMenuRepository {
 
-    List<SysRoleMenu>  findByRoleId(Long roleId);
+    List<SysRoleMenu>  listByRoleId(Long roleId);
 
     void deleteByRoleId(Long roleId);
 
     void save(SysRoleMenu sysRoleMenu);
+
+    List<SysRoleMenu> listByRoleIds(List<Long> roleIds);
+
+    void deleteByMenuIds(List<Long> menuIds);
 }

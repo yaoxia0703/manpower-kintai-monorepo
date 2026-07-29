@@ -1,180 +1,87 @@
 package com.manpowergroup.kintai.system.application.service.impl.sys;
 
-import com.baomidou.mybatisplus.core.conditions.AbstractWrapper;
-import com.baomidou.mybatisplus.core.conditions.Wrapper;
-import com.baomidou.mybatisplus.core.MybatisConfiguration;
-import com.baomidou.mybatisplus.core.metadata.TableInfoHelper;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.manpowergroup.kintai.common.dto.PageRequest;
 import com.manpowergroup.kintai.common.dto.PageResult;
+import com.manpowergroup.kintai.common.enums.PermissionHttpMethod;
 import com.manpowergroup.kintai.common.exception.BizException;
-import com.manpowergroup.kintai.system.domain.entity.sys.SysMenu;
+import com.manpowergroup.kintai.system.application.command.sys.PermissionCreateCommand;
 import com.manpowergroup.kintai.system.domain.entity.sys.SysPermission;
-import com.manpowergroup.kintai.system.infrastructure.mapper.sys.SysEmployeeRoleMapper;
-import com.manpowergroup.kintai.system.infrastructure.mapper.sys.SysMenuMapper;
-import com.manpowergroup.kintai.system.infrastructure.mapper.sys.SysPermissionMapper;
-import com.manpowergroup.kintai.system.infrastructure.mapper.sys.SysRolePermissionMapper;
-import org.apache.ibatis.builder.MapperBuilderAssistant;
-import org.junit.jupiter.api.BeforeAll;
+import com.manpowergroup.kintai.system.domain.repository.sys.SysEmployeeRoleRepository;
+import com.manpowergroup.kintai.system.domain.repository.sys.SysMenuRepository;
+import com.manpowergroup.kintai.system.domain.repository.sys.SysPermissionRepository;
+import com.manpowergroup.kintai.system.domain.repository.sys.SysRolePermissionRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mockito;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 class SysPermissionServiceImplTest {
 
-    @BeforeAll
-    static void initializeTableInfo() {
-        MapperBuilderAssistant assistant = new MapperBuilderAssistant(new MybatisConfiguration(), "");
-        TableInfoHelper.initTableInfo(assistant, SysMenu.class);
-        TableInfoHelper.initTableInfo(assistant, SysPermission.class);
-    }
+    private SysPermissionRepository permissionRepository;
+    private SysRolePermissionRepository rolePermissionRepository;
+    private SysMenuRepository menuRepository;
+    private SysPermissionServiceImpl service;
 
-    private static SysMenu menu(long id, Long parentId) {
-        return SysMenu.create(parentId, "menu-" + id, "menu-" + id,
-                        "/menu-" + id, null, null, 2, (int) id, 1)
-                .setId(id);
+    @BeforeEach
+    void setUp() {
+        permissionRepository = mock(SysPermissionRepository.class);
+        rolePermissionRepository = mock(SysRolePermissionRepository.class);
+        menuRepository = mock(SysMenuRepository.class);
+        service = new SysPermissionServiceImpl(
+            permissionRepository,
+            rolePermissionRepository,
+            mock(SysEmployeeRoleRepository.class),
+            menuRepository);
     }
 
     @Test
     void removeBlocksPermissionAssignedToRole() {
-        SysRolePermissionMapper rolePermissionMapper = Mockito.mock(SysRolePermissionMapper.class);
-        SysPermissionMapper permissionMapper = Mockito.mock(SysPermissionMapper.class);
-        SysPermissionServiceImpl service = new SysPermissionServiceImpl(
-                Mockito.mock(SysEmployeeRoleMapper.class),
-                rolePermissionMapper,
-                Mockito.mock(SysMenuMapper.class));
-        ReflectionTestUtils.setField(service, "baseMapper", permissionMapper);
-
-        when(permissionMapper.selectById(9L)).thenReturn(new SysPermission().setId(9L));
-        when(rolePermissionMapper.selectCount(any())).thenReturn(1L);
+        when(permissionRepository.findById(9L)).thenReturn(new SysPermission().setId(9L));
+        when(rolePermissionRepository.existsByPermissionId(9L)).thenReturn(true);
 
         assertThrows(BizException.class, () -> service.remove(9L));
 
-        verify(rolePermissionMapper).selectCount(any());
-        verify(permissionMapper, never()).deleteById(any(Long.class));
+        verify(permissionRepository, never()).deleteById(any(Long.class));
     }
 
     @Test
-    void pageCombinesDescendantMenusAndKeywordInDatabaseQuery() {
-        SysRolePermissionMapper rolePermissionMapper = Mockito.mock(SysRolePermissionMapper.class);
-        SysPermissionMapper permissionMapper = Mockito.mock(SysPermissionMapper.class);
-        SysMenuMapper menuMapper = Mockito.mock(SysMenuMapper.class);
-        SysPermissionServiceImpl service = new SysPermissionServiceImpl(
-                Mockito.mock(SysEmployeeRoleMapper.class), rolePermissionMapper, menuMapper);
-        ReflectionTestUtils.setField(service, "baseMapper", permissionMapper);
-
-        when(menuMapper.selectList(any())).thenReturn(List.of(
-                menu(1L, null), menu(2L, 1L), menu(3L, 2L), menu(9L, null)));
-        when(permissionMapper.selectPage(any(Page.class), any())).thenAnswer(invocation -> {
-            Page<SysPermission> page = invocation.getArgument(0);
-            page.setRecords(List.of(new SysPermission().setId(20L)));
-            page.setTotal(11L);
-            return page;
-        });
+    void pageDelegatesDescendantMenuIdsAndKeywordToRepository() {
+        PageResult<SysPermission> expected = PageResult.empty(2, 10);
+        when(menuRepository.listSelfAndDescendantIds(1L)).thenReturn(List.of(1L, 2L, 3L));
+        when(permissionRepository.findPageByMenuIdsAndKeyword(
+            List.of(1L, 2L, 3L), " ADMIN ", 2, 10)).thenReturn(expected);
 
         PageResult<SysPermission> result = service.page(1L, " ADMIN ", PageRequest.of(2, 10));
 
-        @SuppressWarnings("unchecked")
-        ArgumentCaptor<Wrapper<SysPermission>> wrapperCaptor = ArgumentCaptor.forClass(Wrapper.class);
-        verify(permissionMapper).selectPage(any(Page.class), wrapperCaptor.capture());
-        Wrapper<SysPermission> capturedWrapper = wrapperCaptor.getValue();
-        String sql = capturedWrapper.getSqlSegment();
-        assertTrue(sql.contains("menu_id IN"));
-        assertTrue(sql.contains("LOWER(code) LIKE"));
-        assertTrue(sql.contains("name LIKE"));
-        assertTrue(sql.contains("ESCAPE '!'"));
-        assertTrue(!sql.contains("LOWER(name)"));
-        assertTrue(sql.contains("sort ASC"));
-        assertTrue(sql.contains("id ASC"));
-        AbstractWrapper<?, ?, ?> abstractWrapper = (AbstractWrapper<?, ?, ?>) capturedWrapper;
-        Set<Long> longParams = abstractWrapper.getParamNameValuePairs().values().stream()
-                .filter(Long.class::isInstance)
-                .map(Long.class::cast)
-                .collect(Collectors.toSet());
-        assertEquals(Set.of(1L, 2L, 3L), longParams);
-        assertEquals(11L, result.getTotal());
-        assertEquals(2L, result.getPage());
-        assertEquals(10L, result.getSize());
-        assertEquals(2L, result.getPages());
+        assertEquals(expected, result);
+        verify(permissionRepository).findPageByMenuIdsAndKeyword(
+            List.of(1L, 2L, 3L), " ADMIN ", 2, 10);
     }
 
     @Test
-    void pageEscapesLikeWildcardsAndKeepsNameCollation() {
-        SysPermissionMapper permissionMapper = Mockito.mock(SysPermissionMapper.class);
-        SysMenuMapper menuMapper = Mockito.mock(SysMenuMapper.class);
-        SysPermissionServiceImpl service = new SysPermissionServiceImpl(
-                Mockito.mock(SysEmployeeRoleMapper.class),
-                Mockito.mock(SysRolePermissionMapper.class), menuMapper);
-        ReflectionTestUtils.setField(service, "baseMapper", permissionMapper);
-        when(permissionMapper.selectPage(any(Page.class), any()))
-                .thenAnswer(invocation -> invocation.getArgument(0));
+    void pageWithoutMenuDelegatesWithEmptyMenuIds() {
+        PageResult<SysPermission> expected = PageResult.empty(1, 10);
+        when(permissionRepository.findPageByMenuIdsAndKeyword(List.of(), " Admin%_! ", 1, 10))
+            .thenReturn(expected);
 
-        service.page(null, " Admin%_! ", PageRequest.of(1, 10));
+        PageResult<SysPermission> result = service.page(null, " Admin%_! ", PageRequest.of(1, 10));
 
-        @SuppressWarnings("unchecked")
-        ArgumentCaptor<Wrapper<SysPermission>> wrapperCaptor = ArgumentCaptor.forClass(Wrapper.class);
-        verify(permissionMapper).selectPage(any(Page.class), wrapperCaptor.capture());
-        AbstractWrapper<?, ?, ?> wrapper = (AbstractWrapper<?, ?, ?>) wrapperCaptor.getValue();
-        String sql = wrapper.getSqlSegment();
-        Set<Object> values = Set.copyOf(wrapper.getParamNameValuePairs().values());
-        assertTrue(values.contains("%admin!%!_!!%"));
-        assertTrue(values.contains("%Admin!%!_!!%"));
-        assertTrue(sql.contains("LOWER(code) LIKE"));
-        assertTrue(sql.contains("name LIKE"));
-        verify(menuMapper, never()).selectList(any());
-    }
-
-    @Test
-    void pageOmitsWhitespaceKeywordAndUsesOnlySelectedLeafMenu() {
-        SysPermissionMapper permissionMapper = Mockito.mock(SysPermissionMapper.class);
-        SysMenuMapper menuMapper = Mockito.mock(SysMenuMapper.class);
-        SysPermissionServiceImpl service = new SysPermissionServiceImpl(
-                Mockito.mock(SysEmployeeRoleMapper.class),
-                Mockito.mock(SysRolePermissionMapper.class), menuMapper);
-        ReflectionTestUtils.setField(service, "baseMapper", permissionMapper);
-        when(menuMapper.selectList(any())).thenReturn(List.of(
-                menu(1L, null), menu(2L, 1L), menu(3L, 2L)));
-        when(permissionMapper.selectPage(any(Page.class), any()))
-                .thenAnswer(invocation -> invocation.getArgument(0));
-
-        service.page(3L, "   ", PageRequest.of(1, 10));
-
-        @SuppressWarnings("unchecked")
-        ArgumentCaptor<Wrapper<SysPermission>> wrapperCaptor = ArgumentCaptor.forClass(Wrapper.class);
-        verify(permissionMapper).selectPage(any(Page.class), wrapperCaptor.capture());
-        AbstractWrapper<?, ?, ?> wrapper = (AbstractWrapper<?, ?, ?>) wrapperCaptor.getValue();
-        String sql = wrapper.getSqlSegment();
-        assertTrue(sql.contains("menu_id IN"));
-        assertTrue(!sql.contains("LIKE"));
-        Set<Long> menuIds = wrapper.getParamNameValuePairs().values().stream()
-                .filter(Long.class::isInstance)
-                .map(Long.class::cast)
-                .collect(Collectors.toSet());
-        assertEquals(Set.of(3L), menuIds);
+        assertEquals(expected, result);
+        verify(menuRepository, never()).listSelfAndDescendantIds(any(Long.class));
     }
 
     @Test
     void pageReturnsEmptyResultForUnknownMenuWithoutQueryingPermissions() {
-        SysPermissionMapper permissionMapper = Mockito.mock(SysPermissionMapper.class);
-        SysMenuMapper menuMapper = Mockito.mock(SysMenuMapper.class);
-        SysPermissionServiceImpl service = new SysPermissionServiceImpl(
-                Mockito.mock(SysEmployeeRoleMapper.class),
-                Mockito.mock(SysRolePermissionMapper.class), menuMapper);
-        ReflectionTestUtils.setField(service, "baseMapper", permissionMapper);
-        when(menuMapper.selectList(any())).thenReturn(List.of(menu(1L, null)));
+        when(menuRepository.listSelfAndDescendantIds(999L)).thenReturn(List.of());
 
         PageResult<SysPermission> result = service.page(999L, null, PageRequest.of(1, 10));
 
@@ -182,6 +89,41 @@ class SysPermissionServiceImplTest {
         assertEquals(0L, result.getTotal());
         assertEquals(1L, result.getPage());
         assertEquals(10L, result.getSize());
-        verify(permissionMapper, never()).selectPage(any(Page.class), any());
+        verify(permissionRepository, never())
+            .findPageByMenuIdsAndKeyword(any(), any(), any(Integer.class), any(Integer.class));
+    }
+
+    @Test
+    void createAcceptsExistingMenu() {
+        when(menuRepository.existsById(1L)).thenReturn(true);
+        when(permissionRepository.existsByCodeExcludingId("employee:read", null)).thenReturn(false);
+
+        SysPermission created = service.create(new PermissionCreateCommand(
+            1L,
+            "employee:read",
+            "Read employee",
+            PermissionHttpMethod.GET,
+            "/employees/**",
+            null,
+            1));
+
+        assertEquals(1L, created.getMenuId());
+        verify(permissionRepository).save(created);
+    }
+
+    @Test
+    void createRejectsUnknownMenu() {
+        when(menuRepository.existsById(999L)).thenReturn(false);
+
+        assertThrows(BizException.class, () -> service.create(new PermissionCreateCommand(
+            999L,
+            "employee:read",
+            "Read employee",
+            PermissionHttpMethod.GET,
+            "/employees/**",
+            null,
+            1)));
+
+        verify(permissionRepository, never()).save(any());
     }
 }

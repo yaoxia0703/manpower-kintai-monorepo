@@ -44,16 +44,16 @@ public class EmpAccountRepositoryImpl implements EmpAccountRepository {
 
     @Override
     public void save(EmpAccount empAccount) {
-
+        empAccountMapper.insert(empAccount);
     }
 
     @Override
     public void updateById(EmpAccount empAccount) {
-
+        empAccountMapper.updateById(empAccount);
     }
 
     @Override
     public void deleteById(Long id) {
-
+        empAccountMapper.deleteById(id);
     }
 }

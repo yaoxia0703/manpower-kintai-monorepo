@@ -8,7 +8,7 @@ import com.manpowergroup.kintai.system.domain.entity.sys.SysEnumValue;
 import java.util.List;
 
 // 列挙値定義サービス（アプリケーション層）
-public interface SysEnumValueService extends IService<SysEnumValue> {
+public interface SysEnumValueService  {
 
     // IDで列挙値を取得（存在しない場合は例外）
     SysEnumValue getById(Long id);

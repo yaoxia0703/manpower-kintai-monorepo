@@ -38,23 +38,23 @@ public class RoleAuthorizationServiceImpl implements RoleAuthorizationService {
     @Override
     public RoleAuthorizationResponse getAuthorization(Long roleId) {
         roleService.getById(roleId);
-        List<Long> selectedMenuIds = sysRoleMenuRepository.findByRoleId(roleId)
+        List<Long> selectedMenuIds = sysRoleMenuRepository.listByRoleId(roleId)
             .stream()
             .map(SysRoleMenu::getMenuId)
             .filter(Objects::nonNull)
             .distinct()
             .toList();
-        List<Long> selectedPermissionIds = sysRolePermissionRepository.findByRoleId(roleId)
+        List<Long> selectedPermissionIds = sysRolePermissionRepository.listByRoleId(roleId)
             .stream()
             .map(SysRolePermission::getPermissionId)
             .filter(Objects::nonNull)
             .distinct()
             .toList();
-        List<MenuResponse> menus = sysMenuRepository.findAll()
+        List<MenuResponse> menus = sysMenuRepository.listAllOrderBySort()
             .stream()
             .map(MenuResponse::from)
             .toList();
-        List<SysPermission> permissions = sysPermissionRepository.findAll();
+        List<SysPermission> permissions = sysPermissionRepository.listAll();
 
         return RoleAuthorizationResponse.builder()
             .menus(menus)

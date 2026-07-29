@@ -10,7 +10,7 @@ import com.manpowergroup.kintai.system.domain.entity.sys.SysPermission;
 import java.util.List;
 
 // 権限マスタサービス（アプリケーション層）
-public interface SysPermissionService extends IService<SysPermission> {
+public interface SysPermissionService  {
 
     // IDで権限を取得（存在しない場合は例外）
     SysPermission getById(Long id);

@@ -37,6 +37,12 @@ public class PageResult<T> {
         result.setPages(page.getPages());
         return result;
     }
+    public static <T> PageResult<T> empty(int page, int size) {
+        Page<T> p = new Page<>(page, size);
+        p.setRecords(List.of());
+        p.setTotal(0L);
+        return PageResult.of(p);
+    }
 
     // Entity → VO変換用
     public static <T, R> PageResult<R> of(Page<T> page, Function<T, R> converter) {

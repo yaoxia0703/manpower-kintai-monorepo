@@ -22,7 +22,7 @@ public class RoleAccessServiceImpl implements RoleAccessService {
 
     @Override
     public List<RoleSummary> listEnabledByCompany(Long companyId) {
-        return sysRoleRepository.findByCompanyId(companyId)
+        return sysRoleRepository.listEnabledByCompanyId(companyId)
             .stream()
             .map(role -> new RoleSummary(role.getId(), role.getCode(), role.getName()))
             .toList();

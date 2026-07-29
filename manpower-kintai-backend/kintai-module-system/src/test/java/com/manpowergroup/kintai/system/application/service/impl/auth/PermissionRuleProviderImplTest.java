@@ -17,7 +17,7 @@ class PermissionRuleProviderImplTest {
     @Test
     void loadsEnabledPermissionRulesFromSysPermission() {
         SysPermissionRepository permissionRepository = mock(SysPermissionRepository.class);
-        when(permissionRepository.loadEnabled()).thenReturn(List.of(
+        when(permissionRepository.listLoadEnabled()).thenReturn(List.of(
                 SysPermission.create(
                         null,
                         "admin:employee:read",

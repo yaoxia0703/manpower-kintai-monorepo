@@ -9,7 +9,7 @@ import com.manpowergroup.kintai.system.domain.entity.sys.SysRole;
 
 import java.util.List;
 
-public interface SysRoleService extends IService<SysRole> {
+public interface SysRoleService  {
 
     SysRole getById(Long id);
 

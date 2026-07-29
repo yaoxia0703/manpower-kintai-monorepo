@@ -29,7 +29,7 @@ public class SysNotificationController {
     @PostMapping
     public Result<SysNotificationResponse> create(@Valid @RequestBody SysNotificationCreateRequest request) {
         return Result.ok(SysNotificationAssembler.toResponse(
-                sysNotificationService.create(SysNotificationAssembler.toCommand(request))));
+            sysNotificationService.create(SysNotificationAssembler.toCommand(request))));
     }
 
     @GetMapping("/unread-count")
@@ -39,15 +39,15 @@ public class SysNotificationController {
 
     @GetMapping("/unread")
     public Result<PageResult<SysNotificationResponse>> listUnread(
-            @AuthenticationPrincipal LoginPrincipal principal,
-            PageRequest pageRequest) {
-        return Result.ok(sysNotificationService.pageUnread(principal.employeeId(), pageRequest));
+        @AuthenticationPrincipal LoginPrincipal principal,
+        PageRequest pageRequest) {
+        return Result.ok(sysNotificationService.pageUnread(principal.employeeId(), pageRequest).map(SysNotificationAssembler::toResponse));
     }
 
     @PutMapping("/read")
     public Result<Void> markAsRead(
-            @AuthenticationPrincipal LoginPrincipal principal,
-            @Valid @RequestBody SysNotificationMarkReadRequest request) {
+        @AuthenticationPrincipal LoginPrincipal principal,
+        @Valid @RequestBody SysNotificationMarkReadRequest request) {
         sysNotificationService.markAsRead(principal.employeeId(), request.ids());
         return Result.ok();
     }

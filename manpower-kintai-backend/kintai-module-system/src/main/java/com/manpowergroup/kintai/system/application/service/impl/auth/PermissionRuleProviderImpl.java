@@ -17,7 +17,7 @@ public class PermissionRuleProviderImpl implements PermissionRuleProvider {
 
     @Override
     public List<PermissionRule> loadEnabledRules() {
-        return permissionRepository.loadEnabled()
+        return permissionRepository.listLoadEnabled()
             .stream()
             .map(p -> new PermissionRule(p.getCode(), p.getMethod(), p.getPath()))
             .toList();

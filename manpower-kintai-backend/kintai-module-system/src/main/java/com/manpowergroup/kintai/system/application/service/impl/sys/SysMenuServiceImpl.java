@@ -1,7 +1,5 @@
 package com.manpowergroup.kintai.system.application.service.impl.sys;
 
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.manpowergroup.kintai.common.exception.BaseErrorCode;
 import com.manpowergroup.kintai.common.exception.BizException;
 import com.manpowergroup.kintai.system.application.command.sys.MenuCreateCommand;
@@ -9,12 +7,11 @@ import com.manpowergroup.kintai.system.application.command.sys.MenuUpdateCommand
 import com.manpowergroup.kintai.system.application.service.sys.SysMenuService;
 import com.manpowergroup.kintai.system.domain.entity.sys.SysEmployeeRole;
 import com.manpowergroup.kintai.system.domain.entity.sys.SysMenu;
-import com.manpowergroup.kintai.system.domain.entity.sys.SysPermission;
 import com.manpowergroup.kintai.system.domain.entity.sys.SysRoleMenu;
-import com.manpowergroup.kintai.system.infrastructure.mapper.sys.SysEmployeeRoleMapper;
-import com.manpowergroup.kintai.system.infrastructure.mapper.sys.SysMenuMapper;
-import com.manpowergroup.kintai.system.infrastructure.mapper.sys.SysPermissionMapper;
-import com.manpowergroup.kintai.system.infrastructure.mapper.sys.SysRoleMenuMapper;
+import com.manpowergroup.kintai.system.domain.repository.sys.SysEmployeeRoleRepository;
+import com.manpowergroup.kintai.system.domain.repository.sys.SysMenuRepository;
+import com.manpowergroup.kintai.system.domain.repository.sys.SysPermissionRepository;
+import com.manpowergroup.kintai.system.domain.repository.sys.SysRoleMenuRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,12 +26,12 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu>
-        implements SysMenuService {
+public class SysMenuServiceImpl implements SysMenuService {
 
-    private final SysEmployeeRoleMapper employeeRoleMapper;
-    private final SysRoleMenuMapper roleMenuMapper;
-    private final SysPermissionMapper permissionMapper;
+    private final SysMenuRepository menuRepository;
+    private final SysEmployeeRoleRepository employeeRoleRepository;
+    private final SysRoleMenuRepository roleMenuRepository;
+    private final SysPermissionRepository permissionRepository;
 
     @Override
     public SysMenu getById(Long id) {
@@ -42,47 +39,41 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu>
     }
 
     private SysMenu requireMenu(Long id) {
-        SysMenu menu = super.getById(id);
+        SysMenu menu = menuRepository.getById(id);
         if (menu == null) throw new BizException(SystemErrorCode.MENU_NOT_FOUND);
         return menu;
     }
 
     @Override
     public List<SysMenu> listAll() {
-        return lambdaQuery().orderByAsc(SysMenu::getSort).list();
+        return menuRepository.listAllOrderBySort();
     }
 
     @Override
     public List<SysMenu> listByEmployeeId(Long employeeId) {
         LocalDate today = LocalDate.now();
-        List<Long> roleIds = employeeRoleMapper.selectList(Wrappers.<SysEmployeeRole>lambdaQuery()
-                        .eq(SysEmployeeRole::getEmployeeId, employeeId))
-                .stream()
-                .filter(assignment -> assignment.isEffectiveOn(today))
-                .map(SysEmployeeRole::getRoleId)
-                .collect(Collectors.toList());
+        List<Long> roleIds = employeeRoleRepository.listByEmployee(employeeId)
+            .stream()
+            .filter(assignment -> assignment.isEffectiveOn(today))
+            .map(SysEmployeeRole::getRoleId)
+            .collect(Collectors.toList());
         if (roleIds.isEmpty()) return Collections.emptyList();
 
-        List<Long> menuIds = roleMenuMapper.selectList(Wrappers.<SysRoleMenu>lambdaQuery()
-                        .in(SysRoleMenu::getRoleId, roleIds))
-                .stream().map(SysRoleMenu::getMenuId).distinct().collect(Collectors.toList());
+        List<Long> menuIds = roleMenuRepository.listByRoleIds(roleIds)
+            .stream().map(SysRoleMenu::getMenuId).distinct().collect(Collectors.toList());
         if (menuIds.isEmpty()) return Collections.emptyList();
 
-        return lambdaQuery()
-                .in(SysMenu::getId, menuIds)
-                .orderByAsc(SysMenu::getSort)
-                .list();
+        return menuRepository.listByIdsOrderBySort(menuIds);
     }
 
     @Override
     @Transactional
     public SysMenu create(MenuCreateCommand command) {
-        boolean exists = lambdaQuery().eq(SysMenu::getCode, command.code()).count() > 0;
-        if (exists) throw new BizException(SystemErrorCode.MENU_CODE_DUPLICATE);
+        if (menuRepository.existsByCode(command.code())) throw new BizException(SystemErrorCode.MENU_CODE_DUPLICATE);
         SysMenu menu = SysMenu.create(
-                command.parentId(), command.name(), command.code(), command.path(),
-                command.component(), command.icon(), command.type(), command.sort(), command.visible());
-        save(menu);
+            command.parentId(), command.name(), command.code(), command.path(),
+            command.component(), command.icon(), command.type(), command.sort(), command.visible());
+        menuRepository.save(menu);
         return menu;
     }
 
@@ -90,15 +81,13 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu>
     @Transactional
     public SysMenu update(Long id, MenuUpdateCommand command) {
         SysMenu existing = requireMenu(id);
-        boolean exists = lambdaQuery()
-                .eq(SysMenu::getCode, command.code())
-                .ne(SysMenu::getId, id)
-                .count() > 0;
-        if (exists) throw new BizException(SystemErrorCode.MENU_CODE_DUPLICATE);
+
+        if (menuRepository.existsByCodeExcludingId(id, command.code()))
+            throw new BizException(SystemErrorCode.MENU_CODE_DUPLICATE);
         existing.updateEditableFields(
-                command.parentId(), command.name(), command.code(), command.path(),
-                command.component(), command.icon(), command.type(), command.sort(), command.visible());
-        updateById(existing);
+            command.parentId(), command.name(), command.code(), command.path(),
+            command.component(), command.icon(), command.type(), command.sort(), command.visible());
+        menuRepository.updateById(existing);
         return existing;
     }
 
@@ -107,7 +96,7 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu>
     public void show(Long id) {
         SysMenu menu = requireMenu(id);
         menu.show();
-        updateById(menu);
+        menuRepository.updateById(menu);
     }
 
     @Override
@@ -115,7 +104,7 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu>
     public void hide(Long id) {
         SysMenu menu = requireMenu(id);
         menu.hide();
-        updateById(menu);
+        menuRepository.updateById(menu);
     }
 
     @Override
@@ -123,7 +112,7 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu>
     public void enable(Long id) {
         SysMenu menu = requireMenu(id);
         menu.enable();
-        updateById(menu);
+        menuRepository.updateById(menu);
     }
 
     @Override
@@ -131,7 +120,7 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu>
     public void disable(Long id) {
         SysMenu menu = requireMenu(id);
         menu.disable();
-        updateById(menu);
+        menuRepository.updateById(menu);
     }
 
     @Override
@@ -139,12 +128,10 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu>
     public void remove(Long id) {
         requireMenu(id);
         List<Long> menuIds = collectDescendantIds(id);
-        boolean hasPermissions = permissionMapper.selectCount(Wrappers.<SysPermission>lambdaQuery()
-                .in(SysPermission::getMenuId, menuIds)) > 0;
-        if (hasPermissions) throw new BizException(SystemErrorCode.MENU_HAS_PERMISSIONS);
+        if (permissionRepository.existsByMenuIds(menuIds)) throw new BizException(SystemErrorCode.MENU_HAS_PERMISSIONS);
 
-        roleMenuMapper.delete(Wrappers.<SysRoleMenu>lambdaQuery().in(SysRoleMenu::getMenuId, menuIds));
-        menuIds.forEach(this::removeById);
+        roleMenuRepository.deleteByMenuIds(menuIds);
+        menuIds.forEach(menuRepository::deleteById);
     }
 
     private List<Long> collectDescendantIds(Long rootId) {
@@ -157,9 +144,9 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu>
             changed = false;
             for (SysMenu menu : menus) {
                 if (menu.getId() != null
-                        && menu.getParentId() != null
-                        && collected.contains(menu.getParentId())
-                        && collected.add(menu.getId())) {
+                    && menu.getParentId() != null
+                    && collected.contains(menu.getParentId())
+                    && collected.add(menu.getId())) {
                     changed = true;
                 }
             }
@@ -181,7 +168,14 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu>
             this.messageKey = messageKey;
         }
 
-        @Override public int code() { return code; }
-        @Override public String messageKey() { return messageKey; }
+        @Override
+        public int code() {
+            return code;
+        }
+
+        @Override
+        public String messageKey() {
+            return messageKey;
+        }
     }
 }

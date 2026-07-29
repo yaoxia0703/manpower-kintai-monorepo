@@ -8,7 +8,7 @@ import com.manpowergroup.kintai.system.domain.entity.sys.SysMenu;
 import java.util.List;
 
 // メニューマスタサービス（アプリケーション層）
-public interface SysMenuService extends IService<SysMenu> {
+public interface SysMenuService  {
 
     // IDでメニューを取得（存在しない場合は例外）
     SysMenu getById(Long id);

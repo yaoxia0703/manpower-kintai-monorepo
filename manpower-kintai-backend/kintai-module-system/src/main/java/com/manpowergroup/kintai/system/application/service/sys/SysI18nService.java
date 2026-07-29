@@ -7,7 +7,7 @@ import com.manpowergroup.kintai.system.domain.entity.sys.SysI18n;
 import java.util.List;
 
 // 国際化翻訳サービス（アプリケーション層）
-public interface SysI18nService extends IService<SysI18n> {
+public interface SysI18nService  {
 
     // IDで翻訳を取得（存在しない場合は例外）
     SysI18n getById(Long id);
