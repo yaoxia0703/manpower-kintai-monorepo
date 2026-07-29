@@ -12,6 +12,12 @@ public final class MenuAssembler {
     private MenuAssembler() {
     }
 
+    /**
+     * 入力データをメニュー作成コマンドへ変換する。
+     *
+     * @param request 変換対象のメニュー作成リクエスト
+     * @return 変換後のメニュー作成コマンド
+     */
     public static MenuCreateCommand toCommand(MenuCreateRequest request) {
         return new MenuCreateCommand(
                 request.getParentId(),
@@ -26,6 +32,12 @@ public final class MenuAssembler {
         );
     }
 
+    /**
+     * 入力データをメニュー更新コマンドへ変換する。
+     *
+     * @param request 変換対象のメニュー更新リクエスト
+     * @return 変換後のメニュー更新コマンド
+     */
     public static MenuUpdateCommand toCommand(MenuUpdateRequest request) {
         return new MenuUpdateCommand(
                 request.getParentId(),
@@ -40,6 +52,12 @@ public final class MenuAssembler {
         );
     }
 
+    /**
+     * 入力データをメニューレスポンスへ変換する。
+     *
+     * @param menu 処理対象のメニュー
+     * @return 変換後のメニューレスポンス
+     */
     public static MenuResponse toResponse(SysMenu menu) {
         return MenuResponse.from(menu);
     }

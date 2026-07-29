@@ -26,17 +26,36 @@ import org.springframework.web.bind.annotation.RestController;
 public class SysNotificationController {
     private final SysNotificationService sysNotificationService;
 
+    /**
+     * 通知を新規作成する。
+     *
+     * @param request 処理対象の通知作成リクエスト
+     * @return 通知レスポンスを含むAPIレスポンス
+     */
     @PostMapping
     public Result<SysNotificationResponse> create(@Valid @RequestBody SysNotificationCreateRequest request) {
         return Result.ok(SysNotificationAssembler.toResponse(
             sysNotificationService.create(SysNotificationAssembler.toCommand(request))));
     }
 
+    /**
+     * 対象社員の未読通知件数を取得する。
+     *
+     * @param principal ログインユーザー情報
+     * @return 未読通知件数を含むAPIレスポンス
+     */
     @GetMapping("/unread-count")
     public Result<Long> countUnread(@AuthenticationPrincipal LoginPrincipal principal) {
         return Result.ok(sysNotificationService.countUnread(principal.employeeId()));
     }
 
+    /**
+     * 対象社員の未読通知を一覧取得する。
+     *
+     * @param principal ログインユーザー情報
+     * @param pageRequest ページング条件
+     * @return ページングされた通知レスポンス一覧を含むAPIレスポンス
+     */
     @GetMapping("/unread")
     public Result<PageResult<SysNotificationResponse>> listUnread(
         @AuthenticationPrincipal LoginPrincipal principal,
@@ -44,6 +63,13 @@ public class SysNotificationController {
         return Result.ok(sysNotificationService.pageUnread(principal.employeeId(), pageRequest).map(SysNotificationAssembler::toResponse));
     }
 
+    /**
+     * 指定された通知を既読に更新する。
+     *
+     * @param principal ログインユーザー情報
+     * @param request 処理対象の通知既読更新リクエスト
+     * @return 処理結果を示すAPIレスポンス
+     */
     @PutMapping("/read")
     public Result<Void> markAsRead(
         @AuthenticationPrincipal LoginPrincipal principal,

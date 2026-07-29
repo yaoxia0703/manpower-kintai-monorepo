@@ -12,6 +12,12 @@ public final class EmployeeAssembler {
     private EmployeeAssembler() {
     }
 
+    /**
+     * 入力データを社員作成コマンドへ変換する。
+     *
+     * @param request 変換対象の社員作成リクエスト
+     * @return 変換後の社員作成コマンド
+     */
     public static EmployeeCreateCommand toCommand(EmployeeCreateRequest request) {
         return new EmployeeCreateCommand(
                 request.getCompanyId(), request.getEmployeeCode(), request.getLastName(), request.getFirstName(),
@@ -21,6 +27,12 @@ public final class EmployeeAssembler {
         );
     }
 
+    /**
+     * 入力データを社員更新コマンドへ変換する。
+     *
+     * @param request 変換対象の社員更新リクエスト
+     * @return 変換後の社員更新コマンド
+     */
     public static EmployeeUpdateCommand toCommand(EmployeeUpdateRequest request) {
         return new EmployeeUpdateCommand(
                 request.getCompanyId(), request.getEmployeeCode(), request.getLastName(), request.getFirstName(),
@@ -30,6 +42,12 @@ public final class EmployeeAssembler {
         );
     }
 
+    /**
+     * 入力データを社員レスポンスへ変換する。
+     *
+     * @param employee 処理対象の社員
+     * @return 変換後の社員レスポンス
+     */
     public static EmployeeResponse toResponse(EmpEmployee employee) {
         return EmployeeResponse.from(employee);
     }

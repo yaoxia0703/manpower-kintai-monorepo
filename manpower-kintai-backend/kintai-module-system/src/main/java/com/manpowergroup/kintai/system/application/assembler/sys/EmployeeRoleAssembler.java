@@ -12,6 +12,12 @@ public final class EmployeeRoleAssembler {
     private EmployeeRoleAssembler() {
     }
 
+    /**
+     * 入力データを社員ロール割当割当コマンドへ変換する。
+     *
+     * @param request 変換対象の社員ロール割当割当リクエスト
+     * @return 変換後の社員ロール割当割当コマンド
+     */
     public static EmployeeRoleAssignCommand toCommand(EmployeeRoleAssignRequest request) {
         return new EmployeeRoleAssignCommand(
                 request.getEmployeeId(),
@@ -22,6 +28,12 @@ public final class EmployeeRoleAssembler {
         );
     }
 
+    /**
+     * 入力データを社員ロール割当更新コマンドへ変換する。
+     *
+     * @param request 変換対象の社員ロール割当更新リクエスト
+     * @return 変換後の社員ロール割当更新コマンド
+     */
     public static EmployeeRoleUpdateCommand toCommand(EmployeeRoleUpdateRequest request) {
         return new EmployeeRoleUpdateCommand(
                 request.getEmployeeId(),
@@ -32,6 +44,12 @@ public final class EmployeeRoleAssembler {
         );
     }
 
+    /**
+     * 入力データを社員ロール割当レスポンスへ変換する。
+     *
+     * @param employeeRole 保存対象の社員ロール割当
+     * @return 変換後の社員ロール割当レスポンス
+     */
     public static EmployeeRoleResponse toResponse(SysEmployeeRole employeeRole) {
         return EmployeeRoleResponse.from(employeeRole);
     }

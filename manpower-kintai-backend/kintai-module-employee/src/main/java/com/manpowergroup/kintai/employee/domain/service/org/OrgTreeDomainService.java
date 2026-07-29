@@ -10,7 +10,13 @@ import java.util.List;
 /** 組織 Closure Table の構築とサブツリー移動計算を担うドメインサービス。 */
 public class OrgTreeDomainService {
 
-    /** 新規ノード自身と親の祖先を含む Closure 行を構築する。 */
+    /**
+     * 新規組織ノードの階層関係を構築する。
+     *
+     * @param nodeId 対象の組織ノードID
+     * @param parentAncestors 親ノードの祖先関係一覧
+     * @return 組織階層関係一覧。該当しない場合は空リスト
+     */
     public List<OrgNodeClosure> buildClosuresForNewNode(Long nodeId, List<OrgNodeClosure> parentAncestors) {
         List<OrgNodeClosure> closures = new ArrayList<>();
         closures.add(new OrgNodeClosure(nodeId, nodeId, 0));
@@ -25,7 +31,12 @@ public class OrgTreeDomainService {
         return closures;
     }
 
-    /** 自己行以外の子孫が存在するか判定する。 */
+    /**
+     * 指定組織ノードに子孫ノードが存在するか判定する。
+     *
+     * @param descendants 対象ノードの子孫関係一覧
+     * @return 条件を満たす場合はtrue、それ以外はfalse
+     */
     public boolean hasDescendants(List<OrgNodeClosure> descendants) {
         if (descendants == null || descendants.isEmpty()) {
             return false;
@@ -34,7 +45,13 @@ public class OrgTreeDomainService {
                 .anyMatch(closure -> closure.getDepth() != null && closure.getDepth() > 0);
     }
 
-    /** サブツリーに指定ノードが含まれるか判定する。 */
+    /**
+     * 指定した組織ノード一覧に対象ノードが含まれるか判定する。
+     *
+     * @param subtree 移動対象サブツリーの階層関係一覧
+     * @param nodeId 対象の組織ノードID
+     * @return 条件を満たす場合はtrue、それ以外はfalse
+     */
     public boolean containsNode(List<OrgNodeClosure> subtree, Long nodeId) {
         if (subtree == null || nodeId == null) {
             return false;
@@ -43,7 +60,13 @@ public class OrgTreeDomainService {
                 .anyMatch(closure -> nodeId.equals(closure.getDescendantId()));
     }
 
-    /** サブツリー移動後に必要な外部祖先との Closure 行を再構築する。 */
+    /**
+     * 移動後のサブツリーに対する外部階層関係を構築する。
+     *
+     * @param newParentAncestors 移動先親ノードの祖先関係一覧
+     * @param subtreeDescendants 移動対象サブツリー内の子孫関係一覧
+     * @return 組織階層関係一覧。該当しない場合は空リスト
+     */
     public List<OrgNodeClosure> buildExternalClosuresForMovedSubtree(
             List<OrgNodeClosure> newParentAncestors,
             List<OrgNodeClosure> subtreeDescendants) {

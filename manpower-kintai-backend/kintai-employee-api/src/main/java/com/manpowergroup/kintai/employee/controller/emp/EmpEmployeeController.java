@@ -20,11 +20,24 @@ public class EmpEmployeeController {
 
     private final EmpEmployeeService service;
 
+    /**
+     * ログイン中の社員プロフィールを取得する。
+     *
+     * @param principal ログインユーザー情報
+     * @return 社員を含むAPIレスポンス
+     */
     @GetMapping
     public Result<EmpEmployee> getMyProfile(@AuthenticationPrincipal LoginPrincipal principal) {
         return Result.ok(service.getById(principal.employeeId()));
     }
 
+    /**
+     * ログイン中の社員プロフィールを更新する。
+     *
+     * @param principal ログインユーザー情報
+     * @param employee 処理対象の社員
+     * @return 社員を含むAPIレスポンス
+     */
     @PutMapping
     public Result<EmpEmployee> updateMyProfile(
             @AuthenticationPrincipal LoginPrincipal principal,
@@ -32,6 +45,12 @@ public class EmpEmployeeController {
         return Result.ok(service.update(principal.employeeId(), toCommand(employee)));
     }
 
+    /**
+     * 社員情報を社員更新コマンドへ変換する。
+     *
+     * @param employee 処理対象の社員
+     * @return 社員更新コマンド
+     */
     private EmployeeUpdateCommand toCommand(EmpEmployee employee) {
         return new EmployeeUpdateCommand(
                 employee.getCompanyId(),

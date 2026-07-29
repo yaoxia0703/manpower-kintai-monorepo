@@ -18,7 +18,12 @@ public class EmpSysMenuController {
 
     private final SysMenuService service;
 
-    // ログイン中の社員がアクセス可能なメニュー一覧を取得
+    /**
+     * ログイン中の社員が利用可能なメニューを取得する。
+     *
+     * @param principal ログインユーザー情報
+     * @return メニュー一覧を含むAPIレスポンス
+     */
     @GetMapping
     public Result<List<SysMenu>> getMyMenus(@AuthenticationPrincipal LoginPrincipal principal) {
         return Result.ok(service.listByEmployeeId(principal.employeeId()));

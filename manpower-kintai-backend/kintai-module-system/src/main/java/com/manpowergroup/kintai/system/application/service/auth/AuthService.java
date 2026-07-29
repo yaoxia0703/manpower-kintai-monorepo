@@ -7,9 +7,20 @@ import com.manpowergroup.kintai.common.dto.auth.LoginResponse;
 // 認証サービス（アプリケーション層）
 public interface AuthService {
 
-    // ログイン認証：社員メールアドレス＋パスワードを検証しJWTトークンを返す
+    /**
+     * 認証情報を検証し、ログイン処理を実行する。
+     *
+     * @param request 処理対象のログインリクエスト
+     * @return Loginレスポンス
+     */
     LoginResponse login(LoginRequest request);
 
-    // 現在ログイン中のユーザー情報・権限・メニューを取得
+    /**
+     * ログイン中のユーザー情報を取得する。
+     *
+     * @param employeeId 対象の社員ID
+     * @param accountId 対象の社員アカウントID
+     * @return CurrentUserレスポンス
+     */
     CurrentUserResponse me(Long employeeId, Long accountId);
 }

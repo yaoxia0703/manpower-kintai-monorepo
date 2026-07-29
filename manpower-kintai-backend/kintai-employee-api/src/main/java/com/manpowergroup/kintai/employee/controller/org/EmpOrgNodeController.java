@@ -16,13 +16,23 @@ public class EmpOrgNodeController {
 
     private final OrgNodeService service;
 
-    // 会社IDで有効な全組織ノードを取得（組織ツリー表示用）
+    /**
+     * 指定された条件に一致する有効な組織ノードを一覧取得する。
+     *
+     * @param companyId 対象の会社ID
+     * @return 組織ノード一覧を含むAPIレスポンス
+     */
     @GetMapping
     public Result<List<OrgNode>> listEnabled(@RequestParam Long companyId) {
         return Result.ok(service.listEnabledByCompany(companyId));
     }
 
-    // IDで組織ノードを取得
+    /**
+     * IDに対応する組織ノードを取得する。
+     *
+     * @param id 対象の組織ノードID
+     * @return 組織ノードを含むAPIレスポンス
+     */
     @GetMapping("/{id}")
     public Result<OrgNode> getById(@PathVariable Long id) {
         return Result.ok(service.getById(id));

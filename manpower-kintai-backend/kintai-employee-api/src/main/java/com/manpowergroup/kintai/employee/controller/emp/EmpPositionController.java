@@ -18,13 +18,23 @@ public class EmpPositionController {
 
     private final EmpEmployeePositionService service;
 
-    // ログイン中の社員自身の有効な職位一覧を取得
+    /**
+     * ログイン中の社員に設定された職位を取得する。
+     *
+     * @param principal ログインユーザー情報
+     * @return 社員職位一覧を含むAPIレスポンス
+     */
     @GetMapping
     public Result<List<EmpEmployeePosition>> getMyPositions(@AuthenticationPrincipal LoginPrincipal principal) {
         return Result.ok(service.listActiveByEmployee(principal.employeeId()));
     }
 
-    // ログイン中の社員の主務職位を取得
+    /**
+     * ログイン中の社員の主職位を取得する。
+     *
+     * @param principal ログインユーザー情報
+     * @return 社員職位を含むAPIレスポンス
+     */
     @GetMapping("/primary")
     public Result<EmpEmployeePosition> getMyPrimaryPosition(@AuthenticationPrincipal LoginPrincipal principal) {
         return Result.ok(service.getPrimaryByEmployee(principal.employeeId()));

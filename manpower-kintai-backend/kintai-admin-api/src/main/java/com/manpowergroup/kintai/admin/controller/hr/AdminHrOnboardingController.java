@@ -23,6 +23,13 @@ public class AdminHrOnboardingController {
 
     private final EmployeeOnboardingService onboardingService;
 
+    /**
+     * 画面表示に必要な選択肢を取得する。
+     *
+     * @param principal ログインユーザー情報
+     * @param companyId 対象の会社ID
+     * @return 入社登録選択肢レスポンスを含むAPIレスポンス
+     */
     @GetMapping("/options")
     public Result<EmployeeOnboardingOptionsResponse> options(
             @AuthenticationPrincipal LoginPrincipal principal,
@@ -30,6 +37,13 @@ public class AdminHrOnboardingController {
         return Result.ok(onboardingService.options(principal.employeeId(), companyId));
     }
 
+    /**
+     * 社員の入社登録を実行する。
+     *
+     * @param principal ログインユーザー情報
+     * @param request 処理対象の入社登録リクエスト
+     * @return 入社登録レスポンスを含むAPIレスポンス
+     */
     @PostMapping("/employees")
     public Result<EmployeeOnboardingResponse> onboardEmployee(
             @AuthenticationPrincipal LoginPrincipal principal,

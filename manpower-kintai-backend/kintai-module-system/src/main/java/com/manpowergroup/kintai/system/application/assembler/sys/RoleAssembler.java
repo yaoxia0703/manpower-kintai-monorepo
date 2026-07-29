@@ -12,6 +12,12 @@ public final class RoleAssembler {
     private RoleAssembler() {
     }
 
+    /**
+     * 入力データをロール作成コマンドへ変換する。
+     *
+     * @param request 変換対象のロール作成リクエスト
+     * @return 変換後のロール作成コマンド
+     */
     public static RoleCreateCommand toCommand(RoleCreateRequest request) {
         return new RoleCreateCommand(
                 request.getCompanyId(),
@@ -22,6 +28,12 @@ public final class RoleAssembler {
         );
     }
 
+    /**
+     * 入力データをロール更新コマンドへ変換する。
+     *
+     * @param request 変換対象のロール更新リクエスト
+     * @return 変換後のロール更新コマンド
+     */
     public static RoleUpdateCommand toCommand(RoleUpdateRequest request) {
         return new RoleUpdateCommand(
                 request.getCompanyId(),
@@ -32,6 +44,12 @@ public final class RoleAssembler {
         );
     }
 
+    /**
+     * 入力データをロールレスポンスへ変換する。
+     *
+     * @param role 処理対象のロール
+     * @return 変換後のロールレスポンス
+     */
     public static RoleResponse toResponse(SysRole role) {
         return RoleResponse.from(role);
     }

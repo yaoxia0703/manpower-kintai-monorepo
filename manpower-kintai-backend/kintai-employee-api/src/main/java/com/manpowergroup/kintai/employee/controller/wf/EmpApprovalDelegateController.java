@@ -22,6 +22,15 @@ public class EmpApprovalDelegateController {
     private final EmpEmployeeService employeeService;
     private final ApprovalManagerEligibility approvalManagerEligibility;
 
+    /**
+     * 指定された検索条件で承認委譲をページング取得する。
+     *
+     * @param principal ログインユーザー情報
+     * @param keyword 検索キーワード。未指定の場合は絞り込まない
+     * @param page ページ番号
+     * @param size 1ページあたりの取得件数
+     * @return ページングされた承認委譲Candidateレスポンス一覧を含むAPIレスポンス
+     */
     @GetMapping
     public Result<PageResult<ApprovalDelegateCandidateResponse>> search(
             @AuthenticationPrincipal LoginPrincipal principal,
@@ -38,6 +47,12 @@ public class EmpApprovalDelegateController {
         return Result.ok(candidates);
     }
 
+    /**
+     * 入力データをレスポンスへ変換する。
+     *
+     * @param employee 処理対象の社員
+     * @return 承認委譲Candidateレスポンス
+     */
     private ApprovalDelegateCandidateResponse toResponse(EmpEmployee employee) {
         return new ApprovalDelegateCandidateResponse(
                 employee.getId(),

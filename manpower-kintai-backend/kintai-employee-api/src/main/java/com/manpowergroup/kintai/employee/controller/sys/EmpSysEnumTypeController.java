@@ -16,13 +16,22 @@ public class EmpSysEnumTypeController {
 
     private final SysEnumTypeService service;
 
-    // 有効な全列挙型を取得
+    /**
+     * 指定された条件に一致する有効な列挙型を一覧取得する。
+     *
+     * @return 列挙型一覧を含むAPIレスポンス
+     */
     @GetMapping
     public Result<List<SysEnumType>> listEnabled() {
         return Result.ok(service.listEnabled());
     }
 
-    // コードで列挙型を取得
+    /**
+     * コードに対応する列挙型を取得する。
+     *
+     * @param code 対象コード
+     * @return 列挙型を含むAPIレスポンス
+     */
     @GetMapping("/code/{code}")
     public Result<SysEnumType> getByCode(@PathVariable String code) {
         return Result.ok(service.getByCode(code));

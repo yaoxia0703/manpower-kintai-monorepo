@@ -11,10 +11,28 @@ import java.util.Optional;
  */
 public interface EmployeeIdentityProvider {
 
+    /**
+     * メールアドレスに対応するログインID情報を取得する。
+     *
+     * @param email 対象のメールアドレス
+     * @return 対象が存在する場合はログインID情報を含むOptional、存在しない場合はOptional.empty()
+     */
     Optional<LoginIdentity> findLoginIdentityByEmail(String email);
 
+    /**
+     * 指定社員のプロフィール情報を取得する。
+     *
+     * @param employeeId 対象の社員ID
+     * @return 対象が存在する場合は社員Profileを含むOptional、存在しない場合はOptional.empty()
+     */
     Optional<EmployeeProfile> findEmployeeProfile(Long employeeId);
 
+    /**
+     * ログイン成功日時を社員アカウントへ記録する。
+     *
+     * @param accountId 対象の社員アカウントID
+     * @param loggedInAt ログイン日時
+     */
     void recordSuccessfulLogin(Long accountId, LocalDateTime loggedInAt);
 
     record LoginIdentity(

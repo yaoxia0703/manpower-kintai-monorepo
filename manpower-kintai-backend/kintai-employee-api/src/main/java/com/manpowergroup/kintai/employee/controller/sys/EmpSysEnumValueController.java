@@ -16,7 +16,12 @@ public class EmpSysEnumValueController {
 
     private final SysEnumValueService service;
 
-    // 列挙型コードで列挙値一覧を取得
+    /**
+     * 列挙型に一致する列挙値を一覧取得する。
+     *
+     * @param enumTypeCode 対象の列挙型コード
+     * @return 列挙値一覧を含むAPIレスポンス
+     */
     @GetMapping
     public Result<List<SysEnumValue>> listByEnumType(@RequestParam String enumTypeCode) {
         return Result.ok(service.listByEnumTypeCode(enumTypeCode));

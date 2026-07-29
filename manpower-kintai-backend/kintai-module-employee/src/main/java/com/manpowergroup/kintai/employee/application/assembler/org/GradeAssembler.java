@@ -12,6 +12,12 @@ public final class GradeAssembler {
     private GradeAssembler() {
     }
 
+    /**
+     * 入力データを職級作成コマンドへ変換する。
+     *
+     * @param request 変換対象の職級作成リクエスト
+     * @return 変換後の職級作成コマンド
+     */
     public static GradeCreateCommand toCommand(GradeCreateRequest request) {
         return new GradeCreateCommand(
                 request.getCompanyId(), request.getName(), request.getCode(), request.getGradeLevel(),
@@ -19,6 +25,12 @@ public final class GradeAssembler {
         );
     }
 
+    /**
+     * 入力データを職級更新コマンドへ変換する。
+     *
+     * @param request 変換対象の職級更新リクエスト
+     * @return 変換後の職級更新コマンド
+     */
     public static GradeUpdateCommand toCommand(GradeUpdateRequest request) {
         return new GradeUpdateCommand(
                 request.getCompanyId(), request.getName(), request.getCode(), request.getGradeLevel(),
@@ -26,6 +38,12 @@ public final class GradeAssembler {
         );
     }
 
+    /**
+     * 入力データを職級レスポンスへ変換する。
+     *
+     * @param grade 処理対象の職級
+     * @return 変換後の職級レスポンス
+     */
     public static GradeResponse toResponse(OrgGrade grade) {
         return GradeResponse.from(grade);
     }

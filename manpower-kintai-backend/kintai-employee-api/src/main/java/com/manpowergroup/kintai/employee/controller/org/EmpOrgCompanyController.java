@@ -16,13 +16,22 @@ public class EmpOrgCompanyController {
 
     private final OrgCompanyService service;
 
-    // 有効な全会社を取得（組織選択用）
+    /**
+     * 指定された条件に一致する有効な会社を一覧取得する。
+     *
+     * @return 会社一覧を含むAPIレスポンス
+     */
     @GetMapping
     public Result<List<OrgCompany>> listEnabled() {
         return Result.ok(service.listEnabled());
     }
 
-    // IDで会社を取得
+    /**
+     * IDに対応する会社を取得する。
+     *
+     * @param id 対象の会社ID
+     * @return 会社を含むAPIレスポンス
+     */
     @GetMapping("/{id}")
     public Result<OrgCompany> getById(@PathVariable Long id) {
         return Result.ok(service.getById(id));

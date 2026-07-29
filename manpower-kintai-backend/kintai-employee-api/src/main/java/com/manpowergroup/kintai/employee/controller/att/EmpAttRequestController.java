@@ -31,6 +31,12 @@ public class EmpAttRequestController {
     private final AttRequestService requestService;
     private final EmpEmployeeService employeeService;
 
+    /**
+     * 指定された条件に一致する勤怠申請を一覧取得する。
+     *
+     * @param principal ログインユーザー情報
+     * @return 勤怠申請レスポンス一覧を含むAPIレスポンス
+     */
     @GetMapping
     public Result<List<AttRequestResponse>> list(
             @AuthenticationPrincipal LoginPrincipal principal) {
@@ -40,6 +46,13 @@ public class EmpAttRequestController {
                 .toList());
     }
 
+    /**
+     * 勤怠申請を新規作成する。
+     *
+     * @param principal ログインユーザー情報
+     * @param request 処理対象の勤怠申請作成リクエスト
+     * @return 勤怠申請レスポンスを含むAPIレスポンス
+     */
     @PostMapping
     public Result<AttRequestResponse> create(
             @AuthenticationPrincipal LoginPrincipal principal,
@@ -59,6 +72,14 @@ public class EmpAttRequestController {
                         request.reason()))));
     }
 
+    /**
+     * 勤怠申請を更新する。
+     *
+     * @param principal ログインユーザー情報
+     * @param requestId 対象の申請ID
+     * @param request 処理対象の勤怠申請更新リクエスト
+     * @return 勤怠申請レスポンスを含むAPIレスポンス
+     */
     @PutMapping("/{requestId}")
     public Result<AttRequestResponse> update(
             @AuthenticationPrincipal LoginPrincipal principal,
@@ -78,6 +99,13 @@ public class EmpAttRequestController {
                         request.reason()))));
     }
 
+    /**
+     * 勤怠申請を取り消す。
+     *
+     * @param principal ログインユーザー情報
+     * @param requestId 対象の申請ID
+     * @return 処理結果を示すAPIレスポンス
+     */
     @PostMapping("/{requestId}/cancel")
     public Result<Void> cancel(
             @AuthenticationPrincipal LoginPrincipal principal,

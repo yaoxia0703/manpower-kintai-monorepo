@@ -16,13 +16,23 @@ public class EmpOrgGradeController {
 
     private final OrgGradeService service;
 
-    // 会社IDで職級一覧を取得（ドロップダウン用）
+    /**
+     * 指定された条件に一致する職級を一覧取得する。
+     *
+     * @param companyId 対象の会社ID
+     * @return 職級一覧を含むAPIレスポンス
+     */
     @GetMapping
     public Result<List<OrgGrade>> list(@RequestParam Long companyId) {
         return Result.ok(service.listByCompany(companyId));
     }
 
-    // IDで職級を取得
+    /**
+     * IDに対応する職級を取得する。
+     *
+     * @param id 対象の職級ID
+     * @return 職級を含むAPIレスポンス
+     */
     @GetMapping("/{id}")
     public Result<OrgGrade> getById(@PathVariable Long id) {
         return Result.ok(service.getById(id));

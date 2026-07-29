@@ -30,6 +30,14 @@ public class EmpTimesheetController {
     private final AttTimesheetRecordService timesheetRecordService;
     private final EmpEmployeeService employeeService;
 
+    /**
+     * 指定社員・対象年月の勤怠表を取得する。
+     *
+     * @param principal ログインユーザー情報
+     * @param year 対象年
+     * @param month 対象月
+     * @return 月次勤怠表レスポンスを含むAPIレスポンス
+     */
     @GetMapping
     public Result<TimesheetMonthResponse> getMonthlyTimesheet(
             @AuthenticationPrincipal LoginPrincipal principal,
@@ -40,6 +48,13 @@ public class EmpTimesheetController {
                 TimesheetAssembler.toMonthQuery(employee.getId(), employee.getCompanyId(), year, month)));
     }
 
+    /**
+     * 指定日の勤怠記録を保存する。
+     *
+     * @param principal ログインユーザー情報
+     * @param request 処理対象の勤怠表保存リクエスト
+     * @return 処理結果を示すAPIレスポンス
+     */
     @PutMapping
     public Result<Void> saveRecord(
             @AuthenticationPrincipal LoginPrincipal principal,
@@ -50,6 +65,13 @@ public class EmpTimesheetController {
         return Result.ok();
     }
 
+    /**
+     * 指定日の勤怠記録を削除する。
+     *
+     * @param principal ログインユーザー情報
+     * @param recordId 対象の勤怠記録ID
+     * @return 処理結果を示すAPIレスポンス
+     */
     @DeleteMapping("/{recordId}")
     public Result<Void> deleteRecord(
             @AuthenticationPrincipal LoginPrincipal principal,

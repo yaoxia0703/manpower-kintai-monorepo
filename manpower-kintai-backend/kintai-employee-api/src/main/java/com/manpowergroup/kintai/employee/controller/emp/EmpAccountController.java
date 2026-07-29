@@ -18,13 +18,24 @@ public class EmpAccountController {
 
     private final EmpAccountService service;
 
-    // ログイン中の社員自身のアカウント情報を取得
+    /**
+     * ログイン中の社員アカウントを取得する。
+     *
+     * @param principal ログインユーザー情報
+     * @return 社員アカウントレスポンスを含むAPIレスポンス
+     */
     @GetMapping
     public Result<AccountResponse> getMyAccount(@AuthenticationPrincipal LoginPrincipal principal) {
         return Result.ok(AccountResponse.from(service.getByEmployeeId(principal.employeeId())));
     }
 
-    // パスワードを変更
+    /**
+     * 社員アカウントの設定を変更する。
+     *
+     * @param principal ログインユーザー情報
+     * @param request 処理対象のパスワード変更リクエスト
+     * @return 処理結果を示すAPIレスポンス
+     */
     @PutMapping("/password")
     public Result<Void> changePassword(
             @AuthenticationPrincipal LoginPrincipal principal,

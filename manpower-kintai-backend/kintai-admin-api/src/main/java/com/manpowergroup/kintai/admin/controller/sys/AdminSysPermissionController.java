@@ -27,6 +27,15 @@ public class AdminSysPermissionController {
 
     private final SysPermissionService service;
 
+    /**
+     * 指定された検索条件で権限をページング取得する。
+     *
+     * @param menuId 対象のメニューID
+     * @param keyword 検索キーワード。未指定の場合は絞り込まない
+     * @param page ページ番号
+     * @param size 1ページあたりの取得件数
+     * @return ページングされた権限レスポンス一覧を含むAPIレスポンス
+     */
     @GetMapping
     public Result<PageResult<PermissionResponse>> page(
             @RequestParam(required = false) Long menuId,
@@ -37,33 +46,70 @@ public class AdminSysPermissionController {
                 .map(PermissionAssembler::toResponse));
     }
 
+    /**
+     * IDに対応する権限を取得する。
+     *
+     * @param id 対象の権限ID
+     * @return 権限レスポンスを含むAPIレスポンス
+     */
     @GetMapping("/{id}")
     public Result<PermissionResponse> getById(@PathVariable Long id) {
         return Result.ok(PermissionAssembler.toResponse(service.getById(id)));
     }
 
+    /**
+     * 権限を新規作成する。
+     *
+     * @param request 処理対象の権限作成リクエスト
+     * @return 権限レスポンスを含むAPIレスポンス
+     */
     @PostMapping
     public Result<PermissionResponse> create(@RequestBody @Valid PermissionCreateRequest request) {
         return Result.ok(PermissionAssembler.toResponse(service.create(PermissionAssembler.toCommand(request))));
     }
 
+    /**
+     * 権限を更新する。
+     *
+     * @param id 対象の権限ID
+     * @param request 処理対象の権限更新リクエスト
+     * @return 権限レスポンスを含むAPIレスポンス
+     */
     @PutMapping("/{id}")
     public Result<PermissionResponse> update(@PathVariable Long id, @RequestBody @Valid PermissionUpdateRequest request) {
         return Result.ok(PermissionAssembler.toResponse(service.update(id, PermissionAssembler.toCommand(request))));
     }
 
+    /**
+     * 権限を有効化する。
+     *
+     * @param id 対象の権限ID
+     * @return 処理結果を示すAPIレスポンス
+     */
     @PutMapping("/{id}/enable")
     public Result<Void> enable(@PathVariable Long id) {
         service.enable(id);
         return Result.ok();
     }
 
+    /**
+     * 権限を無効化する。
+     *
+     * @param id 対象の権限ID
+     * @return 処理結果を示すAPIレスポンス
+     */
     @PutMapping("/{id}/disable")
     public Result<Void> disable(@PathVariable Long id) {
         service.disable(id);
         return Result.ok();
     }
 
+    /**
+     * 指定IDの権限を削除する。
+     *
+     * @param id 対象の権限ID
+     * @return 処理結果を示すAPIレスポンス
+     */
     @DeleteMapping("/{id}")
     public Result<Void> remove(@PathVariable Long id) {
         service.remove(id);

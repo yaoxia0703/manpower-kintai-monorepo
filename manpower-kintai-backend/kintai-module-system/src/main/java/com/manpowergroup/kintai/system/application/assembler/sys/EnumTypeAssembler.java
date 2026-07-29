@@ -12,6 +12,12 @@ public final class EnumTypeAssembler {
     private EnumTypeAssembler() {
     }
 
+    /**
+     * 入力データを列挙型作成コマンドへ変換する。
+     *
+     * @param request 変換対象の列挙型作成リクエスト
+     * @return 変換後の列挙型作成コマンド
+     */
     public static EnumTypeCreateCommand toCommand(EnumTypeCreateRequest request) {
         return new EnumTypeCreateCommand(
                 request.getCode(),
@@ -22,6 +28,12 @@ public final class EnumTypeAssembler {
         );
     }
 
+    /**
+     * 入力データを列挙型更新コマンドへ変換する。
+     *
+     * @param request 変換対象の列挙型更新リクエスト
+     * @return 変換後の列挙型更新コマンド
+     */
     public static EnumTypeUpdateCommand toCommand(EnumTypeUpdateRequest request) {
         return new EnumTypeUpdateCommand(
                 request.getCode(),
@@ -32,6 +44,12 @@ public final class EnumTypeAssembler {
         );
     }
 
+    /**
+     * 入力データを列挙型レスポンスへ変換する。
+     *
+     * @param enumType 変換対象の列挙型
+     * @return 変換後の列挙型レスポンス
+     */
     public static EnumTypeResponse toResponse(SysEnumType enumType) {
         return EnumTypeResponse.from(enumType);
     }

@@ -24,12 +24,25 @@ public class ManagerSubordinateController {
 
     private final ManagerSubordinateService subordinateService;
 
+    /**
+     * 画面表示に必要な選択肢を取得する。
+     *
+     * @param principal ログインユーザー情報
+     * @return 部下情報Filter選択肢レスポンスを含むAPIレスポンス
+     */
     @GetMapping("/options")
     public Result<SubordinateFilterOptionsResponse> options(
             @AuthenticationPrincipal LoginPrincipal principal) {
         return Result.ok(subordinateService.options(principal.employeeId()));
     }
 
+    /**
+     * 対象管理者の部下をページング取得する。
+     *
+     * @param principal ログインユーザー情報
+     * @param request 処理対象の部下情報検索リクエスト
+     * @return 関連情報を含むページングされた部下社員レスポンス一覧のAPIレスポンス
+     */
     @GetMapping
     public Result<JoinPageResult<SubordinateEmployeeResponse>> pageSubordinates(
             @AuthenticationPrincipal LoginPrincipal principal,

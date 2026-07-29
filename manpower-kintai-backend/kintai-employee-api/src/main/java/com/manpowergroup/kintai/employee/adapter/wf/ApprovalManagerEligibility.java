@@ -13,6 +13,12 @@ public class ApprovalManagerEligibility {
 
     private final SysPermissionService permissionService;
 
+    /**
+     * 対象社員が指定申請を承認できるか判定する。
+     *
+     * @param employeeId 対象の社員ID
+     * @return 条件を満たす場合はtrue、それ以外はfalse
+     */
     public boolean canApprove(Long employeeId) {
         return permissionService.listByEmployeeId(employeeId).stream()
                 .anyMatch(permission -> permission.getStatus() == Status.ENABLED
