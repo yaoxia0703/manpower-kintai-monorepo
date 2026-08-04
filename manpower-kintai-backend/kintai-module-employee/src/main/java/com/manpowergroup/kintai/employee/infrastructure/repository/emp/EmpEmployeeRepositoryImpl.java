@@ -3,22 +3,28 @@ package com.manpowergroup.kintai.employee.infrastructure.repository.emp;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.manpowergroup.kintai.common.dto.JoinPageResult;
 import com.manpowergroup.kintai.common.dto.PageRequest;
 import com.manpowergroup.kintai.common.dto.PageResult;
+import com.manpowergroup.kintai.employee.application.dto.directory.EmployeeDirectoryFilter;
+import com.manpowergroup.kintai.employee.application.dto.directory.EmployeeDirectoryResponse;
 import com.manpowergroup.kintai.employee.domain.entity.emp.EmpEmployee;
 import com.manpowergroup.kintai.employee.domain.repository.emp.EmpEmployeeRepository;
 import com.manpowergroup.kintai.employee.infrastructure.mapper.emp.EmpEmployeeMapper;
+import com.manpowergroup.kintai.employee.infrastructure.mapper.emp.EmployeeDirectoryQueryMapper;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
 
+import java.util.List;
+
 @Repository
+@RequiredArgsConstructor
 public class EmpEmployeeRepositoryImpl implements EmpEmployeeRepository {
 
     private final EmpEmployeeMapper empEmployeeMapper;
+    private final EmployeeDirectoryQueryMapper employeeDirectoryQueryMapper;
 
-    public EmpEmployeeRepositoryImpl(EmpEmployeeMapper empEmployeeMapper) {
-        this.empEmployeeMapper = empEmployeeMapper;
-    }
 
     @Override
     public EmpEmployee getById(Long id) {
@@ -87,5 +93,17 @@ public class EmpEmployeeRepositoryImpl implements EmpEmployeeRepository {
             wrapper.ne(EmpEmployee::getId, excludeId);
         }
         return empEmployeeMapper.selectCount(wrapper) > 0;
+    }
+
+    @Override
+    public JoinPageResult<EmployeeDirectoryResponse> pageDirectory(EmployeeDirectoryFilter filter, int page, int size) {
+        //総件数
+        long total = employeeDirectoryQueryMapper.countDirectory(filter);
+        if (total == 0) {
+            return JoinPageResult.empty(page, size);
+        }
+        int offset = (page - 1) * size;
+        List<EmployeeDirectoryResponse> records = employeeDirectoryQueryMapper.pageDirectory(filter, offset, size);
+        return JoinPageResult.of(records, total, page, size);
     }
 }

@@ -45,6 +45,12 @@
             <artifactId>kintai-module-attendance</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <!-- HRモジュール -->
+        <dependency>
+            <groupId>com.manpowergroup.kintai</groupId>
+            <artifactId>kintai-module-hr</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <!-- 管理者API -->
         <dependency>
             <groupId>com.manpowergroup.kintai</groupId>
@@ -55,6 +61,12 @@
         <dependency>
             <groupId>com.manpowergroup.kintai</groupId>
             <artifactId>kintai-employee-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <!-- HRAPI -->
+        <dependency>
+            <groupId>com.manpowergroup.kintai</groupId>
+            <artifactId>kintai-hr-api</artifactId>
             <version>${project.version}</version>
         </dependency>
         <!-- MySQL -->

@@ -1,7 +1,10 @@
 package com.manpowergroup.kintai.employee.domain.repository.emp;
 
+import com.manpowergroup.kintai.common.dto.JoinPageResult;
 import com.manpowergroup.kintai.common.dto.PageRequest;
 import com.manpowergroup.kintai.common.dto.PageResult;
+import com.manpowergroup.kintai.employee.application.dto.directory.EmployeeDirectoryFilter;
+import com.manpowergroup.kintai.employee.application.dto.directory.EmployeeDirectoryResponse;
 import com.manpowergroup.kintai.employee.domain.entity.emp.EmpEmployee;
 
 public interface EmpEmployeeRepository {
@@ -69,4 +72,6 @@ public interface EmpEmployeeRepository {
      * @return 条件を満たす場合はtrue、それ以外はfalse
      */
     boolean existsByEmail(String email, Long excludeId);
+
+    JoinPageResult<EmployeeDirectoryResponse> pageDirectory(EmployeeDirectoryFilter filter, int page, int size);
 }

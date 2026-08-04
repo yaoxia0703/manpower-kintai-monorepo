@@ -52,6 +52,10 @@ public class JoinPageResult<T> implements Serializable {
         return new JoinPageResult<>(records, total, pageNum, pageSize);
     }
 
+    public static <T> JoinPageResult<T> empty(long pageNum, long pageSize) {
+        return new JoinPageResult<>(List.of(), 0, pageNum, pageSize);
+    }
+
     private static long calculatePages(long total, long pageSize) {
         if (pageSize <= 0) {
             return 0;

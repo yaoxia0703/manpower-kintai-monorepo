@@ -109,8 +109,10 @@
         <module>kintai-module-system</module>
         <module>kintai-module-employee</module>
         <module>kintai-module-attendance</module>
+        <module>kintai-module-hr</module>
         <module>kintai-admin-api</module>
         <module>kintai-employee-api</module>
+        <module>kintai-hr-api</module>
         <module>kintai-starter</module>
     </modules>
 

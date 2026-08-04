@@ -54,9 +54,6 @@ desktop.ini
 **/target/
 !**/src/main/**/target/
 !**/src/test/**/target/
-**/build/
-!**/src/main/**/build/
-!**/src/test/**/build/
 
 # Eclipse / STS / NetBeans
 **/.apt_generated/
@@ -69,7 +66,6 @@ desktop.ini
 **/nbproject/private/
 **/nbbuild/
 **/nbdist/
-**/.nb-gradle/
 
 # Local assistant notes
 **/.claude/
