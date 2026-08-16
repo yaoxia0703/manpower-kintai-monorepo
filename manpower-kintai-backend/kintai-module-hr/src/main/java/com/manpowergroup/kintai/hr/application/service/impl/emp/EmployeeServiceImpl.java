@@ -24,8 +24,8 @@ public class EmployeeServiceImpl implements EmployeeService {
     public EmployeeRegisterResult registerEmployee(EmployeeRegisterEntry entry, Long employeeId) {
         //
 
-        validateTargetCompany(operator, command.companyId(), superAdmin);
-        validateOnboardingReferences(command);
+//        validateTargetCompany(operator, command.companyId(), superAdmin);
+//        validateOnboardingReferences(command);
 
         return employeeRegisterProvider.registerEmployee(entry, employeeId);
     }
