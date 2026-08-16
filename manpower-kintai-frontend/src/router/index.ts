@@ -14,6 +14,7 @@ import MenuManagementView from '@/views/system/MenuManagementView.vue'
 import PermissionManagementView from '@/views/system/PermissionManagementView.vue'
 import RoleManagementView from '@/views/system/RoleManagementView.vue'
 import ForbiddenView from '@/views/errors/ForbiddenView.vue'
+import EmployeeDirectoryView from '@/views/hr/EmployeeDirectoryView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -64,12 +65,7 @@ const router = createRouter({
           component: SubordinatesView,
           meta: { permission: 'manager:subordinate:read' },
         },
-        {
-          path: 'hr/onboarding',
-          name: 'hr-onboarding',
-          component: OnboardingView,
-          meta: { permission: 'hr:employee:onboard' },
-        },
+
         {
           path: 'system/menus',
           name: 'system-menus',
@@ -87,6 +83,25 @@ const router = createRouter({
           name: 'system-roles',
           component: RoleManagementView,
           meta: { permission: 'admin:role:read' },
+        },
+        {
+          path: '/hr',
+          name: 'hr',
+          meta: { requiresAuth: true },
+          children: [
+            {
+              path: 'employee',
+              name: 'hr-employee',
+              component: EmployeeDirectoryView,
+              meta: { permission: 'hr:employee:read' },
+            },
+            {
+              path: 'onboarding',
+              name: 'hr-onboarding',
+              component: OnboardingView,
+              meta: { permission: 'hr:employee:onboard' },
+            },
+          ],
         },
       ],
     },
@@ -132,7 +147,10 @@ router.beforeEach(async (to) => {
   }
 
   const requiredPermission = to.meta.permission
-  if (typeof requiredPermission === 'string' && !permissionStore.hasPermission(requiredPermission)) {
+  if (
+    typeof requiredPermission === 'string' &&
+    !permissionStore.hasPermission(requiredPermission)
+  ) {
     return '/403'
   }
 

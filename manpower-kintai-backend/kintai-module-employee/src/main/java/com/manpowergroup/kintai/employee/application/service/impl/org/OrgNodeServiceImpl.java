@@ -31,7 +31,7 @@ public class OrgNodeServiceImpl implements OrgNodeService {
     @Override
     public OrgNode getById(Long id) {
         return nodeRepository.findById(id)
-                .orElseThrow(() -> new BizException(SystemErrorCode.NODE_NOT_FOUND));
+            .orElseThrow(() -> new BizException(SystemErrorCode.NODE_NOT_FOUND));
     }
 
     @Override
@@ -52,15 +52,15 @@ public class OrgNodeServiceImpl implements OrgNodeService {
         }
         OrgNode parent = command.parentId() == null ? null : getById(command.parentId());
         OrgNode node = OrgNode.create(
-                command.companyId(),
-                parent,
-                command.managerId(),
-                command.name(),
-                command.typeCode(),
-                command.deptFunction(),
-                command.code(),
-                command.sort(),
-                command.status());
+            command.companyId(),
+            parent,
+            command.managerId(),
+            command.name(),
+            command.typeCode(),
+            command.deptFunction(),
+            command.code(),
+            command.sort(),
+            command.status());
         nodeRepository.save(node);
 
         List<OrgNodeClosure> parentAncestors = List.of();
@@ -87,12 +87,12 @@ public class OrgNodeServiceImpl implements OrgNodeService {
             moveSubtree(existing, command.parentId(), subtree);
         }
         existing.updateEditableFields(
-                command.managerId(),
-                command.name(),
-                command.typeCode(),
-                command.deptFunction(),
-                command.code(),
-                command.sort());
+            command.managerId(),
+            command.name(),
+            command.typeCode(),
+            command.deptFunction(),
+            command.code(),
+            command.sort());
         return nodeRepository.update(existing);
     }
 
@@ -103,22 +103,22 @@ public class OrgNodeServiceImpl implements OrgNodeService {
         int levelDelta = node.getLevel() - previousLevel;
 
         List<Long> subtreeNodeIds = subtree.stream()
-                .map(OrgNodeClosure::getDescendantId)
-                .toList();
+            .map(OrgNodeClosure::getDescendantId)
+            .toList();
         subtree.stream()
-                .filter(closure -> closure.getDepth() != null && closure.getDepth() > 0)
-                .map(OrgNodeClosure::getDescendantId)
-                .map(this::getById)
-                .forEach(descendant -> {
-                    descendant.shiftLevel(levelDelta);
-                    nodeRepository.update(descendant);
-                });
+            .filter(closure -> closure.getDepth() != null && closure.getDepth() > 0)
+            .map(OrgNodeClosure::getDescendantId)
+            .map(this::getById)
+            .forEach(descendant -> {
+                descendant.shiftLevel(levelDelta);
+                nodeRepository.update(descendant);
+            });
 
         closureRepository.deleteExternalAncestorLinks(subtreeNodeIds);
         if (newParent != null) {
             List<OrgNodeClosure> parentAncestors = closureRepository.findAncestors(newParentId);
             List<OrgNodeClosure> newExternalClosures =
-                    orgTreeDomainService.buildExternalClosuresForMovedSubtree(parentAncestors, subtree);
+                orgTreeDomainService.buildExternalClosuresForMovedSubtree(parentAncestors, subtree);
             closureRepository.saveBatch(newExternalClosures);
         }
     }
@@ -150,6 +150,11 @@ public class OrgNodeServiceImpl implements OrgNodeService {
         nodeRepository.deleteById(id);
     }
 
+    @Override
+    public boolean nodeBelongsToCompany(Long id, Long companyId) {
+        return nodeRepository.selectCountByNodeAndComoany(id, companyId) == 1;
+    }
+
     enum SystemErrorCode implements BaseErrorCode {
         NODE_NOT_FOUND(404, "error.node.not_found"),
         NODE_CODE_DUPLICATE(409, "error.node.code_duplicate"),
@@ -164,7 +169,14 @@ public class OrgNodeServiceImpl implements OrgNodeService {
             this.messageKey = messageKey;
         }
 
-        @Override public int code() { return code; }
-        @Override public String messageKey() { return messageKey; }
+        @Override
+        public int code() {
+            return code;
+        }
+
+        @Override
+        public String messageKey() {
+            return messageKey;
+        }
     }
 }

@@ -29,6 +29,9 @@ public record EmployeeDirectoryResponse(
     @Schema(description = "電話")
     String phone,
     @Schema(description = "性別")
-    Long gender
+    Long gender,
+    Integer sort
+
+
 ) {
 }

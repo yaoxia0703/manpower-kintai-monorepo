@@ -231,9 +231,9 @@ const rules: FormRules<EmployeeOnboardingRequest> = {
   password: [{ required: true, min: 8, message: '初期パスワードは8文字以上です', trigger: 'blur' }],
 }
 
-function nodeLabel(node: NodeOption) {
-  return `${'　'.repeat(Math.max(node.level - 1, 0))}${node.name}（${node.typeCode}）`
-}
+// function nodeLabel(node: NodeOption) {
+//   return `${'　'.repeat(Math.max(node.level - 1, 0))}${node.name}（${node.typeCode}）`
+// }
 
 function buildNodeTree(nodes: NodeOption[]) {
   const map = new Map<number, NodeOption & { treeLabel: string; children: NodeOption[] }>()

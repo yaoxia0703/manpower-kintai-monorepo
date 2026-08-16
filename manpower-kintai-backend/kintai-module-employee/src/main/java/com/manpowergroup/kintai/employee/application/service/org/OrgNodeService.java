@@ -72,4 +72,6 @@ public interface OrgNodeService {
      * @param id 対象の組織ノードID
      */
     void remove(Long id);
+
+    boolean nodeBelongsToCompany(Long id,Long companyId);
 }

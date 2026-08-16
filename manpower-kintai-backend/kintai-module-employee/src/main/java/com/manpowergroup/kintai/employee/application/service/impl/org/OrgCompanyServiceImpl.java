@@ -96,6 +96,11 @@ public class OrgCompanyServiceImpl implements OrgCompanyService {
         orgCompanyRepository.deleteById(id);
     }
 
+    @Override
+    public boolean companyExists(Long id) {
+        return orgCompanyRepository.selectCount(id)==1;
+    }
+
     enum SystemErrorCode implements BaseErrorCode {
         COMPANY_NOT_FOUND(404, "error.company.not_found"),
         COMPANY_CODE_DUPLICATE(409, "error.company.code_duplicate");

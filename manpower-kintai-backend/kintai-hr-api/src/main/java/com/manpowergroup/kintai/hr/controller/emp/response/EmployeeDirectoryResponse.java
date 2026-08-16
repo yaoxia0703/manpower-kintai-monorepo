@@ -42,6 +42,7 @@ public record EmployeeDirectoryResponse(
     String phone,
 
     @Schema(description = "性別")
-    Long gender
+    Long gender,
+    Integer sort
 ) {
 }

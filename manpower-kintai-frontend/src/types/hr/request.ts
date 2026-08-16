@@ -1,3 +1,5 @@
+import type { CommonStatus } from "../enums"
+
 export interface EmployeeOnboardingRequest {
   companyId: number
   employeeCode: string
@@ -14,4 +16,14 @@ export interface EmployeeOnboardingRequest {
   firstNameKana?: string
   phone?: string
   gender?: number
+}
+
+
+export interface EnployeeDirectoryQueryParams {
+  keyword?: string
+  nodeId?: number
+  gradeId?: number
+  status?: CommonStatus
+  page?: number
+  size?: number
 }

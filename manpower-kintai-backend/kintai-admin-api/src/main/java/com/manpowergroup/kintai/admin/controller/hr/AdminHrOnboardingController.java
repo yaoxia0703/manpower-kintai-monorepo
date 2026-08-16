@@ -44,10 +44,10 @@ public class AdminHrOnboardingController {
      * @param request 処理対象の入社登録リクエスト
      * @return 入社登録レスポンスを含むAPIレスポンス
      */
-    @PostMapping("/employees")
-    public Result<EmployeeOnboardingResponse> onboardEmployee(
-            @AuthenticationPrincipal LoginPrincipal principal,
-            @RequestBody @Valid EmployeeOnboardingRequest request) {
-        return Result.ok(onboardingService.onboard(request, principal.employeeId()));
-    }
+//    @PostMapping("/employees")
+//    public Result<EmployeeOnboardingResponse> onboardEmployee(
+//            @AuthenticationPrincipal LoginPrincipal principal,
+//            @RequestBody @Valid EmployeeOnboardingRequest request) {
+//        return Result.ok(onboardingService.onboard(request, principal.employeeId()));
+//    }
 }

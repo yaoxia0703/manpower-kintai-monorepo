@@ -1,9 +1,12 @@
 import request from '@/api/common/request'
-import type { ApiResponse } from '@/types/common'
+import type { ApiResponse, JoinPageResult } from '@/types/common'
 import type {
+  EmployeeDirectoryOptionsResponse,
+  EmployeeDirectoryResponse,
   EmployeeOnboardingOptionsResponse,
   EmployeeOnboardingRequest,
   EmployeeOnboardingResponse,
+  EnployeeDirectoryQueryParams,
 } from '@/types/hr'
 
 export function fetchOnboardingOptions(companyId?: number) {
@@ -13,5 +16,18 @@ export function fetchOnboardingOptions(companyId?: number) {
 }
 
 export function onboardEmployee(payload: EmployeeOnboardingRequest) {
-  return request.post<ApiResponse<EmployeeOnboardingResponse>>('/admin/hr/onboarding/employees', payload)
+  return request.post<ApiResponse<EmployeeOnboardingResponse>>('/hr/emp/employee/register', payload)
+}
+
+
+export function fetchEmployeeDirectory(params: EnployeeDirectoryQueryParams = {}) {
+  return request.get<ApiResponse<JoinPageResult<EmployeeDirectoryResponse>>>('/hr/emp/employee', {
+    params,
+  })
+}
+
+export function fetchEmployeeDirectoryOptions() {
+  return request.get<ApiResponse<EmployeeDirectoryOptionsResponse>>(
+    '/hr/emp/employee/options',
+  )
 }

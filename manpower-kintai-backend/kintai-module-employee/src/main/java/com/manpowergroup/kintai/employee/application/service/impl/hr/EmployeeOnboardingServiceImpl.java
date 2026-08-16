@@ -4,6 +4,7 @@ import com.manpowergroup.kintai.common.enums.Status;
 import com.manpowergroup.kintai.common.exception.BizException;
 import com.manpowergroup.kintai.common.exception.ErrorCode;
 import com.manpowergroup.kintai.employee.application.assembler.hr.EmployeeOnboardingAssembler;
+import com.manpowergroup.kintai.employee.application.command.hr.EmployeeOnboardingCommand;
 import com.manpowergroup.kintai.employee.application.dto.hr.response.EmployeeOnboardingOptionsResponse;
 import com.manpowergroup.kintai.employee.application.dto.hr.request.EmployeeOnboardingRequest;
 import com.manpowergroup.kintai.employee.application.dto.hr.response.EmployeeOnboardingResponse;
@@ -76,26 +77,26 @@ public class EmployeeOnboardingServiceImpl implements EmployeeOnboardingService 
 
     @Override
     @Transactional
-    public EmployeeOnboardingResponse onboard(EmployeeOnboardingRequest request, Long operatorEmployeeId) {
+    public EmployeeOnboardingResponse onboard(EmployeeOnboardingCommand command, Long operatorEmployeeId) {
         EmpEmployee operator = getOperator(operatorEmployeeId);
         boolean superAdmin = isSuperAdmin(operatorEmployeeId);
-        validateTargetCompany(operator, request.getCompanyId(), superAdmin);
-        validateOnboardingReferences(request);
+        validateTargetCompany(operator, command.companyId(), superAdmin);
+        validateOnboardingReferences(command);
 
-        if (!roleAccessService.areAllEnabledForCompany(request.getCompanyId(), request.getRoleIds())) {
+        if (!roleAccessService.areAllEnabledForCompany(command.companyId(), command.roleIds())) {
             throw BizException.withDetail(ErrorCode.VALIDATION_ERROR, "roleIds contain invalid role");
         }
 
         EmpEmployee employee = employeeService.create(
-            EmployeeOnboardingAssembler.toEmployee(request, operatorEmployeeId));
+            EmployeeOnboardingAssembler.toEmployee(command, operatorEmployeeId));
 
         EmpAccount account = accountService.create(
-            EmployeeOnboardingAssembler.toAccount(request, employee.getId(), operatorEmployeeId));
+            EmployeeOnboardingAssembler.toAccount(command, employee.getId(), operatorEmployeeId));
 
         EmpEmployeePosition position = positionService.create(
-            EmployeeOnboardingAssembler.toPosition(request, employee.getId(), operatorEmployeeId));
+            EmployeeOnboardingAssembler.toPosition(command, employee.getId(), operatorEmployeeId));
 
-        EmployeeOnboardingAssembler.toEmployeeRoles(request, employee.getId(), operatorEmployeeId)
+        EmployeeOnboardingAssembler.toEmployeeRoles(command, employee.getId(), operatorEmployeeId)
             .forEach(employeeRoleAssignmentService::assign);
 
         return EmployeeOnboardingResponse.builder()
@@ -140,13 +141,13 @@ public class EmployeeOnboardingServiceImpl implements EmployeeOnboardingService 
         }
     }
 
-    private void validateOnboardingReferences(EmployeeOnboardingRequest request) {
-        Long nodeCount = orgNodeRepository.selectCountByNodeAndComoany(request.getNodeId(), request.getCompanyId());
+    private void validateOnboardingReferences(EmployeeOnboardingCommand command) {
+        Long nodeCount = orgNodeRepository.selectCountByNodeAndComoany(command.nodeId(), command.companyId());
         if (nodeCount != 1) {
             throw BizException.withDetail(ErrorCode.VALIDATION_ERROR, "nodeId is invalid for company");
         }
 
-        Long gradeCount = orgGradeRepository.selectCountByCompanyAndGrade(request.getCompanyId(), request.getGradeId());
+        Long gradeCount = orgGradeRepository.selectCountByCompanyAndGrade(command.companyId(), command.gradeId());
         if (gradeCount != 1) {
             throw BizException.withDetail(ErrorCode.VALIDATION_ERROR, "gradeId is invalid for company");
         }

@@ -82,5 +82,7 @@ public interface OrgGradeService  {
      * @param id 対象の職級ID
      */
     void remove(Long id);
+
+    boolean gradeBelongsToCompany(long gradeId, long companyId);
 }
 

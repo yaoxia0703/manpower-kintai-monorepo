@@ -12,12 +12,14 @@
         AND p.start_date &lt;= CURDATE()
         AND (p.end_date IS NULL OR p.end_date &gt;= CURDATE())
         INNER JOIN emp_employee ee ON ee.id = p.employee_id
-        INNER JOIN org_node n      ON n.id = p.node_id
-        LEFT  JOIN org_grade g     ON g.id = p.grade_id
-        WHERE mn.manager_id = #{q.managerId}
-        AND mn.status = 1
+        INNER JOIN org_node n ON n.id = p.node_id
+        LEFT JOIN org_grade g ON g.id = p.grade_id
+        WHERE mn.status = 1
         AND ee.status = 1
-        AND p.employee_id != #{q.managerId}
+        <if test="q.managerId!= null">
+            AND mn.manager_id = #{q.managerId}
+            AND p.employee_id != #{q.managerId}
+        </if>
     </sql>
 
     <!-- 共通の絞り込み条件（一覧・件数で完全に同一のロジックを共有） -->
@@ -30,8 +32,8 @@
         AND p.start_date &lt;= CURDATE()
         AND (p.end_date IS NULL OR p.end_date &gt;= CURDATE())
         INNER JOIN emp_employee ee ON ee.id = p.employee_id
-        INNER JOIN org_node n      ON n.id = p.node_id
-        LEFT  JOIN org_grade g     ON g.id = p.grade_id
+        INNER JOIN org_node n ON n.id = p.node_id
+        LEFT JOIN org_grade g ON g.id = p.grade_id
         WHERE mn.manager_id = #{q.managerId}
         AND mn.status = 1
         AND p.employee_id != #{q.managerId}
@@ -46,8 +48,8 @@
         </choose>
         <!-- 氏名・社員コードの部分一致 -->
         <if test="q.keyword != null and q.keyword != ''">
-            AND (ee.last_name     LIKE CONCAT('%', #{q.keyword}, '%')
-            OR ee.first_name    LIKE CONCAT('%', #{q.keyword}, '%')
+            AND (ee.last_name LIKE CONCAT('%', #{q.keyword}, '%')
+            OR ee.first_name LIKE CONCAT('%', #{q.keyword}, '%')
             OR ee.employee_code LIKE CONCAT('%', #{q.keyword}, '%'))
         </if>
         <!-- 所属ノードで絞り込み -->
@@ -65,16 +67,16 @@
             resultType="com.manpowergroup.kintai.employee.application.dto.manager.response.SubordinateEmployeeResponse">
         SELECT * FROM (
         SELECT
-        ee.id            AS employeeId,
+        ee.id AS employeeId,
         ee.employee_code AS employeeCode,
         CONCAT(ee.last_name, ' ', ee.first_name) AS displayName,
-        ee.email         AS email,
-        ee.company_id    AS companyId,
-        p.node_id        AS nodeId,
-        n.name           AS nodeName,
-        p.grade_id       AS gradeId,
-        g.name           AS gradeName,
-        p.is_primary     AS isPrimary,
+        ee.email AS email,
+        ee.company_id AS companyId,
+        p.node_id AS nodeId,
+        n.name AS nodeName,
+        p.grade_id AS gradeId,
+        g.name AS gradeName,
+        p.is_primary AS isPrimary,
         ROW_NUMBER() OVER (
         PARTITION BY ee.id
         ORDER BY p.is_primary DESC
@@ -95,12 +97,12 @@
     <select id="selectSubordinateNodeOptions"
             resultType="com.manpowergroup.kintai.employee.application.dto.manager.response.SubordinateFilterOptionsResponse$NodeOption">
         SELECT DISTINCT
-        n.id        AS id,
+        n.id AS id,
         n.parent_id AS parentId,
-        n.name      AS name,
-        n.code      AS code,
+        n.name AS name,
+        n.code AS code,
         n.type_code AS typeCode,
-        n.level     AS level
+        n.level AS level
         <include refid="optionFilter"/>
         ORDER BY n.level, n.name
     </select>
@@ -108,9 +110,9 @@
     <select id="selectSubordinateGradeOptions"
             resultType="com.manpowergroup.kintai.employee.application.dto.manager.response.SubordinateFilterOptionsResponse$GradeOption">
         SELECT DISTINCT
-        g.id          AS id,
-        g.name        AS name,
-        g.code        AS code,
+        g.id AS id,
+        g.name AS name,
+        g.code AS code,
         g.grade_level AS gradeLevel
         <include refid="optionFilter"/>
         AND p.grade_id IS NOT NULL

@@ -72,5 +72,7 @@ public interface OrgCompanyService {
      * @param id 対象の会社ID
      */
     void remove(Long id);
+
+    boolean companyExists(Long id);
 }
 

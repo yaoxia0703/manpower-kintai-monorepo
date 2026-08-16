@@ -1,3 +1,5 @@
+import type { ManagerGradeOption, ManagerOrgNodeOption } from "../manager"
+
 export interface CompanyOption {
   id: number
   parentId: number | null
@@ -43,4 +45,26 @@ export interface EmployeeOnboardingResponse {
   employeeCode: string
   displayName: string
   email: string
+}
+
+
+export interface EmployeeDirectoryResponse {
+  employeeId: number
+  employeeCode: string
+  displayName: string
+  displayNameKana: string
+  email: string
+  companyId: number,
+  companyName:string,
+  nodeId:number,
+  nodeName:string,
+  gradeId:number,
+  gradeName:string,
+  phone:string,
+  gender:number
+}
+
+export interface EmployeeDirectoryOptionsResponse {
+  nodes: ManagerOrgNodeOption[]
+  grades: ManagerGradeOption[]
 }

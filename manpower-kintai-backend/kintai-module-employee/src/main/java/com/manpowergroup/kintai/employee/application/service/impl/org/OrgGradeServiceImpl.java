@@ -100,6 +100,11 @@ public class OrgGradeServiceImpl implements OrgGradeService {
         orgGradeRepository.deleteById(id);
     }
 
+    @Override
+    public boolean gradeBelongsToCompany(long gradeId, long companyId) {
+        return orgGradeRepository.selectCountByCompanyAndGrade(companyId, gradeId) == 1;
+    }
+
     enum SystemErrorCode implements BaseErrorCode {
         GRADE_NOT_FOUND(404, "error.grade.not_found"),
         GRADE_CODE_DUPLICATE(409, "error.grade.code_duplicate");

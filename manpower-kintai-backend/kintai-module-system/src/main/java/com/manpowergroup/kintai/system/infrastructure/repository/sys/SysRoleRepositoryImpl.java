@@ -59,7 +59,7 @@ public class SysRoleRepositoryImpl implements SysRoleRepository {
     public PageResult<SysRole> pageByCompany(Long companyId, int page, int size) {
         Page<SysRole> p = new Page<>(page, size);
         sysRoleMapper.selectPage(p, Wrappers.<SysRole>lambdaQuery()
-            .eq(SysRole::getCompanyId, companyId)
+//            .eq(SysRole::getCompanyId, companyId)
             .orderByAsc(SysRole::getSort));
         return PageResult.of(p);
     }

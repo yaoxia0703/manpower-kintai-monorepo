@@ -21,11 +21,8 @@
         <el-table-column prop="remark" label="備考" min-width="180" />
         <el-table-column label="状態" width="90">
           <template #default="{ row }">
-            <el-switch
-              :model-value="row.status === CommonStatus.ENABLED"
-              :loading="switchingId === row.id"
-              @change="(value: string | number | boolean) => toggleStatus(row, Boolean(value))"
-            />
+            <el-switch :model-value="row.status === CommonStatus.ENABLED" :loading="switchingId === row.id"
+              @change="(value: string | number | boolean) => toggleStatus(row, Boolean(value))" />
           </template>
         </el-table-column>
         <el-table-column label="操作" width="210" fixed="right">
@@ -38,14 +35,8 @@
       </el-table>
 
       <el-row justify="end" class="pager">
-        <el-pagination
-          v-model:current-page="page"
-          v-model:page-size="size"
-          layout="total, sizes, prev, pager, next"
-          :total="total"
-          @current-change="loadRoles"
-          @size-change="loadRoles"
-        />
+        <el-pagination v-model:current-page="page" v-model:page-size="size" layout="total, sizes, prev, pager, next"
+          :total="total" @current-change="loadRoles" @size-change="loadRoles" />
       </el-row>
     </el-card>
 
@@ -74,13 +65,7 @@
     </el-dialog>
 
     <el-drawer v-model="authorizationVisible" :title="`ロール権限設定：${authorizingRole?.name ?? ''}`" size="78%">
-      <el-alert
-        v-if="authorizationWarnings.length > 0"
-        type="warning"
-        :closable="false"
-        show-icon
-        class="auth-warning"
-      >
+      <el-alert v-if="authorizationWarnings.length > 0" type="warning" :closable="false" show-icon class="auth-warning">
         <template #title>
           {{ authorizationWarnings.join('；') }}
         </template>
@@ -89,14 +74,8 @@
       <el-row :gutter="20" class="authorization-body">
         <el-col :xs="24" :md="10">
           <h3>メニュー付与</h3>
-          <el-tree
-            ref="menuTreeRef"
-            :data="authorizationMenuTree"
-            show-checkbox
-            node-key="id"
-            default-expand-all
-            :props="{ label: 'name', children: 'children' }"
-          />
+          <el-tree ref="menuTreeRef" :data="authorizationMenuTree" show-checkbox node-key="id" default-expand-all
+            check-strictly :props="{ label: 'name', children: 'children' }" />
         </el-col>
         <el-col :xs="24" :md="14">
           <h3>権限付与</h3>

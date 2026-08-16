@@ -1,5 +1,6 @@
 package com.manpowergroup.kintai.employee.application.service.hr;
 
+import com.manpowergroup.kintai.employee.application.command.hr.EmployeeOnboardingCommand;
 import com.manpowergroup.kintai.employee.application.dto.hr.request.EmployeeOnboardingRequest;
 import com.manpowergroup.kintai.employee.application.dto.hr.response.EmployeeOnboardingOptionsResponse;
 import com.manpowergroup.kintai.employee.application.dto.hr.response.EmployeeOnboardingResponse;
@@ -22,5 +23,5 @@ public interface EmployeeOnboardingService {
      * @param operatorEmployeeId 操作を行う社員ID
      * @return 入社登録レスポンス
      */
-    EmployeeOnboardingResponse onboard(EmployeeOnboardingRequest request, Long operatorEmployeeId);
+    EmployeeOnboardingResponse onboard(EmployeeOnboardingCommand request, Long operatorEmployeeId);
 }

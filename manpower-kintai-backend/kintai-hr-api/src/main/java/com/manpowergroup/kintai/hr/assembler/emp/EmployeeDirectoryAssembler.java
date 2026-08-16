@@ -24,6 +24,7 @@ public final class EmployeeDirectoryAssembler {
 
     public static EmployeeDirectoryFilter toEmployeeFilter(EmployeeDirectoryQuery query) {
         return new EmployeeDirectoryFilter(
+            query.companyId(),
             query.keyword(),
             query.nodeId(),
             query.gradeId(),
@@ -47,7 +48,8 @@ public final class EmployeeDirectoryAssembler {
             response.gradeId(),
             response.gradeName(),
             response.phone(),
-            response.gender()
+            response.gender(),
+            response.sort()
         );
     }
 
@@ -65,7 +67,8 @@ public final class EmployeeDirectoryAssembler {
             entry.gradeId(),
             entry.gradeName(),
             entry.phone(),
-            entry.gender()
+            entry.gender(),
+            entry.sort()
         );
     }
 
