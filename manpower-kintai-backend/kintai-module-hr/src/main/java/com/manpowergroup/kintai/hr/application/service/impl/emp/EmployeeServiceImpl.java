@@ -18,6 +18,9 @@ public class EmployeeServiceImpl implements EmployeeService {
     private final EmployeeDirectoryProvider employeeDirectoryProvider;
     private final EmployeeRegisterProvider employeeRegisterProvider;
     private final EmployeeRegisterValidationProvider employeeRegisterValidationProvider;
+    private final EmployeeOptionsProvider employeeOptionsProvider;
+
+
 
 
     @Override
@@ -33,6 +36,11 @@ public class EmployeeServiceImpl implements EmployeeService {
         validateOnboardingReferences(entry);
 
         return employeeRegisterProvider.registerEmployee(entry);
+    }
+
+    @Override
+    public EmployeeOptionsResult getEmployeeOptions(Long operatorEmployeeId, Long companyId) {
+        return null;
     }
 
 
