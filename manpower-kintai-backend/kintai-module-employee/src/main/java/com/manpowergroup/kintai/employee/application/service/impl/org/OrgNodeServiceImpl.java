@@ -152,7 +152,7 @@ public class OrgNodeServiceImpl implements OrgNodeService {
 
     @Override
     public boolean nodeBelongsToCompany(Long id, Long companyId) {
-        return nodeRepository.selectCountByNodeAndComoany(id, companyId) == 1;
+        return nodeRepository.selectCountByNodeAndComoany(id, companyId) > 0;
     }
 
     enum SystemErrorCode implements BaseErrorCode {

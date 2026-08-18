@@ -1,10 +1,12 @@
 package com.manpowergroup.kintai.hr.adapter.emp;
 
+import com.manpowergroup.kintai.common.exception.BizException;
+import com.manpowergroup.kintai.common.exception.ErrorCode;
 import com.manpowergroup.kintai.employee.application.service.emp.EmpEmployeeService;
 import com.manpowergroup.kintai.employee.application.service.org.OrgCompanyService;
 import com.manpowergroup.kintai.employee.application.service.org.OrgGradeService;
 import com.manpowergroup.kintai.employee.application.service.org.OrgNodeService;
-import com.manpowergroup.kintai.hr.application.port.emp.EmployeeRegisterValidationPort;
+import com.manpowergroup.kintai.hr.application.port.emp.EmployeeRegisterValidationProvider;
 import com.manpowergroup.kintai.hr.assembler.emp.EmployeeRegisterAssembler;
 import com.manpowergroup.kintai.system.application.service.sys.RoleAccessService;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +18,7 @@ import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
-public class EmployeeRegisterValidationProviderAdapter implements EmployeeRegisterValidationPort {
+public class EmployeeRegisterValidationProviderAdapter implements EmployeeRegisterValidationProvider {
 
     private static final String SUPER_ADMIN_ROLE = "SUPER_ADMIN";
     private final EmpEmployeeService employeeService;
