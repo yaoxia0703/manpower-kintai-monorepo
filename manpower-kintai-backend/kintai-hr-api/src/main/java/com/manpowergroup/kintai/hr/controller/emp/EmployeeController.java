@@ -45,6 +45,12 @@ public class EmployeeController {
         return Result.ok(EmployeeDirectoryAssembler.toResponse(result));
     }
 
+//    @GetMapping("/options")
+//    public Result<EmployeeOnboardingOptionsResponse> options(
+//            @AuthenticationPrincipal LoginPrincipal principal,
+//            @RequestParam(required = false) Long companyId) {
+//        return Result.ok(onboardingService.options(principal.employeeId(), companyId));
+//    }
 
     @GetMapping("/options")
     public Result<SubordinateFilterOptionsResponse> options() {

@@ -102,7 +102,7 @@ public class OrgGradeServiceImpl implements OrgGradeService {
 
     @Override
     public boolean gradeBelongsToCompany(long gradeId, long companyId) {
-        return orgGradeRepository.selectCountByCompanyAndGrade(companyId, gradeId) == 1;
+        return orgGradeRepository.selectCountByCompanyAndGrade(companyId, gradeId) > 0;
     }
 
     enum SystemErrorCode implements BaseErrorCode {

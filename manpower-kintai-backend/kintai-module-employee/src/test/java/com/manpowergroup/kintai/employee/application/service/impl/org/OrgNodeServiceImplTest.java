@@ -16,7 +16,9 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.mock;
@@ -25,6 +27,26 @@ import static org.mockito.Mockito.when;
 
 @SuppressWarnings("unchecked")
 class OrgNodeServiceImplTest {
+
+    @Test
+    void nodeBelongsToCompanyReturnsTrueWhenAssociationExists() {
+        OrgNodeRepository nodeRepository = mock(OrgNodeRepository.class);
+        OrgNodeServiceImpl service = new OrgNodeServiceImpl(
+            nodeRepository, mock(OrgNodeClosureRepository.class), new OrgTreeDomainService());
+        when(nodeRepository.selectCountByNodeAndComoany(20L, 10L)).thenReturn(1L);
+
+        assertTrue(service.nodeBelongsToCompany(20L, 10L));
+    }
+
+    @Test
+    void nodeBelongsToCompanyReturnsFalseWhenAssociationDoesNotExist() {
+        OrgNodeRepository nodeRepository = mock(OrgNodeRepository.class);
+        OrgNodeServiceImpl service = new OrgNodeServiceImpl(
+            nodeRepository, mock(OrgNodeClosureRepository.class), new OrgTreeDomainService());
+        when(nodeRepository.selectCountByNodeAndComoany(20L, 10L)).thenReturn(0L);
+
+        assertFalse(service.nodeBelongsToCompany(20L, 10L));
+    }
 
     @Test
     void createSavesSelfClosureForRootNode() {
